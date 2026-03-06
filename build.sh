@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Iran War Goals Tracker — Build Script
+# Transforms src/iran-war-goals.jsx → docs/index.html
+# The JSX uses import/export for Claude.ai artifact compatibility.
+# This script converts those to browser globals for standalone HTML.
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SRC="$SCRIPT_DIR/src/iran-war-goals.jsx"
+OUT="$SCRIPT_DIR/docs/index.html"
+
+if [ ! -f "$SRC" ]; then
+    echo "ERROR: Source file not found: $SRC"
+    exit 1
+fi
+
+echo "Building docs/index.html from src/iran-war-goals.jsx..."
+
+# Read JSX source
+JSX_CONTENT=$(cat "$SRC")
+
+# Transform for browser:
+# 1. import { useState } from "react" → const { useState } = React;
+# 2. export default function App() → function IranWarGoalsTracker()
+BROWSER_JSX=$(echo "$JSX_CONTENT" \
+    | sed 's/^import { useState } from "react";/const { useState } = React;/' \
+    | sed 's/^export default function App() {/function IranWarGoalsTracker() {/')
+
+# Get current timestamp for the title
+TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+
+# Write the HTML wrapper
+cat > "$OUT" << 'HTMLHEADER'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iran War Goals Tracker</title>
+<meta name="description" content="Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Military operations, regime stability, regional escalation, diplomatic dynamics, and economic impacts.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0F172A; color: #E2E8F0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+HTMLHEADER
+
+# Append the transformed JSX
+echo "$BROWSER_JSX" >> "$OUT"
+
+# Append the React render call and closing tags
+cat >> "$OUT" << 'HTMLFOOTER'
+ReactDOM.render(React.createElement(IranWarGoalsTracker), document.getElementById('root'));
+</script>
+</body>
+</html>
+HTMLFOOTER
+
+# Report
+SRC_SIZE=$(wc -c < "$SRC")
+OUT_SIZE=$(wc -c < "$OUT")
+echo "Done: src ($SRC_SIZE bytes) → docs/index.html ($OUT_SIZE bytes)"
+echo "Built at: $TIMESTAMP"

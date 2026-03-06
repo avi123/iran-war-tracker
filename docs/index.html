@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Iran War Goals Tracker</title>
+<meta name="description" content="Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Military operations, regime stability, regional escalation, diplomatic dynamics, and economic impacts.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0F172A; color: #E2E8F0; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState } = React;
+
+const C = {
+  bg: "#0B1120", card: "#111B2E", cardAlt: "#162035",
+  navy: "#1A2744", blue: "#2D5FA0", blueLt: "#4888CC",
+  border: "#243450", borderLt: "#2E4468",
+  text: "#D8DFE8", textDim: "#7A8FA8", white: "#F0F3F7",
+  us: "#3B82F6", israel: "#10B981", both: "#A78BFA", oppose: "#F59E0B",
+  achieve: "#22C55E", avoid: "#EF4444",
+  green: "#22C55E", greenBg: "#0F2918", amber: "#F59E0B", amberBg: "#2E2410",
+  red: "#EF4444", redBg: "#2E1010", gray: "#6B7280", grayBg: "#1E2228",
+  purple: "#A78BFA", purpleBg: "#1E152E",
+};
+
+const partyLabel = { us: "US", israel: "ISRAEL", both: "BOTH", opposing: "OPPOSING" };
+const partyColor = { us: C.us, israel: C.israel, both: C.purple, opposing: C.oppose };
+const statusColor = { "achieved": C.green, "in progress": C.amber, "at risk": C.red, "unachievable": C.gray, "tbd": C.gray };
+
+const PartyBadge = ({ party }) => (
+  <span style={{ display:"inline-block", padding:"1px 8px", borderRadius:10, fontSize:10, fontWeight:700, letterSpacing:0.8, background:`${partyColor[party]}20`, color:partyColor[party], border:`1px solid ${partyColor[party]}50`, textTransform:"uppercase" }}>{partyLabel[party]}</span>
+);
+
+const TypeBadge = ({ type }) => (
+  <span style={{ display:"inline-block", padding:"1px 6px", borderRadius:10, fontSize:9, fontWeight:700, letterSpacing:0.5, background: type==="achieve"?`${C.achieve}15`:`${C.avoid}15`, color: type==="achieve"?C.achieve:C.avoid, border:`1px solid ${type==="achieve"?C.achieve:C.avoid}40`, textTransform:"uppercase" }}>{type==="achieve"?"ACHIEVE":"AVOID"}</span>
+);
+
+const trendColor = { "failing":"#EF4444", "expanding":"#F59E0B" };
+const trendLabel = { "failing":"FAILING", "expanding":"EXPANDING" };
+
+const StatusBadge = ({ status, trend }) => {
+  const c = statusColor[status] || C.gray;
+  return <span style={{ display:"inline-flex", alignItems:"center", gap:4 }}>
+    <span style={{ display:"inline-block", padding:"1px 8px", borderRadius:10, fontSize:10, fontWeight:700, background:`${c}20`, color:c, border:`1px solid ${c}40`, textTransform:"uppercase" }}>{status}</span>
+    {trend && <span style={{ display:"inline-block", padding:"1px 5px", borderRadius:8, fontSize:8, fontWeight:700, background:`${trendColor[trend]}15`, color:trendColor[trend], border:`1px solid ${trendColor[trend]}35`, textTransform:"uppercase", letterSpacing:0.3 }}>{trendLabel[trend]}</span>}
+  </span>;
+};
+
+const ImportanceBar = ({ value, label, color }) => (
+  <div style={{ display:"flex", alignItems:"center", gap:6, minWidth:120 }}>
+    <span style={{ fontSize:10, color:C.textDim, width:55, textAlign:"right" }}>{label}</span>
+    <div style={{ flex:1, height:6, background:`${C.border}80`, borderRadius:3, overflow:"hidden" }}>
+      <div style={{ width:`${value*20}%`, height:"100%", background:color||C.blueLt, borderRadius:3, transition:"width 0.3s" }}/>
+    </div>
+    <span style={{ fontSize:11, fontWeight:700, color:color||C.blueLt, width:16 }}>{value}</span>
+  </div>
+);
+
+const GoalRow = ({ goal, depth = 0, expanded, onToggle }) => {
+  const hasChildren = goal.subgoals && goal.subgoals.length > 0;
+  const isOpen = expanded[goal.id];
+  const indent = depth * 24;
+
+  return (
+    <>
+      <div
+        onClick={() => hasChildren && onToggle(goal.id)}
+        style={{
+          display:"grid", gridTemplateColumns:"minmax(260px,2fr) 80px 70px 130px 130px minmax(180px,1.5fr) 90px",
+          alignItems:"center", gap:8, padding:"10px 14px", paddingLeft:14+indent,
+          background: depth===0 ? C.cardAlt : "transparent",
+          borderBottom:`1px solid ${C.border}30`, cursor: hasChildren?"pointer":"default",
+          borderLeft: depth>0 ? `2px solid ${partyColor[goal.party]}30` : "none",
+          transition:"background 0.15s",
+        }}
+        onMouseEnter={e => { if(hasChildren) e.currentTarget.style.background=`${C.blue}10`; }}
+        onMouseLeave={e => { e.currentTarget.style.background = depth===0 ? C.cardAlt : "transparent"; }}
+      >
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
+          {hasChildren && <span style={{ color:C.textDim, fontSize:12, width:14, textAlign:"center", fontWeight:700 }}>{isOpen?"▼":"▶"}</span>}
+          {!hasChildren && <span style={{ width:14 }}/>}
+          <span style={{ color: depth===0?C.white:C.text, fontWeight: depth===0?700:500, fontSize: depth===0?13.5:12.5 }}>{goal.name}</span>
+        </div>
+        <div><PartyBadge party={goal.party}/></div>
+        <div><TypeBadge type={goal.type}/></div>
+        <div><ImportanceBar value={goal.importance} label="Import." color={goal.importance>=4?C.amber:C.blueLt}/></div>
+        <div><ImportanceBar value={goal.achievability} label="Achiev." color={goal.achievability>=4?C.green:goal.achievability<=2?C.red:C.amber}/></div>
+        <div style={{ fontSize:11.5, color:C.text, lineHeight:1.4 }}>
+          {goal.outcomeNote}
+          {goal.sources && goal.sources.length > 0 && (
+            <div style={{ marginTop:3, display:"flex", flexWrap:"wrap", gap:3 }}>
+              {goal.sources.map((s,i) => (
+                <a key={i} href={s.u} target="_blank" rel="noopener noreferrer" style={{
+                  fontSize:9, color:C.blueLt, textDecoration:"none", padding:"1px 4px",
+                  background:`${C.blue}15`, borderRadius:3, border:`1px solid ${C.blue}30`,
+                  whiteSpace:"nowrap",
+                }} onMouseEnter={e=>e.target.style.background=`${C.blue}30`}
+                   onMouseLeave={e=>e.target.style.background=`${C.blue}15`}>{s.t}</a>
+              ))}
+            </div>
+          )}
+        </div>
+        <div><StatusBadge status={goal.status} trend={goal.trend}/></div>
+      </div>
+      {isOpen && hasChildren && goal.subgoals.map(sg => (
+        <GoalRow key={sg.id} goal={sg} depth={depth+1} expanded={expanded} onToggle={onToggle}/>
+      ))}
+    </>
+  );
+};
+
+const GOALS = [
+  // ═══ TIER 1: EXISTENTIAL / STRATEGIC ═══
+  {
+    id:"nuke", name:"Eliminate Iran's Nuclear Weapons Capability", party:"both", type:"achieve",
+    importance:5, achievability:3, status:"in progress", outcomeNote:"Natanz entrance damaged; underground BDA unverifiable; Israel's own assessment: 'will not be destroyed'",
+    subgoals:[
+      { id:"nuke-natanz", name:"Destroy Natanz enrichment facility", party:"both", type:"achieve", importance:5, achievability:3, status:"in progress", outcomeNote:"IAEA confirmed damage to entrance buildings of Natanz FEP. No radiological consequence. Underground FEP itself not additionally impacted. Surface infrastructure degraded but core enrichment capability unclear." },
+      { id:"nuke-fordow", name:"Destroy Fordow underground facility", party:"both", type:"achieve", importance:5, achievability:2, status:"in progress", outcomeNote:"Built inside mountain. B-2 GBU-57 bunker busters deployed but penetration uncertain. IDF also struck separate underground site where scientists were 'covertly' developing key nuclear weapon component — intelligence-led strike on relocated personnel." },
+      { id:"nuke-isfahan", name:"Destroy Isfahan uranium conversion plant", party:"both", type:"achieve", importance:4, achievability:4, status:"in progress", outcomeNote:"Strikes confirmed in Isfahan province; specific facility BDA unclear." },
+      { id:"nuke-spnd", name:"Kill nuclear weapons program scientists/leaders", party:"both", type:"achieve", importance:4, achievability:5, status:"achieved", outcomeNote:"Both SPND chiefs confirmed killed Day 1." },
+      { id:"nuke-knowledge", name:"Destroy nuclear knowledge base", party:"israel", type:"achieve", importance:4, achievability:1, status:"unachievable", outcomeNote:"Knowledge cannot be bombed. Scientists survive. Documents digital. Fundamentally unachievable via military action." },
+      { id:"nuke-breakout", name:"Prevent future breakout capability", party:"both", type:"avoid", importance:5, achievability:2, status:"tbd", outcomeNote:"Even if facilities destroyed, Iran retains technical knowledge + can rebuild. Oman deal would have achieved this diplomatically." },
+      { id:"nuke-noradio", name:"Avoid radiological contamination", party:"both", type:"avoid", importance:5, achievability:4, status:"achieved", outcomeNote:"IAEA: 'no radiological consequence' from Natanz strikes so far." },
+    ]
+  },
+  {
+    id:"missile", name:"Destroy Iran's Missile & Drone Capability", party:"both", type:"achieve",
+    importance:5, achievability:2, status:"in progress", outcomeNote:"BIFURCATED: Missiles down 86% (FDD: 137→3 BMs/day at UAE). BUT drones SURGING — 131 at UAE alone on Day 6. INSS: 1,600+ drones total across all theaters. Iran shifting weapon mix: depleting expensive BMs, ramping cheap drones. Phase 2 targeting underground BM bunkers. IRGC: recent attacks were 'first powerful steps.' Total: 500+ BMs, 2,000+ drones fired. Campaign succeeding against missiles, struggling against drones.", sources:[{t:"CBS",u:"https://www.cbsnews.com/live-updates/us-iran-war-spreads-azerbaijan-israel-strikes-tehran-lebanon/"},{t:"FDD",u:"https://www.fdd.org/analysis/2026/03/04/why-irans-ballistic-missile-launches-are-declining/"},{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/5/drone-targets-us-base-in-iraq-as-iran-attacks-hit-region-amid-us-israel-war"}],
+    subgoals:[
+      { id:"mis-fixed", name:"Destroy fixed missile launch sites", party:"both", type:"achieve", importance:4, achievability:4, status:"in progress", outcomeNote:"IDF: ~300 launchers destroyed. UAE data: ballistic missiles per day 137→28→9→12→3 (FDD). June 2025 12-Day War already damaged capacity; current campaign preventing reconstitution. FDD: multiple factors — strikes on launchers, prior degradation, possible concealment of remaining assets. 90%+ Gulf interception rates holding.", sources:[{t:"FDD",u:"https://www.fdd.org/analysis/2026/03/04/why-irans-ballistic-missile-launches-are-declining/"}] },
+      { id:"mis-mobile", name:"Destroy mobile missile launchers", party:"both", type:"achieve", importance:5, achievability:2, status:"in progress", outcomeNote:"Mobile TELs remain the hardest target. Scud-hunt problem from 1991 repeating." },
+      { id:"mis-prod", name:"Destroy missile production facilities", party:"both", type:"achieve", importance:5, achievability:3, status:"in progress", outcomeNote:"Hegseth Objective #2. Some facilities struck but Iran has dispersed production across dozens of sites." },
+      { id:"mis-drone", name:"Destroy drone production & launch sites", party:"both", type:"achieve", importance:4, achievability:3, status:"in progress", outcomeNote:"DRONE SURGE: Missiles declining 86% but drones SURGING. UAE Day 6: 131 drones detected (125 intercepted) vs only 7 BMs. INSS total: 1,600+ drones launched across all theaters. IRGC called 230-drone attack 'first powerful steps.' Iran shifting to cheaper, more producible weapon system as missile stocks deplete. Drone factories distributed + harder to eliminate. Kamikaze drone boats attacking shipping. AWS data centers targeted. This is the weapon mix adaptation the campaign didn't plan for.", sources:[{t:"CBS",u:"https://www.cbsnews.com/live-updates/us-iran-war-spreads-azerbaijan-israel-strikes-tehran-lebanon/"},{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/5/drone-targets-us-base-in-iraq-as-iran-attacks-hit-region-amid-us-israel-war"}] },
+      { id:"mis-c2", name:"Destroy missile command & control", party:"both", type:"achieve", importance:4, achievability:4, status:"in progress", outcomeNote:"Iranian missile fire on Israel significantly decreased. Israel says Iran may be rationing munitions for long war. C2 degradation evident — sporadic fire patterns. But missiles still launching at Gulf states." },
+      { id:"mis-supply", name:"Interdict missile component supply chains", party:"us", type:"achieve", importance:3, achievability:2, status:"tbd", outcomeNote:"Long-term objective. Chinese/North Korean supply networks not addressed by air campaign." },
+    ]
+  },
+  {
+    id:"regime", name:"Regime Change / Regime Weakening", party:"opposing", type:"achieve",
+    importance:5, achievability:2, status:"in progress", outcomeNote:"UNCONDITIONAL SURRENDER + 'MIGA': Trump Truth Social (Mar 6 8:50 AM): 'No deal with Iran except UNCONDITIONAL SURRENDER! After that, and the selection of a GREAT & ACCEPTABLE Leader(s)... MAKE IRAN GREAT AGAIN (MIGA!).' Full text confirms both surrender AND leader-selection authority in single demand. Day 7 bombing more intense than ANY previous day. IDF: 2,500 strikes, 80% air defense destroyed. But Iran: 'no reason to negotiate.' 1,332+ dead (Red Crescent), 181 children (UNICEF). Pro-regime rally in Tehran after Friday prayers = regime still mobilizing.", sources:[{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/6/tehran-hit-by-heavy-bombing-on-day-seven-of-us-israel-war-on-iran"},{t:"AJZ-Day7",u:"https://www.aljazeera.com/news/2026/3/6/iran-war-what-is-happening-on-day-seven-of-us-israel-attacks"},{t:"Trump-TS",u:"https://x.com/TrumpTruthOnX/status/2029930671687549133"}],
+    subgoals:[
+      { id:"reg-khamenei", name:"Kill Supreme Leader Khamenei", party:"both", type:"achieve", importance:5, achievability:5, status:"achieved", outcomeNote:"Confirmed dead Day 1. Wife also confirmed dead March 2." },
+      { id:"reg-irgc-leaders", name:"Kill IRGC senior leadership", party:"both", type:"achieve", importance:5, achievability:5, status:"achieved", outcomeNote:"~40+ senior leaders killed. Day 6: Rahman Moghadam (IRGC Special Operations Division chief) eliminated. Davoud Alizadeh (deputy Quds Force Lebanon Corps commander) eliminated. But Mojtaba survived airstrike (Iranian sources). IRGC institutional structure adapting — ground forces entering battle, Radwan deploying, attacks continuing despite leadership losses. Decapitation working tactically but not producing institutional collapse.", sources:[{t:"Alma",u:"https://israel-alma.org/daily-report-the-second-iran-war-march-4-2026/"},{t:"IranIntl",u:"https://www.iranintl.com/en/liveblog/202602288143"}] },
+      { id:"reg-succession", name:"Prevent regime reconstitution", party:"israel", type:"achieve", importance:4, achievability:3, status:"at risk", outcomeNote:"FAILED: Assembly of Experts elected Mojtaba Khamenei as Supreme Leader DESPITE Israel destroying their Qom building — met virtually or at alternative site under IRGC pressure. Regime reconstituted constitutional succession mechanism under active bombing. Israel immediately declared Mojtaba 'an unequivocal target for elimination.' Trump: 'everybody that wants to be a leader, they end up dead.'", sources:[{t:"FDD-AoE",u:"https://www.fdd.org/analysis/2026/03/03/israel-strikes-tehran-regimes-assembly-of-experts-underlining-efforts-to-disrupt-succession-process/"},{t:"IranIntl",u:"https://www.iranintl.com/en/liveblog/202602288143"},{t:"AJZ-Mojtaba",u:"https://www.aljazeera.com/features/2026/3/4/who-is-mojtaba-khamenei-a-contender-for-irans-leadership-amid-war"}] },
+      { id:"reg-irgc-cohesion", name:"Break IRGC institutional cohesion", party:"both", type:"achieve", importance:4, achievability:2, status:"at risk", outcomeNote:"IRGC CONSOLIDATING: IRGC pressure drove Mojtaba selection — hardline faction in control of succession. IRGC announced ground forces entering battle + 'attacks will become more intense and extensive.' Zero defections. Institutional cohesion EXCEEDING predictions. IRGC designed the succession outcome.", sources:[{t:"IranIntl",u:"https://www.iranintl.com/en/liveblog/202602288143"},{t:"CNN",u:"https://edition.cnn.com/world/live-news/iran-war-us-israel-trump-03-04-26"}] },
+      { id:"reg-moderate", name:"Install moderate / pro-Western successor", party:"opposing", type:"achieve", importance:4, achievability:1, status:"at risk", outcomeNote:"TRUMP WANTS TO PICK: Trump: 'I have to be involved in the appointment.' Called Mojtaba 'a lightweight.' Venezuela/Delcy comparison = US-installed leader model. Meanwhile Mojtaba selected under IRGC pressure. Carnegie: 'no cracks.' BUT: Trump explicitly rejecting Mojtaba = won't accept hardline succession. If US won't accept IRGC's choice and IRGC won't accept US choice = deadlock. Moderate outcome requires either IRGC fracture or negotiated compromise — both possible, neither imminent.", sources:[{t:"Euronews",u:"https://www.euronews.com/2026/03/05/iran-claims-it-hit-us-tanker-as-israel-launches-fresh-strikes-on-tehran"}] },
+      { id:"reg-popular", name:"Trigger popular uprising / revolution", party:"us", type:"achieve", importance:3, achievability:2, status:"at risk", outcomeNote:"CONTRADICTORY: Some Iranians celebrated strikes — chanted 'Death to Khamenei' from windows, female students chanted 'Death to Velayat.' But security forces deployed and OPENED FIRE on celebrants. Internet at 1% for 100 hours. Khamenei mourning ceremony postponed (can't secure mass gathering). Reza Pahlavi urging uprising. But IRGC consolidating via Mojtaba selection — repression apparatus intact.", sources:[{t:"Wiki-Protests",u:"https://en.wikipedia.org/wiki/2025%E2%80%932026_Iranian_protests"},{t:"CNN",u:"https://edition.cnn.com/world/live-news/iran-war-us-israel-trump-03-04-26"}] },
+      { id:"reg-defect", name:"Encourage IRGC defections", party:"us", type:"achieve", importance:3, achievability:1, status:"at risk", outcomeNote:"ZERO DEFECTIONS — BUT DAY 6 OF BOMBING: Trump offered immunity. No confirmed defections yet. IRGC issuing 'no surrender.' BUT: Iran FM admitted military 'lost control over several units.' Thousands of IRGC killed/wounded (ISNA). Senior leadership being systematically eliminated. Mojtaba succession could create internal resentment. January protests showed some security forces refused orders. Iraqi military defections in 2003 were gradual, not Day 1. Zero defections during Week 1 is expected — the question is Week 3-4 under sustained attrition." },
+      { id:"reg-repress", name:"Degrade regime's internal repression capability", party:"israel", type:"achieve", importance:3, achievability:4, status:"in progress", outcomeNote:"Day 5: IDF 'broad wave of strikes' explicitly targeting internal security command centers in Tehran. Systematic degradation of regime's repression apparatus. But 60hr internet blackout (Israeli cyberattack) also prevents organizing opposition. Degrading repression AND communication simultaneously." },
+      { id:"reg-comms", name:"Destroy regime communications", party:"both", type:"achieve", importance:3, achievability:4, status:"in progress", outcomeNote:"120+ HOUR BLACKOUT: NetBlocks (Mar 5): internet blackout exceeded 120 hours, connectivity at 1%. NEW: telcos now threatening users who try to connect to global internet with LEGAL ACTION — 'increasingly Orwellian environment.' State broadcaster (IRIB) struck in Tabriz and Sanandaj. But regime still communicating — Araghchi posting, IRGC issuing statements, Assembly of Experts held virtual succession vote, pro-regime rally mobilized in Tehran after Friday prayers. Regime comms degraded but functional for leadership; population completely cut off AND now legally threatened for trying.", sources:[{t:"NetBlocks",u:"https://x.com/netblocks/status/2029458179956883509"},{t:"OSINT-IRIB",u:"https://x.com/hey_itsmyturn/status/2029612966916628902"}] },
+      { id:"reg-endgame", name:"Define post-war governance plan", party:"opposing", type:"achieve", importance:5, achievability:1, status:"at risk", trend:"failing", outcomeNote:"MIGA vs REALITY: Trump full post (Mar 6): 'UNCONDITIONAL SURRENDER...selection of GREAT & ACCEPTABLE Leader(s)...MAKE IRAN GREAT AGAIN (MIGA!).' Simultaneously promises to 'bring Iran back from brink of destruction' while the destruction continues. Hegseth told Israel: 'keep going to the end.' But Iran FM: 'Washington untrustworthy.' NCRI, Pahlavi, Kurds positioning but no US framework. IDF issuing Gaza-style evacuation orders inside Qom. The gap between 'MIGA' and any achievable political outcome is the widest it's been. Pro-regime rally in Tehran after Friday prayers shows regime still has mobilization capacity.", sources:[{t:"AJZ-Live",u:"https://www.aljazeera.com/news/liveblog/2026/3/6/iran-live-trump-says-iran-being-demolished-tehran-keeps-up-gulf-attacks"},{t:"Trump-TS",u:"https://x.com/TrumpTruthOnX/status/2029930671687549133"}] },
+    ]
+  },
+  {
+    id:"navy", name:"Destroy Iran's Navy & Maritime Threat", party:"us", type:"achieve",
+    importance:5, achievability:5, status:"achieved", outcomeNote:"ANNIHILATED: 30+ ships sunk. Drone carrier on fire. IRIS Bushehr interned by Sri Lanka (first warship internment since WWII) — crew of 208 detained. 87 bodies recovered from IRIS Dena. Cooper: navy attacks 'intensified.' BMs down 90%. Goal of 'complete elimination' approaching. But IRGC coastal asymmetric forces still operating — drone boats, mines, fast boats sustaining Hormuz blockade independent of conventional navy.", sources:[{t:"Wiki",u:"https://en.wikipedia.org/wiki/2026_Iran_war"},{t:"NavyTimes",u:"https://www.navytimes.com/news/2026/03/05/us-has-destroyed-iranian-drone-carrier-centcom-commander-says/"}],
+    subgoals:[
+      { id:"nav-ships", name:"Sink Iranian warships", party:"us", type:"achieve", importance:5, achievability:5, status:"achieved", outcomeNote:"17+ ships destroyed including IRIS Jamaran, IRIS Dena (torpedoed off Sri Lanka by US submarine — 100+ missing, 32 rescued). Soleimani-class corvette IRIS Shahid Sayyad Shirazi struck at Bandar Abbas. Drone carrier Shahid Bagheri struck. Hegseth: 'quiet death' — first US torpedo kill since WWII." },
+      { id:"nav-subs", name:"Neutralize submarine threat", party:"us", type:"achieve", importance:4, achievability:4, status:"achieved", outcomeNote:"CENTCOM: 'most operational Iranian submarine now has a hole in its side.' Iran's 3 Kilo-class subs effectively neutralized. US submarine warfare capability demonstrated with IRIS Dena torpedo attack — USS Ohio (SSGN-726) reportedly in region." },
+      { id:"nav-fast", name:"Neutralize IRGC fast boat fleet", party:"us", type:"achieve", importance:4, achievability:3, status:"in progress", outcomeNote:"Hundreds of fast boats dispersed across Gulf coastline. Asymmetric threat harder to eliminate than conventional navy." },
+      { id:"nav-asms", name:"Destroy anti-ship missile sites", party:"us", type:"achieve", importance:5, achievability:4, status:"in progress", outcomeNote:"Coastal anti-ship missile sites under sustained attack. But 10 tankers reported burning in/around Strait of Hormuz — Iran still capable of anti-shipping attacks via drones, mines, and remaining IRGC fast boats even with conventional navy destroyed." },
+      { id:"nav-mines", name:"Prevent/clear mine-laying in Hormuz", party:"us", type:"avoid", importance:5, achievability:3, status:"tbd", outcomeNote:"Iran has extensive mine inventory. Mine clearance would take weeks-months if deployed. Unclear if mines laid yet." },
+    ]
+  },
+  {
+    id:"hormuz", name:"Maintain / Reopen Strait of Hormuz", party:"us", type:"achieve",
+    importance:5, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"WARLIKE OPERATIONS AREA: Maritime sector upgraded Strait from 'high risk' to 'warlike operations area' — highest designation, triggers crew right of refusal. IRGC hit US tanker. Expanded ban to European vessels. P&I insurance removed. 150+ ships stalled. Macron building Strait protection coalition (France/Spain/Greece/Italy). But no escort operational yet. Kuwait tanker explosion — oil spill risk. Oman storage tank damaged. Physical and legal closure now complete.", sources:[{t:"Euronews",u:"https://www.euronews.com/2026/03/05/iran-claims-it-hit-us-tanker-as-israel-launches-fresh-strikes-on-tehran"},{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/5/drone-targets-us-base-in-iraq-as-iran-attacks-hit-region-amid-us-israel-war"}],
+    subgoals:[
+      { id:"hor-open", name:"Keep Hormuz open during operations", party:"us", type:"achieve", importance:5, achievability:1, status:"at risk", trend:"failing", outcomeNote:"WARLIKE OPS AREA: Upgraded from 'high risk' — triggers crew right of refusal + extra pay. IRGC hit US tanker. Kuwait tanker explosion (oil spill risk). Oman storage hit. P&I insurance removed. 150+ ships stalled. Maersk/Hapag-Lloyd suspended. Macron building European naval coalition for Strait protection. But escort not operational. IRGC: 'no shipping linked to US, Israel, or European supporters will pass.'", sources:[{t:"Euronews",u:"https://www.euronews.com/2026/03/05/iran-claims-it-hit-us-tanker-as-israel-launches-fresh-strikes-on-tehran"}] },
+      { id:"hor-escort", name:"Establish naval escort for tankers", party:"us", type:"achieve", importance:5, achievability:3, status:"at risk", trend:"failing", outcomeNote:"NOT YET OPERATIONAL: Navy escort pledged but IRGC hit US oil tanker in northern Gulf on Day 6. Small craft attacking tankers at anchor. Insurance removed. UKMTO daily summary (official maritime authority) tracking ongoing incidents. Escort plan can't protect stationary vessels and 150+ stalled ships simultaneously. IRGC expanding ban to European ships = escort would have to cover all commercial traffic, not just US-flagged.", sources:[{t:"UKMTO",u:"https://x.com/UK_MTO/status/2029603749413441837"},{t:"CBS",u:"https://www.cbsnews.com/live-updates/us-iran-war-spreads-azerbaijan-israel-strikes-tehran-lebanon/"}] },
+      { id:"hor-insurance", name:"Maintain commercial insurance for shipping", party:"us", type:"achieve", importance:4, achievability:1, status:"at risk", trend:"failing", outcomeNote:"DFC INSURANCE IS FICTION: JPMorgan: DFC likely can't insure 300+ tankers anchored near Strait. Evercore: 'typically takes 6-9 months from application to approve.' Trump pledged backstop but product doesn't exist, can't be created at speed of war. 150+ ships stalled. P&I removed. Warlike ops area. Gas up 20 cents. Trump won't tap SPR. The insurance gap is structural, not correctable in weeks.", sources:[{t:"NBC",u:"https://www.nbcnews.com/world/iran/live-blog/live-updates-iran-war-trump-israel-warship-attack-middle-east-rcna261866"}] },
+      { id:"hor-bypass", name:"Maintain alternative export routes", party:"us", type:"achieve", importance:4, achievability:2, status:"at risk", trend:"failing", outcomeNote:"Fujairah port (UAE Hormuz bypass) struck by Iranian drones, operations halted. Bypass infrastructure being systematically degraded." },
+      { id:"hor-energy", name:"Prevent global energy crisis", party:"us", type:"avoid", importance:5, achievability:2, status:"at risk", trend:"failing", outcomeNote:"Brent $82+. US gas biggest 1-day spike since 2005. EU gas +42%. QatarEnergy offline. Iraq shutting Rumaila (3M bpd). Crisis materializing." },
+    ]
+  },
+
+  // ═══ TIER 2: OPERATIONAL ═══
+  {
+    id:"airsup", name:"Achieve & Maintain Air Superiority Over Iran", party:"both", type:"achieve",
+    importance:5, achievability:5, status:"achieved", outcomeNote:"NEAR-COMPLETE: IDF claims 'near-complete air superiority' — 2,500 strikes, 80% of air defense destroyed. Day 7 bombing 'more intense than any previous day' (AJZ Tehran). B-2s dropping 2,000lb penetrators on underground targets. IDF hit 6 missile launchers overnight before they could fire + destroyed 3 advanced defense systems. Strikes near Pasteur Street (most secured area in Tehran). LUCAS drones in combat. F-35 YAK-130 kill. Air campaign entering exploitation phase — hitting targets of opportunity, not just pre-planned sets.", sources:[{t:"AJZ-Day7",u:"https://www.aljazeera.com/news/2026/3/6/iran-war-what-is-happening-on-day-seven-of-us-israel-attacks"},{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/6/tehran-hit-by-heavy-bombing-on-day-seven-of-us-israel-war-on-iran"}],
+    subgoals:[
+      { id:"air-ad", name:"Destroy Iranian air defense network", party:"both", type:"achieve", importance:5, achievability:5, status:"achieved", outcomeNote:"80% DESTROYED: IDF claims 80% of Iran's air defense systems destroyed. 'Near-complete air superiority.' 3 more advanced defense systems destroyed overnight. Phase 2 underground targeting proceeding uncontested. This means B-2s and F-35s operating freely over virtually all Iranian territory. Remaining 20% likely deepest/most hardened systems or mobile units.", sources:[{t:"AJZ-Day7",u:"https://www.aljazeera.com/news/2026/3/6/iran-war-what-is-happening-on-day-seven-of-us-israel-attacks"}] },
+      { id:"air-hq9", name:"Neutralize Chinese HQ-9B systems", party:"both", type:"achieve", importance:4, achievability:5, status:"achieved", outcomeNote:"All 3 batteries destroyed by EA-18G Growlers in first hour. Zero interceptors fired. Third consecutive combat failure." },
+      { id:"air-iaf", name:"Destroy Iranian Air Force", party:"both", type:"achieve", importance:3, achievability:5, status:"achieved", outcomeNote:"DESTROYED: IDF F-35 shot down Iranian YAK-130 fighter jet — first downing of enemy aircraft since 1985 (Syrian jets over Lebanon). Iran's air force was already obsolete. Qatar shot down 2 Su-24 bombers. Shiraz air base struck. Iranian air force now effectively nonexistent." },
+      { id:"air-stealth", name:"Maintain stealth advantage", party:"us", type:"achieve", importance:4, achievability:5, status:"achieved", outcomeNote:"F-35s and B-2s operating freely. British F-35 shot down Iranian drone. No stealth aircraft losses." },
+      { id:"air-ew", name:"Maintain electronic warfare dominance", party:"us", type:"achieve", importance:4, achievability:5, status:"achieved", outcomeNote:"EA-18G Growlers + Israeli ALQ-322 blinding Iranian radar. Cyber ops disrupting news sites." },
+    ]
+  },
+  {
+    id:"hez", name:"Neutralize Hezbollah", party:"israel", type:"achieve",
+    importance:5, achievability:2, status:"in progress", outcomeNote:"GAZA TEMPLATE: IDF ordered evacuation of nearly ALL of southern Beirut — 500,000+ people. Previous orders targeted single buildings; this covers entire neighborhoods. Smotrich: 'Dahieh will look like Khan Younis' (city flattened in Gaza). IRGC Quds Force officers still fleeing Lebanon (Axios). Radwan deployed but IRGC advisory network hollowing out. Lebanon displacement soaring past 58,000. This is no longer a targeted campaign — it's a planned urban destruction operation.", sources:[{t:"CNN",u:"https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-05-26"},{t:"NBC",u:"https://www.nbcnews.com/world/iran/live-blog/live-updates-iran-war-trump-israel-warship-attack-middle-east-rcna261866"}],
+    subgoals:[
+      { id:"hez-deter", name:"Deter Hezbollah from entering war", party:"both", type:"avoid", importance:4, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"PREDICTION MISS: Hezbollah entered Day 3 with missile + drone swarm 'in revenge for Khamenei.' Our biggest analytical miss." },
+      { id:"hez-leaders", name:"Kill Hezbollah leadership", party:"israel", type:"achieve", importance:5, achievability:3, status:"in progress", outcomeNote:"Hussein Makled (Hezbollah intelligence chief) confirmed killed in Beirut strike. IDF also struck Jamaa Islamiya HQ in Sidon (Hamas/Hezbollah ally). Targeting expanding beyond Hezbollah to allied organizations." },
+      { id:"hez-ground", name:"Clear southern Lebanon border zone", party:"israel", type:"achieve", importance:4, achievability:3, status:"in progress", outcomeNote:"URBAN DESTRUCTION PLANNED: IDF ordered 500,000+ to evacuate ALL of southern Beirut. Smotrich: 'Dahieh will look like Khan Younis.' This goes beyond Radwan confrontation to planned area devastation. Radwan deployed to block tanks. 2 IDF soldiers wounded. Lebanon: displacement soaring. Previous evacuations = single buildings. This = entire neighborhoods. Gaza template now explicitly applied to Beirut by Israeli officials themselves.", sources:[{t:"CNN",u:"https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-05-26"}] },
+      { id:"hez-leb", name:"Get Lebanon to act against Hezbollah", party:"israel", type:"achieve", importance:3, achievability:2, status:"at risk", trend:"failing", outcomeNote:"UNPRECEDENTED LEBANESE ACTION: PM Salam ordered ban on IRGC military activity in Lebanon. Cabinet reinstated visa requirements for Iranians. IRGC members to be arrested and deported. But Radwan force deploying DESPITE ban — Lebanese Army not enforcing. Ban is political signal, not operational reality. Lebanon caught between Israeli invasion and Hezbollah defiance.", sources:[{t:"Haaretz",u:"https://www.haaretz.com/israel-news/israel-security/2026-03-05/ty-article-live/idf-launches-second-wave-of-strikes-on-regime-targets-in-tehran/0000019c-bb20-df64-a59c-fb765d040000"}] },
+      { id:"hez-rocket", name:"Stop rocket fire on northern Israel", party:"israel", type:"avoid", importance:5, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"TEL AVIV NOW IN RANGE: Hezbollah expanded attacks to Tel Aviv area — 2 launches toward central Israel. 38 attacks in 24hrs using drones, ATGMs, missiles. Attacks on Galilee, Haifa, Golan Heights continuing. Range expansion = strategic escalation, not just border harassment." },
+    ]
+  },
+  {
+    id:"proxies", name:"Neutralize Iranian Proxy Network", party:"opposing", type:"achieve",
+    importance:4, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"OPPOSING: Israel wants total proxy destruction. US wants proxy restraint but created conditions for activation. All major proxies now active.",
+    subgoals:[
+      { id:"prx-houthi", name:"Suppress Houthi threats", party:"us", type:"achieve", importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"Houthis re-entered with missile/drone attacks on US/Israeli ships in Red Sea. Bab al-Mandab chokepoint back on map." },
+      { id:"prx-iraq", name:"Prevent Iraqi militia activation", party:"us", type:"avoid", importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"IRAQ CAUGHT: Parliament + president rejected 'any use of territory to attack neighboring states.' But US bases still in Iraq. Islamic Resistance claimed 23+ drone strikes on Erbil. Iran striking Kurdish positions ON IRAQI SOIL. PMF fighters killed at Jurf al-Sakhar. Baghdad International Airport targeted by drones. Iraq being used as battlefield by both sides while trying to stay neutral.", sources:[{t:"Haaretz",u:"https://www.haaretz.com/israel-news/israel-security/2026-03-05/ty-article-live/idf-launches-second-wave-of-strikes-on-regime-targets-in-tehran/0000019c-bb20-df64-a59c-fb765d040000"},{t:"Siasat",u:"https://www.siasat.com/live-us-israel-attack-iran-day-6-3424183/"}] },
+      { id:"prx-kurdish", name:"Leverage Kurdish opposition to Iran", party:"us", type:"achieve", importance:3, achievability:3, status:"in progress", outcomeNote:"PROXY WAR ACTIVE: Iran preemptively struck Kurdish separatist positions on Iraq border — destroyed facilities, claimed 'heavy losses.' Iran says cooperating with 'noble Kurds' against 'Israeli-American scheme.' WH denied arming plan but multiple outlets report discussions. Kurdish forces already 'deep inside Iran.' Iraq parliament rejected use of territory for attacking neighbors. Two-way proxy front now active on Iran-Iraq border.", sources:[{t:"Siasat",u:"https://www.siasat.com/live-us-israel-attack-iran-day-6-3424183/"},{t:"Haaretz",u:"https://www.haaretz.com/israel-news/israel-security/2026-03-05/ty-article-live/idf-launches-second-wave-of-strikes-on-regime-targets-in-tehran/0000019c-bb20-df64-a59c-fb765d040000"}] },
+    ]
+  },
+  {
+    id:"cas-us", name:"Minimize US Casualties", party:"us", type:"avoid",
+    importance:5, achievability:3, status:"at risk", trend:"expanding", outcomeNote:"6 KIA, 18 seriously wounded. Drone hit Kuwait command center with 'little overhead protection.' Murphy: Pentagon admitted 'more Americans are going to die, they can't stop the drones.' Force protection failing.",
+    subgoals:[
+      { id:"cas-zero", name:"Maintain zero-casualty posture", party:"us", type:"avoid", importance:5, achievability:1, status:"unachievable", outcomeNote:"Failed Day 2. First 3 KIA confirmed. Now at 6 KIA. Pentagon had pre-positioned for casualties by drawing down personnel." },
+      { id:"cas-mass", name:"Prevent mass-casualty event", party:"us", type:"avoid", importance:5, achievability:3, status:"at risk", trend:"expanding", outcomeNote:"CIA station inside US Embassy Riyadh hit by drone. Pentagon admitted 'can't stop drones.' Kuwait command center had 'little overhead protection.' IRGC now committing 230 drones in ground operations. If IRGC drone swarm targets concentrated US position = mass-casualty event. Senate briefed: 'more Americans will be killed.'" },
+      { id:"cas-ff", name:"Prevent friendly fire incidents", party:"us", type:"avoid", importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"3 US F-15Es shot down by Kuwaiti air defenses (all 6 crew survived). Battlespace complexity exceeding coordination capacity. Multiple nations' air defenses firing simultaneously — fog of war intensifying as more European assets arrive." },
+      { id:"cas-ground", name:"Avoid need for ground troops", party:"us", type:"avoid", importance:5, achievability:3, status:"in progress", outcomeNote:"IRAN: 'READY FOR INVASION': Al Jazeera headline — Tehran says prepared for ground invasion. IRGC ground forces already in battle with 230 drones. Radwan force deployed in Lebanon. Hegseth won't rule out. Trump: 'if they were necessary.' Mossad potentially inside Iran. Kurdish proxy front active on Iraq border. Iran preemptively struck Kurdish positions. The ground dimension is activating from multiple vectors simultaneously even without formal US ground deployment.", sources:[{t:"AJZ",u:"https://www.aljazeera.com/news/liveblog/2026/3/5/iran-live-us-senate-backs-trumps-attacks-on-tehran-israel-pounds-lebanon"}] },
+    ]
+  },
+  {
+    id:"cas-civ", name:"Minimize Iranian Civilian Casualties", party:"opposing", type:"avoid",
+    importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"UNICEF DOCUMENTING: 1,300+ dead, 181 children (UNICEF). Second school struck. Residential buildings hit. Smotrich: 'Dahieh will look like Khan Younis.' IDF issuing evacuation orders inside Iranian cities (Qom). 500,000 person Beirut evacuation. Day 7 most intense bombing yet. The civilian toll is no longer just a number — it's being institutionally documented by UNICEF, creating a permanent accountability record.", sources:[{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/6/tehran-hit-by-heavy-bombing-on-day-seven-of-us-israel-war-on-iran"},{t:"CNN",u:"https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-05-26"}],
+    subgoals:[
+      { id:"civ-school", name:"Avoid targeting schools / children", party:"us", type:"avoid", importance:5, achievability:1, status:"at risk", trend:"failing", outcomeNote:"SECOND SCHOOL HIT: Tehran's Niloufar Square elementary — FM spokesman posted footage of destroyed classrooms. First school (Minab): 175 dead girls, US investigators 'likely' responsible. UNICEF now documenting: 181 children killed. Pattern: military targets near civilian infrastructure generating collateral. Two schools in 7 days. The school narrative has moved from 'uncontrollable' to 'repeating.' Each incident compounds the last.", sources:[{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/6/tehran-hit-by-heavy-bombing-on-day-seven-of-us-israel-war-on-iran"}] },
+      { id:"civ-hospital", name:"Avoid targeting hospitals", party:"us", type:"avoid", importance:5, achievability:2, status:"at risk", trend:"failing", outcomeNote:"Khatam-al-Anbia + Gandhi hospitals in Tehran struck — verified by BBC." },
+      { id:"civ-heritage", name:"Avoid targeting cultural sites", party:"us", type:"avoid", importance:3, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"Golestan Palace (UNESCO World Heritage Site) damaged in strikes." },
+      { id:"civ-total", name:"Keep civilian death toll manageable", party:"us", type:"avoid", importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"1,332+ DEAD (Red Crescent): UNICEF: 181 children killed. SECOND school hit — Tehran's Niloufar Square (destroyed classrooms). Shiraz: 20 dead, 30 injured in Zibashahr area. Day 7 most intense yet — AJZ Tehran correspondent: 'heavier bombardment than previous days.' Strikes near Pasteur Street (President's office), residential buildings, car parks, petrol stations. IDF issuing Gaza-style evacuation orders in Qom. Beirut: 500,000 person evacuation ordered. Italy defense minister: US-Israel attack 'violated international law.'", sources:[{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/6/tehran-hit-by-heavy-bombing-on-day-seven-of-us-israel-war-on-iran"},{t:"AJZ-tracker",u:"https://www.aljazeera.com/news/2026/3/1/us-israel-attacks-on-iran-death-toll-and-injuries-live-tracker"}] },
+    ]
+  },
+  {
+    id:"cas-isr", name:"Minimize Israeli Civilian Casualties", party:"israel", type:"avoid",
+    importance:5, achievability:3, status:"at risk", trend:"expanding", outcomeNote:"12 civilians dead, 1,200+ injured (Alma Center data). 128 Iranian attack waves since Day 1. Pattern declining (62→24→7→8) but Hezbollah expanding to Tel Aviv = new threat axis. Beit Shemesh synagogue (9 dead) worst single incident. Haifa refinery hit. Defense systems working but cumulative strain visible — 1,200 injuries in 5 days.",
+    subgoals:[
+      { id:"isr-dome", name:"Intercept all Iranian missiles at Israel", party:"israel", type:"avoid", importance:5, achievability:3, status:"at risk", outcomeNote:"128 Iranian attack waves total. Day 5: 8 waves including 2 coordinated Iran-Hezbollah at central Israel. MDA no casualties from latest salvos but 1,200+ injured cumulative. Iran says most advanced weapons withheld. Hezbollah now targeting Tel Aviv. Declining wave frequency ≠ declining lethality — coordination improving as volume decreases." },
+      { id:"isr-aqsa", name:"Prevent Al-Aqsa / Temple Mount strike", party:"israel", type:"avoid", importance:5, achievability:4, status:"in progress", outcomeNote:"Iranian warhead fell <1 km from Temple Mount. Near-miss. One stray warhead from detonating religious dimension." },
+    ]
+  },
+
+  // ═══ TIER 3: POLITICAL / DIPLOMATIC ═══
+  {
+    id:"domestic", name:"Maintain Domestic Political Support", party:"opposing", type:"achieve",
+    importance:5, achievability:2, status:"at risk", outcomeNote:"BOTH CHAMBERS REJECTED WAR POWERS: House also voted down resolution. Trump has complete free hand. But: CSIS $891M/day cost, $3.5B unbudgeted. Gas up 20 cents/7%. Trump won't tap SPR. DFC insurance fiction exposed by JPMorgan (6-9 months to approve). First evacuation flight landed at Dulles. Hundreds of Americans returning. 'Unconditional surrender' = indefinite commitment with no budget. Congress gave Trump the war; now the bill arrives.", sources:[{t:"NBC",u:"https://www.nbcnews.com/world/iran/live-blog/live-updates-iran-war-trump-israel-warship-attack-middle-east-rcna261866"},{t:"AJZ-Day7",u:"https://www.aljazeera.com/news/2026/3/6/iran-war-what-is-happening-on-day-seven-of-us-israel-attacks"}],
+    subgoals:[
+      { id:"dom-justify", name:"Maintain 'imminent threat' justification", party:"us", type:"achieve", importance:5, achievability:1, status:"at risk", trend:"failing", outcomeNote:"FOURTH justification added Day 4: Trump in Oval Office: 'It was my opinion they were going to attack first.' Cited no intelligence. Now FOUR contradictory rationales: (1) imminent threat, (2) Israel forced hand (Rubio Mon), (3) diplomacy failed, (4) preemptive intuition. Rubio denying own Monday statement on Tuesday." },
+      { id:"dom-oman", name:"Counter 'deal was done' narrative", party:"us", type:"achieve", importance:5, achievability:2, status:"at risk", trend:"failing", outcomeNote:"Witkoff: 'impossible by meeting 2.' But Gang of 8 briefed Thursday that Trump 'hadn't decided' — decision made Friday, strikes Saturday. Oman says breakthrough Feb 27. Timeline increasingly damning." },
+      { id:"dom-warpow", name:"Avoid War Powers Act confrontation", party:"us", type:"avoid", importance:4, achievability:3, status:"at risk", trend:"failing", outcomeNote:"BOTH CHAMBERS DONE: Senate 47-53. House also rejected. Trump has complete legal freedom for 60-day War Powers clock. No congressional brake exists. Kaine can force repeat votes but unlikely to flip enough. Only constraint: 60-day clock requiring eventual AUMF. But CENTCOM planning 100 days = past the clock. Congress will have to either authorize or be ignored.", sources:[{t:"NBC",u:"https://www.nbcnews.com/world/iran/live-blog/live-updates-iran-war-trump-israel-warship-attack-middle-east-rcna261866"}] },
+      { id:"dom-midterm", name:"Prevent war from becoming midterm issue", party:"us", type:"avoid", importance:4, achievability:1, status:"unachievable", outcomeNote:"WAR IS THE ISSUE — VALENCE TBD: The war cannot be un-noticed. NC-4 primary candidates running on it. Campaign ads from Day 4. BUT: whether it's a NEGATIVE midterm issue depends on outcome. Gulf War 1991 initially boosted Bush. If war ends quickly with clear victory + gas normalizes, could become asset not liability. If it drags on or escalates, becomes defining negative. The goal as stated (prevent it from being an issue) is impossible — but the political valence is genuinely uncertain." },
+      { id:"dom-predict", name:"Prevent insider trading / prediction market scandal", party:"us", type:"avoid", importance:2, achievability:1, status:"unachievable", outcomeNote:"People profited via Kalshi. Sen. Murphy: 'People around Trump profiting off war and death.' Legislation incoming." },
+    ]
+  },
+  {
+    id:"alliance", name:"Maintain Alliance Cohesion", party:"us", type:"achieve",
+    importance:4, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"EXPANDING MILITARILY, FRACTURING POLITICALLY: Spain reversed — sending Cristobal Colon frigate. France authorized US base access. Italy sending destroyer BUT defense minister said US-Israel attack 'violated international law.' Zelenskyy proposed WEAPONS SWAP: Ukrainian interceptor drones in exchange for PAC-2/PAC-3 missiles (full tweet reveals proposal news outlets softened to 'offering expertise'). Backchannel: Ravid sourced directly — US dismissed Iranian messages as 'bull****.' Netanyahu suspicious of WH contacts. Alliance growing militarily while political coherence fragmenting. IDF: 20,000 reservists called up, 35 battalions deployed domestically.", sources:[{t:"Euronews",u:"https://www.euronews.com/2026/03/05/iran-claims-it-hit-us-tanker-as-israel-launches-fresh-strikes-on-tehran"},{t:"Zelenskyy",u:"https://x.com/ZelenskyyUa/status/2029470937695781108"},{t:"Ravid",u:"https://x.com/BarakRavid/status/2029302384837488800"}],
+    subgoals:[
+      { id:"all-nato", name:"Maintain NATO unity", party:"us", type:"achieve", importance:4, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"SPAIN REVERSED + FRANCE BASES: Spain sending Cristobal Colon frigate (24hr reversal). France authorized US base access. Italy + Spain naval assets to Cyprus. Macron building Strait coalition. Iran DENIED firing missile at Turkey despite NATO shooting it down — avoiding escalation with NATO member. UK withdrawing some Bahrain staff. Greek F-16s downing drones. European military commitment deepening daily. NATO coalition now: US, UK, France, Greece, Spain, Italy, Germany — 7 nations with assets deployed or committed.", sources:[{t:"Euronews",u:"https://www.euronews.com/2026/03/05/iran-claims-it-hit-us-tanker-as-israel-launches-fresh-strikes-on-tehran"},{t:"WaPo",u:"https://www.washingtonpost.com/world/2026/03/05/us-iran-israel-strikes-trump-live-updates/"}] },
+      { id:"all-gulf", name:"Maintain Gulf state cooperation", party:"both", type:"achieve", importance:4, achievability:3, status:"in progress", outcomeNote:"GCC threatening offensive action vs. Iran (favorable). Saudi MBS vowed force. But Kuwait friendly fire, Qatar LNG offline = strains." },
+      { id:"all-base", name:"Maintain basing rights across region", party:"us", type:"achieve", importance:5, achievability:3, status:"in progress", outcomeNote:"CIA station in Riyadh embassy hit. US embassies closed in Kuwait, Lebanon, Saudi Arabia. Non-essential US workers evacuating Cyprus. Diego Garcia refused by UK. Syria closed Lebanon border crossing after Israeli targeting warning. Basing architecture under sustained attack across entire region." },
+      { id:"all-oman", name:"Preserve Oman mediation channel", party:"us", type:"achieve", importance:3, achievability:1, status:"at risk", trend:"failing", outcomeNote:"BACKCHANNEL EXISTS BUT DISMISSED: NYT: Iran's intelligence contacted CIA through third-country spy agency. Markets rebounded on report. But Barak Ravid (Axios) sourced directly: US official said 'We treated these messages as bull****' — not skepticism but active dismissal. Netanyahu called WH demanding clarification — suspicious US might negotiate without Israel. WH denied any talks. Oman channel dead. Iran publicly: 'won't negotiate.' Backchannel less real than markets priced in. Becoming wedge between US-Israel more than actual negotiation pathway.", sources:[{t:"IranIntl-Axios",u:"https://www.iranintl.com/en/liveblog/202602288143"},{t:"CNN",u:"https://edition.cnn.com/world/live-news/iran-war-us-israel-trump-03-04-26"}] },
+    ]
+  },
+  {
+    id:"greatpow", name:"Prevent Great Power Intervention", party:"both", type:"avoid",
+    importance:5, achievability:4, status:"in progress", outcomeNote:"China/Russia rhetorical only so far. But: Chinese citizen killed, HQ-9B humiliated, 1 Chinese national dead. Pressure building.",
+    subgoals:[
+      { id:"gp-china", name:"Prevent Chinese military support to Iran", party:"both", type:"avoid", importance:5, achievability:4, status:"in progress", outcomeNote:"Still rhetorical. HQ-9B destroyed = humiliation. Citizen killed = leverage. Watch: arms resupply, intel sharing, energy guarantees." },
+      { id:"gp-russia", name:"Prevent Russian military support to Iran", party:"both", type:"avoid", importance:4, achievability:4, status:"at risk", trend:"expanding", outcomeNote:"HOLDING — FOR NOW: Peskov confirmed Iran has NOT requested weapons from Russia. 'No changes in our position.' But Bushehr still under threat. Russian LNG tanker hit. E3 did not condemn strikes. Russia increasingly isolated diplomatically. Key question: does Iran's declining missile inventory (86% drop) eventually force a resupply request? That would be the critical escalation trigger.", sources:[{t:"Siasat",u:"https://www.siasat.com/live-us-israel-attack-iran-day-6-3424183/"}] },
+      { id:"gp-unsc", name:"Prevent UNSC action against US/Israel", party:"both", type:"avoid", importance:3, achievability:5, status:"achieved", outcomeNote:"US veto power ensures no binding resolution. But UN agencies (UNESCO, OHCHR, IAEA) all condemning strikes." },
+    ]
+  },
+  {
+    id:"narrative", name:"Win the Information / Narrative War", party:"opposing", type:"achieve",
+    importance:4, achievability:1, status:"at risk", trend:"failing", outcomeNote:"MAXIMALIST DISCONNECT: Trump demands 'unconditional surrender' while second school hit and UNICEF documents 181 dead children. Hegseth: 'keep going to the end.' Smotrich: 'Dahieh = Khan Younis.' IDF evacuation orders inside Iran (Qom). $891M/day unbudgeted. DFC insurance fiction. Each escalatory statement makes the 'precision/limited' frame more absurd. The narrative isn't failing — it's been abandoned in favor of maximalist rhetoric that contradicts any off-ramp.", sources:[{t:"AJZ-Live",u:"https://www.aljazeera.com/news/liveblog/2026/3/6/iran-live-trump-says-iran-being-demolished-tehran-keeps-up-gulf-attacks"},{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/6/tehran-hit-by-heavy-bombing-on-day-seven-of-us-israel-war-on-iran"}],
+    subgoals:[
+      { id:"nar-justify", name:"Maintain credible justification narrative", party:"us", type:"achieve", importance:5, achievability:1, status:"at risk", trend:"failing", outcomeNote:"SIX justifications: imminent threat, Israel forced hand, diplomacy failed, preemptive intuition, missiles reaching America, AND NOW: 'I must be involved in choosing the leader, like with Delcy.' Venezuela puppet-state comparison = regime selection, not regime change. Each new statement contradicts the last. But Spain's reversal and France's base authorization suggest the contradictions aren't costing coalition support — yet.", sources:[{t:"Euronews",u:"https://www.euronews.com/2026/03/05/iran-claims-it-hit-us-tanker-as-israel-launches-fresh-strikes-on-tehran"}] },
+      { id:"nar-school", name:"Control Minab school narrative", party:"us", type:"achieve", importance:4, achievability:1, status:"at risk", trend:"failing", outcomeNote:"CBS SATELLITE ANALYSIS: Planet Labs imagery shows school was NOT the only building hit — a building WITHIN the IRGC's Seyyed Al-Shohada Barracks compound was also destroyed, plus roof damage to another military structure. Pattern: strike targeted military compound, school 60m away suffered collateral damage. Neither US nor Israel claiming responsibility. IDF: 'no connection to our operations.' This is proximity targeting, not deliberate school strike — but 175 dead children regardless.", sources:[{t:"CBS-Satellite",u:"https://www.cbsnews.com/live-updates/us-iran-war-spreads-azerbaijan-israel-strikes-tehran-lebanon/"}] },
+      { id:"nar-araghchi", name:"Counter Araghchi's information campaign", party:"us", type:"achieve", importance:3, achievability:1, status:"at risk", trend:"failing", outcomeNote:"Araghchi weaponizing every US admission. 'Mr. Rubio admitted war of choice.' Calling on Americans to 'take back their country.' Outperforming US messaging." },
+      { id:"nar-iran", name:"Control narrative inside Iran", party:"both", type:"achieve", importance:3, achievability:3, status:"in progress", outcomeNote:"Internet at 1%. State broadcaster struck but still operating. Regime still communicating. Cyber ops hacking Iranian news sites." },
+    ]
+  },
+  {
+    id:"scope", name:"Control War Scope & Duration", party:"opposing", type:"achieve",
+    importance:5, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"MAXIMALIST: Trump demands 'unconditional surrender.' Hegseth: 'keep going to the end.' CENTCOM planning 100 days. CSIS: $891M/day, $3.5B unbudgeted. IDF issuing Gaza-style evacuation orders inside Iran (Qom). 500,000 Beirut evacuation. 2,500 strikes. Day 7 most intense yet. IRIS Bushehr interned in Sri Lanka (first since WWII). 9+ theaters. IDF 'near-complete air superiority.' No exit criteria. Unconditional surrender = no off-ramp by design.", sources:[{t:"AJZ-Day7",u:"https://www.aljazeera.com/news/2026/3/6/iran-war-what-is-happening-on-day-seven-of-us-israel-attacks"},{t:"AJZ-Live",u:"https://www.aljazeera.com/news/liveblog/2026/3/6/iran-live-trump-says-iran-being-demolished-tehran-keeps-up-gulf-attacks"}],
+    subgoals:[
+      { id:"sco-time", name:"Complete operations within 4-5 weeks", party:"us", type:"achieve", importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"SIX TIMELINES: Israel 2 weeks. Trump 4-5 weeks. Hegseth 8 weeks. CENTCOM 100 days. Trump 'no time limits.' Hegseth 'only just begun.' CSIS: $891M/day = $62B if 100 days, $3.5B already unbudgeted. DFC insurance: JPMorgan says 6-9 months to approve. Every signal points longer, more expensive, more expansive than any public statement has acknowledged.", sources:[{t:"AJZ-Day7",u:"https://www.aljazeera.com/news/2026/3/6/iran-war-what-is-happening-on-day-seven-of-us-israel-attacks"},{t:"NBC",u:"https://www.nbcnews.com/world/iran/live-blog/live-updates-iran-war-trump-israel-warship-attack-middle-east-rcna261866"}] },
+      { id:"sco-theater", name:"Limit conflict to Iran bilateral", party:"us", type:"achieve", importance:4, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"9+ THEATERS + GROUND EXPANDING: Azerbaijan (drones hit airport). Oman (oil storage hit). IDF 810 Brigade operating at Mt. Dov/Shebaa Farms — Hebrew military reporter (censor-approved): 'IDF reinforcing at least 10 controlling points in southern Lebanon, preparing to send more battalions in.' 20,000 reservists, 35 battalions deployed. France authorized US base access. Spain sending frigate. Italy sending destroyer (but defense minister: 'violated international law'). Zelenskyy proposing weapons swap. War touching 9+ sovereign nations.", sources:[{t:"IDF",u:"https://x.com/idfonline/status/2029433117384020284"},{t:"InonYttach",u:"https://x.com/inon_yttach/status/2029524396293890073"},{t:"Euronews",u:"https://www.euronews.com/2026/03/05/iran-claims-it-hit-us-tanker-as-israel-launches-fresh-strikes-on-tehran"}] },
+      { id:"sco-exit", name:"Define clear exit criteria", party:"us", type:"achieve", importance:5, achievability:1, status:"at risk", trend:"failing", outcomeNote:"UNDEFINED — BUT DEFINABLE: Hegseth stated 4 objectives (missiles, navy, nuclear, terror funding). Those are operationalizable with measurable thresholds — someone just hasn't done it. 60-day War Powers clock creates institutional forcing function. Phase 2 underground targeting implies military planners DO have internal metrics. The public framing is vague but internal planning may be more specific. Politically neglected ≠ structurally impossible." },
+      { id:"sco-noendless", name:"Prevent 'endless war' comparison", party:"us", type:"avoid", importance:4, achievability:2, status:"at risk", trend:"failing", outcomeNote:"EIGHT WEEKS: Hegseth extended timeline to 8 weeks, up from 4-5. Also said campaign 'just getting started.' Trump: 'wars can be fought forever.' Murphy: 'open ended.' Senate War Powers defeated 47-53 — no congressional brake. House vote Thursday will also likely fail. 60-day War Powers clock is the only legal limit." },
+      { id:"sco-occupy", name:"Avoid occupation / nation-building", party:"us", type:"avoid", importance:5, achievability:4, status:"in progress", outcomeNote:"No ground troops deployed to Iran yet. But Mossad ground op reported. Israel in Lebanon. Scope creep risk rising daily." },
+    ]
+  },
+  {
+    id:"energy", name:"Manage Global Energy Market Impact", party:"us", type:"achieve",
+    importance:5, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"$891M/DAY: CSIS estimates first 100 hours cost $3.7B ($891M/day). $3.5B unbudgeted. Gas up 20 cents/7%. Trump won't tap SPR. DFC insurance 6-9 months away (JPMorgan). Strait = warlike ops. If CENTCOM's 100-day plan holds: ~$62B total, virtually none budgeted. Oil up 6% Thursday. Bahrain refinery hit. Iran strikes targeting Gulf hotels + residential buildings. The economic war is now a two-front cost: military spending + energy disruption.", sources:[{t:"AJZ-Day7",u:"https://www.aljazeera.com/news/2026/3/6/iran-war-what-is-happening-on-day-seven-of-us-israel-attacks"},{t:"CNN",u:"https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-05-26"}],
+    subgoals:[
+      { id:"en-oil", name:"Keep oil below $100/barrel", party:"us", type:"avoid", importance:5, achievability:3, status:"at risk", trend:"expanding", outcomeNote:"VOLATILE: 10 tankers burning at Hormuz. Iran declared Strait CLOSED — traffic halted. But crude moderated to ~$74 after NYT reported Iran CIA backchannel + Bessent confirmed Navy 'safe passage' for tankers. KOSPI crashed ~12% (worst day ever). Gold above $5,100. Markets pricing best-case scenario — analyst: 'real risks still out there.' Supertanker rates still at all-time record." },
+      { id:"en-gas", name:"Prevent European gas crisis", party:"us", type:"avoid", importance:4, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"EU gas +42%. QatarEnergy offline (world's #2 LNG). European Stoxx 600 -2.7% Tue (extending -1.6% Mon). Banks -3.8%, insurance -4.2%. Even defense stocks fell -2.5%. If Qatar offline for weeks, 2022 crisis comparison becomes real." },
+      { id:"en-iraq", name:"Prevent Iraqi oil shutdown", party:"us", type:"avoid", importance:5, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"Iraq shutting Rumaila field. Could shutter 3M bpd total if Hormuz crisis continues. Iraq has no export route except via Gulf." },
+      { id:"en-pump", name:"Keep US gas prices manageable", party:"us", type:"avoid", importance:4, achievability:3, status:"at risk", trend:"expanding", outcomeNote:"GAS UP 20 CENTS / 7%: Largest multi-day spike since 2005. Trump won't tap Strategic Petroleum Reserve. DFC insurance 6-9 months from operational. Strait fully closed. If 100-day war: gas trajectory depends entirely on whether Hormuz reopens. Trump during SOTU touted low gas prices — now rising 7% in a week. Summer blend switchover adds pressure. CA already at $5+.", sources:[{t:"CNN",u:"https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-05-26"}] },
+    ]
+  },
+  {
+    id:"gulf-protect", name:"Protect Gulf Allies From Iranian Retaliation", party:"us", type:"achieve",
+    importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"EXISTENTIAL THREAT: Iran vowed to 'completely destroy Middle East military and economic infrastructure.' CIA station Riyadh hit. 10 tankers burning. Strait closed. NATO intercepting over Turkey. Qatar PM demanded Araghchi stop — Araghchi: 'attacks target US interests, not Qatar.' Qatar arrested 10 IRGC spies. Gulf states now in kinetic war they didn't choose.", sources:[{t:"FDD-Gulf",u:"https://www.fdd.org/analysis/2026/03/01/overcoming-division-arab-gulf-states-condemn-iran-in-harmony-after-being-struck-by-missiles/"},{t:"CNBC",u:"https://www.cnbc.com/2026/03/04/us-iran-war-live-updates.html"}],
+    subgoals:[
+      { id:"gulf-ad", name:"Maintain Gulf air defense effectiveness", party:"us", type:"achieve", importance:5, achievability:3, status:"at risk", trend:"expanding", outcomeNote:"UAE MOD EXACT CUMULATIVE DATA (Mar 5 tweet): 196 BMs total (181 destroyed, 13 fell at sea, 2 hit territory). 1,072 drones total (1,001 intercepted, 71 hit territory). 8 cruise missiles destroyed. Casualties: 3 dead (Pakistani, Nepali, Bangladeshi), 94 wounded across 18 nationalities. Single-day Day 6: 7 BMs + 131 drones = drone surge confirmed. Abu Dhabi hit AGAIN Thursday evening. Gulf interceptor stocks = critical sustainability question. Zelenskyy proposing interceptor drones to address the PAC missile drain.", sources:[{t:"UAE-MOD",u:"https://x.com/modgovae/status/2029520996974407745"},{t:"Zelenskyy",u:"https://x.com/ZelenskyyUa/status/2029470937695781108"}] },
+      { id:"gulf-infra", name:"Protect Gulf energy infrastructure", party:"us", type:"achieve", importance:5, achievability:1, status:"at risk", trend:"expanding", outcomeNote:"10 TANKERS BURNING in/around Strait of Hormuz. Saudi Aramco shut down Ras Tanura refinery (its biggest) after drone strike. Kamikaze drone boat hit Russian shadow-fleet LNG tanker in Mediterranean — conflict expanding to non-Gulf shipping routes. Amazon data centers UAE/Bahrain still affected." },
+      { id:"gulf-civ", name:"Protect Gulf civilian populations", party:"us", type:"achieve", importance:4, achievability:3, status:"at risk", trend:"expanding", outcomeNote:"CIVILIAN TARGETS: Iranian strikes hit hotel + 2 residential buildings in Manama, Bahrain (fire, no deaths). Qatar barrage continues. UAE intercepting 120+ drones/day. Kuwait embassy suspended. Azerbaijan airport hit. Oman storage damaged. First US evacuation flight from Abu Dhabi landed at Dulles. 500,000 Beirut evacuation. Displacement across Gulf soaring. War affecting daily life in 9+ countries.", sources:[{t:"CNN",u:"https://www.cnn.com/world/live-news/iran-war-us-israel-trump-03-05-26"},{t:"AJZ-Day7",u:"https://www.aljazeera.com/news/2026/3/6/iran-war-what-is-happening-on-day-seven-of-us-israel-attacks"}] },
+    ]
+  },
+  {
+    id:"terror", name:"Prevent Terrorist / Asymmetric Blowback", party:"both", type:"avoid",
+    importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"EXPANDING: IRGC ground forces entering battle = conventional warfare not just terrorism. CIA station Riyadh hit. Kamikaze drone boats in Mediterranean (non-Gulf). NATO intercepting Iranian missiles over Turkey. Iran's asymmetric reach extending beyond Middle East — IRIS Dena attacked in Indian Ocean shows US extending too.",
+    subgoals:[
+      { id:"ter-us", name:"Prevent attacks on US homeland", party:"us", type:"avoid", importance:5, achievability:3, status:"in progress", outcomeNote:"ELEVATED: DHS Noem: terrorism risk 'elevated at this time.' Texas shooting (man with Iran flag). KRG 'deeply concerned' about Kurdish militias using northern Iraq as launch pad. Iran-Hezbollah first coordinated attack on Israel. No mass-casualty event on US soil yet but threat level highest since 9/11 era." },
+      { id:"ter-global", name:"Prevent global Iranian retaliation", party:"both", type:"avoid", importance:4, achievability:2, status:"at risk", trend:"expanding", outcomeNote:"GLOBALIZING + WEAPONS SWAPS: Zelenskyy's full tweet (2.2M views) reveals not just 'expertise offer' but proposed weapons swap — Ukrainian interceptor drones for PAC-2/PAC-3 missiles. Quote: 'They have missiles for the Patriots, but hundreds of Shaheds cannot be intercepted with Patriot missiles — it is too costly.' Iran hitting Azerbaijan (airport + school area). IRGC: attacks were 'first powerful steps.' Iran's asymmetric reach touching 9+ countries. Non-Middle Eastern actors (Ukraine, European navies) becoming participants, not just observers.", sources:[{t:"Zelenskyy",u:"https://x.com/ZelenskyyUa/status/2029470937695781108"},{t:"CBS",u:"https://www.cbsnews.com/live-updates/us-iran-war-spreads-azerbaijan-israel-strikes-tehran-lebanon/"}] },
+      { id:"ter-cyber", name:"Prevent major cyberattacks", party:"us", type:"avoid", importance:4, achievability:3, status:"in progress", outcomeNote:"OVERSTATED BY IRAN: FDD analysis: Iran's pro-regime hackers 'cannot back up their claims.' CrowdStrike: 'much activity appears claim-driven rather than evidence-backed.' But physical drone strikes on AWS data centers (UAE/Bahrain) are real — all still offline. 60 hacktivist groups including pro-Russian identified. 100hr internet blackout inside Iran. Actual cyber damage modest vs. physical infrastructure damage.", sources:[{t:"FDD-Cyber",u:"https://www.fdd.org/analysis/2026/03/04/irans-pro-regime-hackers-cannot-back-up-their-claims-of-successful-cyber-attacks/"},{t:"CNBC",u:"https://www.cnbc.com/2026/03/04/us-iran-war-live-updates.html"}] },
+    ]
+  },
+];
+
+function IranWarGoalsTracker() {
+  const [expanded, setExpanded] = useState(() => {
+    const init = {};
+    GOALS.forEach(g => { init[g.id] = false; });
+    return init;
+  });
+  const [filter, setFilter] = useState("all");
+  const [expandAll, setExpandAll] = useState(false);
+
+  const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+
+  const toggleAll = () => {
+    const next = !expandAll;
+    setExpandAll(next);
+    const newExp = {};
+    GOALS.forEach(g => { newExp[g.id] = next; });
+    setExpanded(newExp);
+  };
+
+  const filtered = filter === "all" ? GOALS : GOALS.filter(g => {
+    if (filter === "atrisk") return g.status === "at risk";
+    if (filter === "failing") return g.trend === "failing" || (g.subgoals && g.subgoals.some(sg => sg.trend === "failing"));
+    if (filter === "expanding") return g.trend === "expanding" || (g.subgoals && g.subgoals.some(sg => sg.trend === "expanding"));
+    if (filter === "achieved") return g.status === "achieved";
+    if (filter === "unachievable") return g.status === "unachievable";
+    if (filter === "opposing") return g.party === "opposing";
+    return g.party === filter;
+  });
+
+  const countAll = (goals) => {
+    let all = [];
+    const collect = (list) => { list.forEach(g => { all.push(g); if (g.subgoals) collect(g.subgoals); }); };
+    collect(goals);
+    return all;
+  };
+  const allGoals = countAll(GOALS);
+
+  const stats = {
+    total: allGoals.length,
+    achieved: allGoals.filter(g => g.status === "achieved").length,
+    inProgress: allGoals.filter(g => g.status === "in progress").length,
+    atRisk: allGoals.filter(g => g.status === "at risk").length,
+    failing: allGoals.filter(g => g.trend === "failing").length,
+    expanding: allGoals.filter(g => g.trend === "expanding").length,
+    unachievable: allGoals.filter(g => g.status === "unachievable").length,
+    tbd: allGoals.filter(g => g.status === "tbd").length,
+  };
+
+  return (
+    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"'SF Mono',SFMono-Regular,Menlo,Consolas,monospace" }}>
+      {/* HEADER */}
+      <div style={{ background:`linear-gradient(135deg, ${C.navy} 0%, #0E1A30 100%)`, padding:"20px 24px 16px", borderBottom:`2px solid ${C.blue}` }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:12 }}>
+          <div>
+            <div style={{ fontSize:10, color:C.textDim, letterSpacing:3, textTransform:"uppercase", marginBottom:4 }}>Two Generals Framework</div>
+            <h1 style={{ color:C.white, fontSize:20, fontWeight:800, margin:0, letterSpacing:-0.5 }}>Iran War Goals Assessment</h1>
+            <div style={{ fontSize:11, color:C.textDim, marginTop:4 }}>
+              <span style={{color:C.us}}>■</span> Gen. Caine (CJCS/CENTCOM) &nbsp;
+              <span style={{color:C.israel}}>■</span> IDF Chief Halevi &nbsp;
+              <span style={{color:C.purple}}>■</span> Shared &nbsp;
+              <span style={{color:C.oppose}}>■</span> Opposing &nbsp;|&nbsp; Day 7 — Hour 180 — March 6, 2026 — Afternoon Update
+            </div>
+          </div>
+          <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
+            {[
+              { label:"ACHIEVED", value:stats.achieved, color:C.green },
+              { label:"IN PROGRESS", value:stats.inProgress, color:C.amber },
+              { label:"AT RISK", value:stats.atRisk, color:C.red, sub:`${stats.failing}F ${stats.expanding}E` },
+              { label:"UNACHIEVABLE", value:stats.unachievable, color:C.gray },
+              { label:"TBD", value:stats.tbd, color:C.gray },
+            ].map(s => (
+              <div key={s.label} style={{ background:C.card, borderRadius:8, padding:"8px 10px", border:`1px solid ${C.border}`, textAlign:"center", minWidth:60 }}>
+                <div style={{ fontSize:18, fontWeight:800, color:s.color }}>{s.value}</div>
+                <div style={{ fontSize:8, color:C.textDim, letterSpacing:0.8 }}>{s.label}</div>
+                {s.sub && <div style={{ fontSize:8, color:C.textDim, marginTop:2, letterSpacing:0.3 }}>{s.sub}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* FILTER BAR */}
+      <div style={{ display:"flex", gap:6, padding:"10px 24px", background:C.card, borderBottom:`1px solid ${C.border}`, overflowX:"auto", alignItems:"center" }}>
+        <span style={{ fontSize:10, color:C.textDim, marginRight:8, letterSpacing:1 }}>FILTER:</span>
+        {[
+          { key:"all", label:"All Goals" },
+          { key:"us", label:"US Only" },
+          { key:"israel", label:"Israel Only" },
+          { key:"opposing", label:"Opposing" },
+          { key:"atrisk", label:"At Risk (All)" },
+          { key:"failing", label:"Failing" },
+          { key:"expanding", label:"Expanding" },
+          { key:"achieved", label:"Achieved" },
+          { key:"unachievable", label:"Unachievable" },
+        ].map(f => (
+          <button key={f.key} onClick={()=>setFilter(f.key)} style={{
+            padding:"5px 12px", cursor:"pointer", border:`1px solid ${filter===f.key?C.blue:C.border}`,
+            background:filter===f.key?`${C.blue}30`:"transparent", color:filter===f.key?C.white:C.textDim,
+            borderRadius:6, fontSize:11, fontWeight:filter===f.key?700:500, transition:"all 0.15s",
+            fontFamily:"inherit",
+          }}>{f.label}</button>
+        ))}
+        <div style={{ flex:1 }}/>
+        <button onClick={toggleAll} style={{
+          padding:"5px 12px", cursor:"pointer", border:`1px solid ${C.border}`,
+          background:"transparent", color:C.textDim, borderRadius:6, fontSize:11,
+          fontFamily:"inherit",
+        }}>{expandAll?"Collapse All":"Expand All"}</button>
+      </div>
+
+      {/* STATUS LEGEND */}
+      <div style={{ display:"flex", gap:16, padding:"6px 24px 6px", background:`${C.card}80`, borderBottom:`1px solid ${C.border}30`, flexWrap:"wrap", alignItems:"center" }}>
+        <span style={{ fontSize:9, color:C.textDim, letterSpacing:1 }}>STATUS KEY:</span>
+        {[
+          { s:"achieved", d:"Goal met", c:C.green },
+          { s:"in progress", d:"Underway, outcome uncertain", c:C.amber },
+          { s:"at risk", d:"Still achievable but trajectory negative", c:C.red },
+          { s:"unachievable", d:"Structurally impossible", c:C.gray },
+          { s:"tbd", d:"Too early to assess", c:C.gray },
+        ].map(x => (
+          <span key={x.s} style={{ fontSize:10, color:x.c }} title={x.d}>
+            <span style={{ fontWeight:700 }}>●</span> {x.s}
+          </span>
+        ))}
+        <span style={{ fontSize:9, color:C.textDim, letterSpacing:1, marginLeft:8 }}>TREND:</span>
+        {[
+          { s:"failing", d:"Approach not working", c:"#EF4444" },
+          { s:"expanding", d:"Scope growing — could be positive or negative", c:"#F59E0B" },
+        ].map(x => (
+          <span key={x.s} style={{ fontSize:10, color:x.c }} title={x.d}>
+            <span style={{ fontWeight:700 }}>◆</span> {x.s}
+          </span>
+        ))}
+      </div>
+
+      {/* GOALS TABLE */}
+      <div style={{ padding:"0", maxWidth:1400, margin:"0 auto" }}>
+        <div style={{ overflowX:"auto" }}>
+          {/* Column headers */}
+          <div style={{
+            display:"grid", gridTemplateColumns:"minmax(260px,2fr) 80px 70px 130px 130px minmax(180px,1.5fr) 90px",
+            gap:8, padding:"10px 14px", background:C.navy, borderBottom:`2px solid ${C.blue}`,
+            position:"sticky", top:0, zIndex:10,
+          }}>
+            {["Goal","Party","Type","Importance","Achievability","Outcome","Status"].map(h => (
+              <span key={h} style={{ fontSize:10, fontWeight:700, color:C.textDim, letterSpacing:1, textTransform:"uppercase" }}>{h}</span>
+            ))}
+          </div>
+
+          {filtered.map(goal => (
+            <GoalRow key={goal.id} goal={goal} depth={0} expanded={expanded} onToggle={toggleExpand}/>
+          ))}
+        </div>
+      </div>
+
+      {/* OPPOSING GOALS ANALYSIS */}
+      <div style={{ padding:"24px", maxWidth:1400, margin:"0 auto" }}>
+        <h3 style={{ color:C.oppose, fontSize:15, fontWeight:700, marginBottom:12, borderBottom:`2px solid ${C.oppose}40`, paddingBottom:6 }}>
+          US–Israel Fault Lines
+        </h3>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))", gap:12 }}>
+          {[
+            { title:"Regime Change Endgame", us:"Trump told Axios: 'I must be involved in the appointment, like with Delcy' (Venezuela). Called Mojtaba 'a lightweight.' Six contradictory justifications. Pentagon requesting critical minerals. CIA backchannel exists but Trump demanding puppet-state model.", israel:"Vowed to kill Mojtaba. Phase 2 underground targeting. 11 strike waves on 600 targets. Destroyed Assembly of Experts building — regime met virtually and elected successor anyway.", risk:"Trump comparing Iran to Venezuela puppet-state model while Israel promises infinite assassination. Mojtaba selected under IRGC pressure = hardline consolidation. Carnegie: 'no cracks.' But Trump explicitly rejecting IRGC's choice + Iran 'ready for invasion' = deadlock with no political pathway. Regime reconstituted; coalition can't agree on what should replace it." },
+            { title:"War Duration & Escalation", us:"Senate War Powers DEFEATED 47-53. House vote Thursday. Hegseth: 8 weeks, 'very early.' Pentagon requesting critical minerals. Defense execs at WH Friday. IRGC hit US oil tanker Day 6. Missile decline 86% but IRGC promises escalation.", israel:"Entering PHASE 2 — shifting to deep underground missile bunkers (Haaretz). Phase 1 surface targets largely complete. IDF ordered Dahiyeh evacuation. Radwan force deployed against IDF tanks. F-35 air-to-air kill. No wind-down.", risk:"Phase 2 = campaign deepening, not concluding. Underground targets are harder, take longer, require heavier munitions. IRGC adapting to asymmetric warfare (small craft, drone boats, ground forces). Russia confirms Iran hasn't requested weapons — YET. The 86% missile decline is genuine degradation (FDD/UAE data) but IRGC promises escalation. Watch Day 7-8 for whether decline reverses." },
+            { title:"Ground Troops", us:"Senate vote gives Trump free hand for 60 days. Cassidy: admin 'left open' ground troops. Hawley: 'ground troops will require authorization.' Hegseth: 8 weeks + 'just getting started.' No ground forces in Iran yet but IRGC entering battlefield changes calculus.", israel:"Already deployed ground forces into Lebanon. IDF chief Zamir: won't stop 'until Hezbollah disarmed.' Expanding deeper. Mossad potentially inside Iran.", risk:"IRGC ground force entry is the trigger. If IRGC commits conventional ground forces + 230 drone swarms, air campaign alone may prove insufficient. Senate constraint gone. Hawley's 'authorization required' line = last Republican red line on ground troops." },
+            { title:"Civilian Casualties", us:"Iran: 1,097+ (HRANA) including 168 children. CBS satellite analysis: Minab school 60m from IRGC barracks — military compound also destroyed. Pattern: proximity targeting. US: 'wouldn't deliberately target.' Neither side claiming responsibility.", israel:"IDF ordered Dahiyeh evacuation — major Beirut strikes imminent. Lebanon: 77 dead, 527 wounded, family of 4 wiped out, 7 children in 24hrs. Phase 2 underground strikes may reduce surface civilian exposure — or drive munitions into populated areas.", risk:"Multi-theater toll approaching 1,250+ across 8+ countries. Azerbaijan now hit (drones near school). Lebanon casualties accelerating. Iran blackout prevents accurate counting. CBS satellite imagery emerging as primary BDA tool — showing military targets adjacent to civilian sites. The 'precision' narrative depends entirely on how you define the blast radius." },
+            { title:"Hormuz vs. Global Shipping", us:"Strait upgraded to WARLIKE OPERATIONS AREA — highest designation, crew right of refusal. IRGC hit US tanker. Kuwait tanker explosion (oil spill). Oman storage hit. DFC insurance in 'infancy.' Macron building European naval coalition for Strait protection — separate from US command.", israel:"Phase 2 underground targeting. Dahiyeh evacuation ordered. Hezbollah Radwan deployed. Hormuz remains US problem — Israel focused on Lebanon + Tehran.", risk:"Drone volume SURGING (131 at UAE Day 6) even as missiles decline 86%. Iran shifting to cheaper, more producible weapon system. Campaign succeeding against missiles but struggling against drones. Warlike ops designation = legal/institutional closure layered on physical/insurance closure. Macron's separate Strait coalition could help OR could create competing command structures." },
+            { title:"Alliance Management", us:"CIA backchannel exists but US DISMISSED Iranian messages as 'bull****' (Ravid direct source) — less real than markets priced. Trump demanding role in choosing Iran's leader. France authorized US base access. Spain REVERSED — sending best frigate to Cyprus. Zelenskyy proposed weapons swap: Ukrainian interceptor drones for PAC missiles. Italy sending destroyer but defense minister said strikes 'violated international law.' IDF: 20,000 reservists, 35 battalions.", israel:"Netanyahu called WH demanding answers on Iran contacts. Operating independently — Phase 2 underground + Dahiyeh evacuation. Vowing to kill Mojtaba. 810 Brigade expanding Lebanon ground positions (10+ controlling points).", risk:"Alliance EXPANDING militarily (Spain, France, Italy, Greece, UK, Germany + Ukraine offering weapons) while FRACTURING politically (Netanyahu suspicious, Trump 'MIGA' puppet model, Italy calling strikes illegal, no agreed endgame). Spain's reversal shows Trump pressure works on allies. But the more nations drawn in = the harder it becomes to stop. Macron building Strait coalition separate from US command." },
+          ].map(f => (
+            <div key={f.title} style={{ background:C.card, borderRadius:8, padding:14, border:`1px solid ${C.border}`, borderTop:`3px solid ${C.oppose}` }}>
+              <div style={{ fontWeight:700, color:C.white, fontSize:13, marginBottom:8 }}>{f.title}</div>
+              <div style={{ fontSize:11.5, marginBottom:6 }}><span style={{ color:C.us, fontWeight:700 }}>US: </span><span style={{ color:C.text }}>{f.us}</span></div>
+              <div style={{ fontSize:11.5, marginBottom:6 }}><span style={{ color:C.israel, fontWeight:700 }}>ISR: </span><span style={{ color:C.text }}>{f.israel}</span></div>
+              <div style={{ fontSize:11.5, borderTop:`1px solid ${C.border}`, paddingTop:6, marginTop:4 }}><span style={{ color:C.red, fontWeight:700 }}>RISK: </span><span style={{ color:C.amber }}>{f.risk}</span></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* HISTORICAL ANALOGUES */}
+      <div style={{ padding:"24px", maxWidth:1400, margin:"0 auto" }}>
+        <h3 style={{ color:C.blueLt, fontSize:15, fontWeight:700, marginBottom:12, borderBottom:`2px solid ${C.blue}40`, paddingBottom:6 }}>
+          Historical Analogues Assessment
+        </h3>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:12 }}>
+          {[
+            { name:"Kosovo 1999", fit:"HIGH", fitColor:C.green, note:"Air campaign alone forced political outcome. No ground troops. NATO unity strained but held. ~78 days. Key parallel: sustained air pressure changed regime calculus without invasion. Key difference: Milosevic was rational actor with defined territory to concede; Iran's IRGC has no Kosovo to give up." },
+            { name:"Panama 1989", fit:"MEDIUM", fitColor:C.amber, note:"Decapitation + regime change achieved rapidly. Noriega captured, democracy installed. Key parallel: leadership removal as primary objective. Key difference: Panama had no retaliatory capability, no regional proxy network, no nuclear dimension, and US had 10,000 troops pre-positioned." },
+            { name:"Desert Storm 1991", fit:"MEDIUM", fitColor:C.amber, note:"Limited objectives, overwhelming force, declared victory, stopped. Coalition held. Key parallel: air superiority achieved rapidly, coalition management critical. Key difference: Bush defined clear exit criteria (Kuwait liberated) and stopped. Current operation has no equivalent 'done' marker." },
+            { name:"Iraq 2003", fit:"MEDIUM", fitColor:C.amber, note:"Military brilliance → political catastrophe. Regime collapsed faster than expected; governance vacuum filled by insurgency. Key parallel: no post-war governance plan, de-Baathification parallel to IRGC targeting. Key CAUTION: this is the dominant media frame and may be over-applied. Iraq had no internet-era opposition movement; Iran does." },
+            { name:"Libya 2011", fit:"MEDIUM", fitColor:C.amber, note:"Air campaign → regime collapse → state failure → ongoing civil war. Key parallel: no ground troops, regime fell but nothing replaced it. Key difference: Iran has stronger institutions (IRGC, judiciary, Assembly of Experts) that survived bombing — Libya's were one-man rule." },
+            { name:"June 2025 12-Day War", fit:"HIGH", fitColor:C.green, note:"Israeli strikes on Iran's nuclear sites + limited US participation. Nuclear facilities damaged but not destroyed. Iran reconstituted some capacity before Feb 2026 strikes. Key lesson: single-wave strikes bought time but didn't eliminate programs. This operation is explicitly designed to go further." },
+            { name:"Israel-Hezbollah 2006", fit:"LOW", fitColor:C.red, note:"Air campaign failed to achieve political objectives. Ground invasion inconclusive. Hezbollah declared victory. Key parallel: limits of air power against dispersed non-state actors. Key difference: current operation targets a state, not just a militia, with vastly superior ISR and precision." },
+            { name:"Osirak 1981", fit:"LOW", fitColor:C.red, note:"Surgical strike delayed Iraq's nuclear program ~10 years. Key parallel: counter-proliferation objective. Key difference: this is not a surgical strike — it's a sustained multi-week campaign across multiple countries with regime change as a stated goal." },
+          ].map(a => (
+            <div key={a.name} style={{ background:C.card, borderRadius:8, padding:12, border:`1px solid ${C.border}`, borderLeft:`3px solid ${a.fitColor}` }}>
+              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+                <span style={{ fontWeight:700, color:C.white, fontSize:13 }}>{a.name}</span>
+                <span style={{ fontSize:9, fontWeight:700, padding:"2px 6px", borderRadius:8, background:`${a.fitColor}20`, color:a.fitColor, border:`1px solid ${a.fitColor}40` }}>FIT: {a.fit}</span>
+              </div>
+              <div style={{ fontSize:11, color:C.text, lineHeight:1.5 }}>{a.note}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* VERDICT — THREE READINGS */}
+      <div style={{ padding:"0 24px 12px", maxWidth:1400, margin:"0 auto" }}>
+        <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.green}` }}>
+          <h3 style={{ color:C.green, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Succeeding — Day 7</h3>
+          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+            <span style={{color:C.green,fontWeight:700}}>30+ ships sunk. BMs down 90%. Drones down 83%. 80% of air defense destroyed. 2,500 strikes.</span> IDF claims "near-complete air superiority." Day 7 bombing most intense yet — the campaign is ACCELERATING, not winding down. B-2s dropping 2,000lb penetrators on underground bunkers. Drone carrier on fire. IRIS Bushehr interned in Sri Lanka (first since WWII). Trump: "unconditional surrender." Hegseth to Israel: "keep going to the end." The military machine is performing at a historically extraordinary level.
+          </p>
+          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+            The proxy network is cracking: <span style={{color:C.green,fontWeight:700}}>IRGC Quds Force officers fleeing Lebanon</span> (Axios). Kurdish forces: "those moments are not far." 7 NATO nations deployed. Both chambers rejected War Powers — Trump has complete freedom. House and Senate on record supporting the campaign. Iran's Araghchi: "no reason to negotiate" — but that's what a regime losing 90% of its missile capability and 30+ ships says before the calculus changes. "Unconditional surrender" is maximalist — but so was demanding Japan's, and it worked. Kosovo prior: Day 7 of 78. The campaign hasn't peaked yet.
+          </p>
+        </div>
+      </div>
+
+      <div style={{ padding:"0 24px 12px", maxWidth:1400, margin:"0 auto" }}>
+        <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid #F59E0B` }}>
+          <h3 style={{ color:"#F59E0B", fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Expanding — Day 7</h3>
+          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+            <span style={{color:"#F59E0B",fontWeight:700}}>{stats.expanding} goals growing beyond plan</span>. Trump demands "unconditional surrender." CENTCOM planning 100 days. CSIS: <span style={{color:"#F59E0B",fontWeight:700}}>$891M/day, $3.5B unbudgeted in first 100 hours alone</span>. If 100-day war: ~$62B total. Second school hit (Tehran Niloufar Square). UNICEF: 181 children killed. IDF issuing Gaza-style evacuation orders inside Iran (Qom). 500,000-person Beirut evacuation. Smotrich: "Dahieh will look like Khan Younis." Day 7 most intense bombing yet. The war is expanding in cost, duration, civilian toll, geographic scope, and ambition simultaneously.
+          </p>
+          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+            Six timelines from one coalition: Israel 2 weeks, Trump 4-5, Hegseth 8, CENTCOM 100 days, Trump "no time limits," Hegseth "only just begun." DFC insurance fiction exposed by JPMorgan (6-9 months to approve). Gas up 20 cents/7%. Trump won't tap SPR. UAE MOD cumulative: 1,072 drones (1,001 intercepted) — Zelenskyy proposing interceptor drones for PAC missiles, acknowledging the interception cost problem. The expansion is no longer ambiguous in one respect: <span style={{color:"#F59E0B",fontWeight:700}}>the cost is unsustainable at current pace without budgetary authorization</span>. Congress rejected War Powers AND hasn't authorized spending. The 7 untagged goals (Iranian internals behind 120hr+ blackout — telcos now threatening VPN users with legal action) are where this resolves. Key question: does "MIGA" produce capitulation (WWII Japan) or infinite war (WWII Germany without D-Day)?
+          </p>
+        </div>
+      </div>
+
+      <div style={{ padding:"0 24px 40px", maxWidth:1400, margin:"0 auto" }}>
+        <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.red}` }}>
+          <h3 style={{ color:C.red, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Failing — Day 7</h3>
+          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+            <span style={{color:C.red,fontWeight:700}}>{stats.failing} goals are genuinely failing</span>. Three compounding failures: (1) US "likely" struck first school, now a SECOND school hit in Tehran. UNICEF documenting 181 dead children — permanent accountability record. (2) DFC insurance is fiction — JPMorgan: 6-9 months to approve, can't cover 300+ tankers. Strait blockade has no economic solution on the table. (3) "Unconditional surrender" demand eliminates any off-ramp. You can't negotiate unconditional surrender with a regime that says "no reason to negotiate." These aren't expanding — they're broken.
+          </p>
+          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+            The failing bucket may be growing. The Hormuz insurance gap is now confirmed structural (JPMorgan), not correctable in weeks. The school accountability is now institutional (UNICEF: 181 children, 1,332+ total dead per Red Crescent), not just narrative. "MIGA" may have moved the governance/exit goals from "politically neglected" toward genuinely unachievable — because you can't plan post-war governance while demanding total capitulation AND simultaneously promising to "bring Iran back from brink of destruction." Italy's defense minister calling strikes a violation of international law while sending a destroyer = the alliance incoherence in miniature. The $891M/day cost with $3.5B unbudgeted creates a fiscal cliff. Backchannel less real than markets priced (Ravid: US dismissed Iranian messages as "bull****"). Macron's Strait coalition is the one visible course correction. Everything else in the failing bucket got harder on Day 7, not easier.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+ReactDOM.render(React.createElement(IranWarGoalsTracker), document.getElementById('root'));
+</script>
+</body>
+</html>
