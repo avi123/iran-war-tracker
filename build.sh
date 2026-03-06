@@ -45,9 +45,12 @@ cat > "$OUT" << 'HTMLHEADER'
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0F172A; color: #E2E8F0; }
+#build-timestamp { position:fixed; top:0; left:0; right:0; background:#1E293B; color:#94A3B8; font-size:11px; font-family:monospace; padding:3px 12px; text-align:right; z-index:9999; border-bottom:1px solid #334155; }
+#root { padding-top: 24px; }
 </style>
 </head>
 <body>
+<div id="build-timestamp">Generated: __BUILD_TIMESTAMP__</div>
 <div id="root"></div>
 <script type="text/babel">
 HTMLHEADER
@@ -59,9 +62,14 @@ echo "$BROWSER_JSX" >> "$OUT"
 cat >> "$OUT" << 'HTMLFOOTER'
 ReactDOM.render(React.createElement(IranWarGoalsTracker), document.getElementById('root'));
 </script>
+<footer style="text-align:center;padding:16px;font-size:11px;color:#475569;font-family:monospace;border-top:1px solid #1E293B;">&copy; __BUILD_YEAR__ avi123</footer>
 </body>
 </html>
 HTMLFOOTER
+
+# Inject timestamp and year
+sed -i '' "s/__BUILD_TIMESTAMP__/$TIMESTAMP/g" "$OUT"
+sed -i '' "s/__BUILD_YEAR__/$(date -u '+%Y')/g" "$OUT"
 
 # Report
 SRC_SIZE=$(wc -c < "$SRC")
