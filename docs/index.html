@@ -23,7 +23,7 @@
   "applicationCategory": "News & Analysis",
   "operatingSystem": "Web",
   "author": { "@type": "Person", "name": "avi123" },
-  "dateModified": "2026-03-07T01:03:19Z"
+  "dateModified": "2026-03-07T01:05:21Z"
 }
 </script>
 <!-- Google tag (gtag.js) -->
@@ -45,7 +45,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </style>
 </head>
 <body>
-<div id="build-timestamp">Generated: 2026-03-07 01:03 UTC</div>
+<div id="build-timestamp">Generated: 2026-03-07 01:05 UTC</div>
 
 <div id="intro-toggle" style="max-width:900px;margin:0 auto;padding:28px 24px 0;">
   <button onclick="var el=document.getElementById('static-intro');var show=el.style.display==='none';el.style.display=show?'block':'none';this.textContent=show?'Hide: About This Tracker':'About This Tracker';try{localStorage.setItem('intro-dismissed',show?'0':'1')}catch(e){}" style="background:none;border:1px solid #475569;color:#4888CC;font-size:13px;cursor:pointer;padding:5px 14px;border-radius:4px;font-family:inherit;" onmouseenter="this.style.borderColor='#64748B';this.style.color='#60A5FA'" onmouseleave="this.style.borderColor='#475569';this.style.color='#4888CC'">Hide: About This Tracker</button>
@@ -481,13 +481,13 @@ function IranWarGoalsTracker() {
   };
 
   const filtered = filter === "all" ? GOALS : GOALS.filter(g => {
-    if (filter === "atrisk") return g.status === "at risk";
+    if (filter === "atrisk") return g.status === "at risk" || (g.subgoals && g.subgoals.some(sg => sg.status === "at risk"));
     if (filter === "failing") return g.trend === "failing" || (g.subgoals && g.subgoals.some(sg => sg.trend === "failing"));
     if (filter === "expanding") return g.trend === "expanding" || (g.subgoals && g.subgoals.some(sg => sg.trend === "expanding"));
-    if (filter === "achieved") return g.status === "achieved";
-    if (filter === "unachievable") return g.status === "unachievable";
-    if (filter === "opposing") return g.party === "opposing";
-    return g.party === filter;
+    if (filter === "achieved") return g.status === "achieved" || (g.subgoals && g.subgoals.some(sg => sg.status === "achieved"));
+    if (filter === "unachievable") return g.status === "unachievable" || (g.subgoals && g.subgoals.some(sg => sg.status === "unachievable"));
+    if (filter === "opposing") return g.party === "opposing" || (g.subgoals && g.subgoals.some(sg => sg.party === "opposing"));
+    return g.party === filter || (g.subgoals && g.subgoals.some(sg => sg.party === filter));
   });
 
   const countAll = (goals) => {

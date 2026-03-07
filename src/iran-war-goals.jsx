@@ -377,13 +377,13 @@ export default function App() {
   };
 
   const filtered = filter === "all" ? GOALS : GOALS.filter(g => {
-    if (filter === "atrisk") return g.status === "at risk";
+    if (filter === "atrisk") return g.status === "at risk" || (g.subgoals && g.subgoals.some(sg => sg.status === "at risk"));
     if (filter === "failing") return g.trend === "failing" || (g.subgoals && g.subgoals.some(sg => sg.trend === "failing"));
     if (filter === "expanding") return g.trend === "expanding" || (g.subgoals && g.subgoals.some(sg => sg.trend === "expanding"));
-    if (filter === "achieved") return g.status === "achieved";
-    if (filter === "unachievable") return g.status === "unachievable";
-    if (filter === "opposing") return g.party === "opposing";
-    return g.party === filter;
+    if (filter === "achieved") return g.status === "achieved" || (g.subgoals && g.subgoals.some(sg => sg.status === "achieved"));
+    if (filter === "unachievable") return g.status === "unachievable" || (g.subgoals && g.subgoals.some(sg => sg.status === "unachievable"));
+    if (filter === "opposing") return g.party === "opposing" || (g.subgoals && g.subgoals.some(sg => sg.party === "opposing"));
+    return g.party === filter || (g.subgoals && g.subgoals.some(sg => sg.party === filter));
   });
 
   const countAll = (goals) => {
