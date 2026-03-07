@@ -81,7 +81,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 <body>
 <div id="build-timestamp">Generated: __BUILD_TIMESTAMP__</div>
 
-<article id="static-intro" style="max-width:900px;margin:0 auto;padding:32px 24px 0;color:#94A3B8;font-size:13px;line-height:1.7;">
+<article id="static-intro" style="max-width:900px;margin:0 auto;padding:32px 24px 0;color:#94A3B8;font-size:13px;line-height:1.7;position:relative;">
+  <button onclick="this.parentElement.style.display='none'" style="position:absolute;top:12px;right:12px;background:none;border:1px solid #475569;color:#94A3B8;font-size:18px;line-height:1;cursor:pointer;padding:2px 8px;border-radius:4px;" onmouseenter="this.style.color='#E2E8F0';this.style.borderColor='#64748B'" onmouseleave="this.style.color='#94A3B8';this.style.borderColor='#475569'">&times;</button>
   <h2 style="color:#E2E8F0;font-size:18px;margin-bottom:12px;">How is the war actually going?</h2>
   <p style="margin-bottom:10px;">
     In an era of constantly shifting headlines and highly partisan coverage, it can be hard to answer that question. Cable news picks sides. Social media amplifies noise. The facts get buried under spin.
