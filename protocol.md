@@ -1,6 +1,6 @@
 # Iran War Goals Tracker — Research Protocol & Context
 
-**Version:** 2.6 — March 7, 2026 (Day 8 Morning)
+**Version:** 2.7 — March 7, 2026 (Day 8 Evening)
 **Artifact:** iran-war-goals.jsx / iran-war-goals.html
 **Framework:** Two Generals model tracking 106 goals (19 parents, 87 sub-goals)
 
@@ -165,29 +165,37 @@ ONLY the "failing" trend goals. Specific, identifiable, correctable breakdowns. 
 
 ### Military (update every cycle)
 - UAE BMs/day: D1:137, D2:28, D3:9, D4:12, D5:3, D6:7, D7:9
-- UAE drones/day: D6:131 (peak), D7:109+
-- UAE cumulative: ~205 BMs, ~1,180 drones
-- Bahrain totals: 75 missiles + 123 drones + BAPCO refinery struck D7
+- UAE drones/day: D6:131 (peak), D7:109+, D8:121 (119 intercepted, 98.3%)
+- UAE cumulative: ~205 BMs, ~1,300 drones
+- Saudi: intercepted 16 drones targeting Shaybah (D8)
+- Qatar: 9/10 BMs intercepted (D8)
+- Bahrain totals: 75 missiles + 123 drones + BAPCO refinery struck D7 + Manama hotel/residential hit
 - INSS total drones: 1,600+ across all theaters
-- CENTCOM: 2,500 strikes (IDF claim) / ships destroyed: 43 / 200 targets in 72hrs (B-2s)
+- CENTCOM: 2,500 strikes (IDF claim) / ships destroyed: 43 / D8: 80+ jets, 230+ munitions/supply targets
+- 16 IRGC Quds Force aircraft destroyed at Isfahan (D8)
+- Underground missile factory hit in western Iran (D8)
 - Missile decline: 90% / Drone decline: 83% (but drone volume surging)
 - Phase: 2 (underground bunkers + defense industrial base — Abbas Abad/Shenzar evacuation orders)
-- Iran→Israel attack waves: 148 total (D1:25, D2:64, D3:25, D4:9, D5:11, D6:9, D7:5)
-- Hezbollah attack waves: 116 total (D3:10, D4:20, D5:36, D6:25, D7:23)
+- Iran→Israel attack waves: 148+ total (D1:25, D2:64, D3:25, D4:9, D5:11, D6:9, D7:5)
+- Hezbollah attack waves: 116+ total (D3:10, D4:20, D5:36, D6:25, D7:23)
 
 ### Casualties
 - Iran: 1,332+ (Red Crescent/multiple) / 181 children (UNICEF) / 6,000+ wounded
 - Israel: 12 dead, 1,600+ injured (140 in past 24hrs)
 - US: 6 KIA, 18+ WIA
-- Lebanon: 217 dead, ~800 wounded (up from 123/600+)
-- Gulf: 3 dead (UAE) + others / Azerbaijan: drones hit airport
-- Americans evacuated: 20,000 from Middle East
+- Lebanon: 217+ dead, ~800 wounded, 110,162 displaced (UNHCR D8), 24,000 evacuated D8
+- Lebanon D8: Nabi Chit cemetery raid (IDF Ron Arad search) — 41 killed incl. 3 Lebanese soldiers
+- Gulf: 3 dead (UAE) + others / Azerbaijan: drones hit airport / Dubai airport drone D8
+- Americans evacuated: 20,000+ from Middle East
 
 ### Economic
-- Brent: $85.41 / WTI: $81.01 / Gas: up 20 cents/7% / Strait: CLOSED (warlike ops area)
+- Brent: $92.69 / WTI: $90.90 (D8) / WTI +35.63% weekly = largest weekly gain in history
+- Gas: up 20 cents/7% / Strait: CLOSED (warlike ops area)
 - Ships stalled: 150+ / P&I: removed / IRGC ban: expanded to European / DFC insurance: FICTION
 - Gold: $5,100+ / KOSPI: -12% / Supertanker rates: $423K/day (record)
-- NEW: 2 Iranian cargo ships transited Hormuz for Malaysia (first since war). 4 tankers loading 8M bbl at Kharg Island.
+- Kuwait cutting oil production (storage overflow + Hormuz closure, D8)
+- QatarEnergy LNG halt continues (D8)
+- 2 Iranian cargo ships transited Hormuz for Malaysia (first since war). 4 tankers loading 8M bbl at Kharg Island.
 - Qatar partially reopened airspace
 
 ### Political
@@ -197,9 +205,11 @@ ONLY the "failing" trend goals. Specific, identifiable, correctable breakdowns. 
 
 ### Regime
 - Blackout: 120+ hours / Mojtaba elected / Israel vows to kill him
+- D8: Assembly of Experts preparing to meet within 24hrs to formalize Mojtaba investiture
+- D8: Shoot-to-kill orders on protesters. "Fifth column" warning. Police chief: shoot thieves on sight.
 - IRGC: zero defections in Iran BUT Quds Force officers FLEEING Lebanon. Ground forces committed.
-- Russia: providing real-time intelligence on US positions (WaPo confirmed). Weapons NOT requested.
-- NEW: Sistan-Baluchistan insurgency — Mobarizoun Popular Front claimed first attack since war
+- Russia: providing real-time intelligence on US positions (WaPo/CBS confirmed). Weapons NOT requested.
+- Sistan-Baluchistan insurgency — Mobarizoun Popular Front active
 - Unknown forces landed Anbar Province, Iraq near Saudi border (CTP-ISW)
 
 ---
@@ -219,6 +229,9 @@ ONLY the "failing" trend goals. Specific, identifiable, correctable breakdowns. 
 11. **Unconditional Surrender: Trump's demand eliminates off-ramps by design.**
 12. **Sistan-Baluchistan insurgency: Mobarizoun Popular Front active. Internal front opening.**
 13. **Russian intelligence: Confirmed providing targeting data on US forces. De facto co-belligerence threshold.**
+14. **Oil approaching $100: WTI $90.90, Brent $92.69. +35.63% weekly = record. $100 threshold = political crisis.**
+15. **Iran threatening Europe: European basing nations declared 'legitimate targets.' Could fracture coalition.**
+16. **Lebanon anger: Nabi Chit raid (41 killed) + 110K displaced + 3 Lebanese soldiers killed. Ron Arad search inflaming Lebanese opinion.**
 
 ---
 
@@ -334,7 +347,58 @@ Run these web searches to surface tweets cited by news outlets:
 
 **Before:** Read protocol → **Twitter Sweep (Steps 1-3)** → Tier 1 sources → Tier 2 → Update data series → 7 bias checks → Analogue fit → Status/trend changes (2+ sources) → Three verdicts → Source links
 
-**After:** Verify counts → Rebuild HTML → Update this protocol
+**After:** Verify counts → **Spot-check (§9a)** → Rebuild HTML → Update this protocol
+
+---
+
+## 9a. SPOT-CHECK PROTOCOL (Post-Research, Pre-Edit)
+
+**Purpose:** Catch factual errors introduced by subagents or fast research before they reach the tracker. The Ron Arad/Nabi Chit error (Day 8: subagent placed a Lebanon raid inside Iran) demonstrated that subagents can confidently assert wrong locations, countries, or attributions.
+
+### When to Run
+After all research agents complete, BEFORE editing `iran-war-goals.jsx`. Takes ~5 minutes.
+
+### Check Categories
+
+**1. Geography Spot-Check (highest error rate)**
+For every claim involving a LOCATION (city, country, facility, base):
+- Does the stated country match the source?
+- Is the city in that country? (e.g., Nabi Chit is in Lebanon, not Iran)
+- Cross-reference: if a source says "Baalbek district," confirm which country that's in
+
+**2. Attribution Spot-Check**
+For every claim involving WHO DID WHAT:
+- Which military/group is claimed to have acted?
+- Does the source actually say that actor, or a different one?
+- Check: IDF vs CENTCOM vs coalition — who did the strike?
+
+**3. Number Spot-Check**
+Pick 3 key numbers from the research (casualties, intercepted missiles, oil prices):
+- Re-check against the cited source
+- Verify units (barrels vs dollars, daily vs cumulative, dead vs wounded)
+- Check if number is from today or a previous day being re-cited
+
+**4. Temporal Spot-Check**
+For claims marked as "new" or "Day X":
+- Is this actually new, or a re-report of a previous day's event?
+- Check timestamps in sources vs. last build timestamp
+
+**5. Negation/Reversal Spot-Check**
+For any claim where something DIDN'T happen or was DENIED:
+- Does the source say "denied" or "confirmed"?
+- Is the subagent reporting a denial as a confirmation or vice versa?
+
+### How to Run
+1. Pick the 5 most consequential claims from the research batch
+2. For each, re-read the ACTUAL source URL (not the subagent's summary)
+3. Verify: location, actor, number, timeframe, positive/negative
+4. If ANY fail: re-check ALL claims from that subagent
+
+### Error Log
+Track spot-check catches to improve the process:
+| Date | Error | Category | Subagent | Caught By |
+|------|-------|----------|----------|-----------|
+| Day 8 | Ron Arad search placed in Iran (was Lebanon — Nabi Chit, Baalbek district) | Geography | Tier 1 | User |
 
 ---
 
