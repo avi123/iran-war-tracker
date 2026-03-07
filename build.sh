@@ -104,7 +104,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
   </details>
 </article>
 
-<div id="root" data-nosnippet></div>
+<div id="root"></div>
 
 <noscript>
   <div style="max-width:900px;margin:0 auto;padding:24px;color:#E2E8F0;">
