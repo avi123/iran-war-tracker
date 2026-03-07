@@ -151,19 +151,19 @@ const GoalRow = ({ goal, depth = 0, expanded, onToggle, mobile }) => {
 const HIGHLIGHTS = {
   updatedAt: "2026-03-07T22:24Z",
   keyDevelopments: [
-    { text: "First oil infrastructure strikes — 3 Tehran depots targeted (Kuhak, Shahran, Karaj). New target category escalation.", category: "military", goalIds: ["en-oil", "sco-theater"], sources: [{t:"ToI",u:"https://www.timesofisrael.com/liveblog_entry/air-force-striking-iranian-oil-infrastructure-in-tehran-in-apparent-first/"},{t:"Ynet",u:"https://www.ynetnews.com/article/skj4fx5tzl"}] },
-    { text: "Classified US intel: regime 'unlikely' to be ousted by military campaign — contradicts 'unconditional surrender' rhetoric.", category: "political", goalIds: ["reg-endgame"], sources: [{t:"WaPo",u:"https://www.washingtonpost.com/national-security/2026/03/07/iran-intelligence-report-unlikely-oust-regime/"}] },
-    { text: "Lebanon deaths jump to 294 (from 217), 300K+ displaced. Nabi Chit raid: 41 killed including 3 Lebanese soldiers.", category: "humanitarian", goalIds: ["hez", "cas-civ"], sources: [{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/7/hezbollah-israeli-troops-clash-on-the-ground-in-eastern-lebanons-bekaa"},{t:"NRC",u:"https://www.nrc.no/news/2026/lebanon-300000-already-displaced-as-israel-issues-mass-evacuation-orders"}] },
-    { text: "B-1B Lancers arriving at RAF Fairford (UK). Hegseth: firepower 'about to surge dramatically.' $151.8M emergency bomb sale.", category: "military", goalIds: ["all-base", "airsup"], sources: [{t:"MEE",u:"https://www.middleeasteye.net/news/us-bombers-land-britain-pentagon-prepares-surge-iran-strikes"},{t:"DefOne",u:"https://www.defenseone.com/threats/2026/03/firepower-about-surge-dramatically-over-iran-hegseth/411935/"}] },
-    { text: "Pezeshkian conditional ceasefire to neighbors collapsed — Dubai airport drone hit Concourse A within 1 hour of apology.", category: "political", goalIds: ["gulf-infra", "mis-drone"], sources: [{t:"Euronews",u:"https://www.euronews.com/2026/03/07/iranian-drone-attack-suspends-flights-at-dubai-international-airport"},{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/7/iran-to-halt-strikes-on-neighbours-unless-attacks-from-there-pezeshkian"}] },
+    { text: "First oil infrastructure strikes — 3 Tehran depots targeted (Kuhak, Shahran, Karaj). New target category escalation.", why: "Crossing into energy infrastructure signals campaign expanding beyond military targets — raises economic pressure but also escalation risk.", category: "military", goalIds: ["en-oil", "sco-theater"], sources: [{t:"ToI",u:"https://www.timesofisrael.com/liveblog_entry/air-force-striking-iranian-oil-infrastructure-in-tehran-in-apparent-first/"},{t:"Ynet",u:"https://www.ynetnews.com/article/skj4fx5tzl"}] },
+    { text: "Classified US intel: regime 'unlikely' to be ousted by military campaign — contradicts 'unconditional surrender' rhetoric.", why: "Gap between stated war aims and intelligence assessment is the central tension — if regime change isn't achievable, what's the exit?", category: "political", goalIds: ["reg-endgame"], sources: [{t:"WaPo",u:"https://www.washingtonpost.com/national-security/2026/03/07/iran-intelligence-report-unlikely-oust-regime/"}] },
+    { text: "Lebanon deaths jump to 294 (from 217), 300K+ displaced. Nabi Chit raid: 41 killed including 3 Lebanese soldiers.", why: "Accelerating civilian toll in a secondary theater pressures international support and complicates Israel's justification framework.", category: "humanitarian", goalIds: ["hez", "cas-civ"], sources: [{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/7/hezbollah-israeli-troops-clash-on-the-ground-in-eastern-lebanons-bekaa"},{t:"NRC",u:"https://www.nrc.no/news/2026/lebanon-300000-already-displaced-as-israel-issues-mass-evacuation-orders"}] },
+    { text: "B-1B Lancers arriving at RAF Fairford (UK). Hegseth: firepower 'about to surge dramatically.' $151.8M emergency bomb sale.", why: "B-1Bs carry 75,000+ lbs of ordnance each — their deployment signals a step-change in sortie tempo and deep-strike capability.", category: "military", goalIds: ["all-base", "airsup"], sources: [{t:"MEE",u:"https://www.middleeasteye.net/news/us-bombers-land-britain-pentagon-prepares-surge-iran-strikes"},{t:"DefOne",u:"https://www.defenseone.com/threats/2026/03/firepower-about-surge-dramatically-over-iran-hegseth/411935/"}] },
+    { text: "Pezeshkian conditional ceasefire to neighbors collapsed — Dubai airport drone hit Concourse A within 1 hour of apology.", why: "Reveals disconnect between Iran's civilian leadership and IRGC operations — undermines any diplomatic off-ramp through Pezeshkian.", category: "political", goalIds: ["gulf-infra", "mis-drone"], sources: [{t:"Euronews",u:"https://www.euronews.com/2026/03/07/iranian-drone-attack-suspends-flights-at-dubai-international-airport"},{t:"AJZ",u:"https://www.aljazeera.com/news/2026/3/7/iran-to-halt-strikes-on-neighbours-unless-attacks-from-there-pezeshkian"}] },
   ],
   watchNext: [
-    { text: "B-1B sorties from Fairford — UK armed forces chief expects missions 'within days'", category: "military", timeframe: "imminent", sources: [{t:"ITV",u:"https://www.itv.com/news/westcountry/2026-03-07/us-bomber-lands-in-gloucestershire-as-iran-war-enters-eighth-day"}] },
-    { text: "Assembly of Experts formal announcement of Mojtaba — delayed by 8/88 refusal, but imminent", category: "regime", timeframe: "24-48h", sources: [{t:"JPost",u:"https://www.jpost.com/middle-east/iran-news/article-888965"},{t:"IranIntl",u:"https://www.iranintl.com/en/202603052337"}] },
-    { text: "Oil approaching $100/bbl — WTI at $90.90, Goldman says $100 if Hormuz disrupted 5 weeks", category: "economic", timeframe: "24-48h", sources: [{t:"CNBC",u:"https://www.cnbc.com/2026/03/07/kuwait-oil-cut-iran-war-strait-hormuz.html"}] },
-    { text: "Gulf interceptor depletion — at least one ally running low by Day 4, resupply lagging", category: "military", timeframe: "this week", sources: [{t:"CBS",u:"https://www.cbsnews.com/news/arab-states-running-low-interceptors-iranian-fired-missiles/"},{t:"Fortune",u:"https://fortune.com/2026/03/07/trump-munitions-iran-war-ukraine-interceptors-patriot-thaad-low-supply/"}] },
-    { text: "Iran missile redirect to Israel — IDF assessment says Iran may concentrate BMs on Israel instead of Gulf", category: "military", timeframe: "this week", sources: [{t:"Haaretz",u:"https://www.haaretz.com/israel-news/israel-security/2026-03-07/ty-article/.premium/idf-officials-israel-bracing-for-iran-to-ramp-up-missile-launches/0000019c-c8fb-d3fb-a1fe-dffb592b0000"}] },
-    { text: "Do NCRI 'organized uprising' reports reflect ground reality or opposition framing?", category: "regime", timeframe: "open question", sources: [{t:"NCRI",u:"https://www.ncr-iran.org/en/news/iran-news-in-brief-news/iran-news-in-brief-march-7-2026/"}] },
+    { text: "B-1B sorties from Fairford — UK armed forces chief expects missions 'within days'", why: "Marks shift from precision strikes to heavy bombardment — changes the character of the campaign.", category: "military", timeframe: "imminent", sources: [{t:"ITV",u:"https://www.itv.com/news/westcountry/2026-03-07/us-bomber-lands-in-gloucestershire-as-iran-war-enters-eighth-day"}] },
+    { text: "Assembly of Experts formal announcement of Mojtaba — delayed by 8/88 refusal, but imminent", why: "Contested succession weakens regime cohesion — if 8 of 88 already refuse, more defections possible under pressure.", category: "regime", timeframe: "24-48h", sources: [{t:"JPost",u:"https://www.jpost.com/middle-east/iran-news/article-888965"},{t:"IranIntl",u:"https://www.iranintl.com/en/202603052337"}] },
+    { text: "Oil approaching $100/bbl — WTI at $90.90, Goldman says $100 if Hormuz disrupted 5 weeks", why: "$100 oil is a political threshold — triggers US gas price spikes that erode domestic war support.", category: "economic", timeframe: "24-48h", sources: [{t:"CNBC",u:"https://www.cnbc.com/2026/03/07/kuwait-oil-cut-iran-war-strait-hormuz.html"}] },
+    { text: "Gulf interceptor depletion — at least one ally running low by Day 4, resupply lagging", why: "If Gulf allies can't defend themselves, they either demand US assets or restrict basing — both constrain operations.", category: "military", timeframe: "this week", sources: [{t:"CBS",u:"https://www.cbsnews.com/news/arab-states-running-low-interceptors-iranian-fired-missiles/"},{t:"Fortune",u:"https://fortune.com/2026/03/07/trump-munitions-iran-war-ukraine-interceptors-patriot-thaad-low-supply/"}] },
+    { text: "Iran missile redirect to Israel — IDF assessment says Iran may concentrate BMs on Israel instead of Gulf", why: "Shifts Iran's strategy from harassing Gulf neighbors to direct confrontation with Israel — higher stakes, harder to intercept.", category: "military", timeframe: "this week", sources: [{t:"Haaretz",u:"https://www.haaretz.com/israel-news/israel-security/2026-03-07/ty-article/.premium/idf-officials-israel-bracing-for-iran-to-ramp-up-missile-launches/0000019c-c8fb-d3fb-a1fe-dffb592b0000"}] },
+    { text: "Do NCRI 'organized uprising' reports reflect ground reality or opposition framing?", why: "If real, internal unrest is the one thing that could actually threaten the regime — but NCRI has incentives to exaggerate.", category: "regime", timeframe: "open question", sources: [{t:"NCRI",u:"https://www.ncr-iran.org/en/news/iran-news-in-brief-news/iran-news-in-brief-march-7-2026/"}] },
   ],
   watchResolved: [],
 };
@@ -223,12 +223,15 @@ const HighlightsPanel = ({ mobile }) => {
               Key Developments
             </div>
             {HIGHLIGHTS.keyDevelopments.map((d, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "flex-start" }}>
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "flex-start" }}>
                 <span style={{
                   display: "inline-block", width: 6, height: 6, borderRadius: 3, flexShrink: 0, marginTop: 5,
                   background: categoryColor[d.category] || C.textDim,
                 }}/>
-                <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{d.text}{d.sources && <SourceLinks sources={d.sources}/>}</span>
+                <div>
+                  <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{d.text}{d.sources && <SourceLinks sources={d.sources}/>}</span>
+                  {d.why && <div style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic" }}>{d.why}</div>}
+                </div>
               </div>
             ))}
           </div>
@@ -241,13 +244,16 @@ const HighlightsPanel = ({ mobile }) => {
             {HIGHLIGHTS.watchNext.map((w, i) => {
               const tf = timeframeConfig[w.timeframe] || timeframeConfig["open question"];
               return (
-                <div key={i} style={{ display: "flex", gap: 6, marginBottom: 7, alignItems: "flex-start" }}>
+                <div key={i} style={{ display: "flex", gap: 6, marginBottom: 9, alignItems: "flex-start" }}>
                   <span style={{
                     display: "inline-block", padding: "1px 4px", borderRadius: 3, fontSize: 7, fontWeight: 700,
                     background: tf.bg, color: tf.color, border: `1px solid ${tf.color}40`,
                     letterSpacing: 0.3, whiteSpace: "nowrap", flexShrink: 0, marginTop: 3,
                   }}>{tf.label}</span>
-                  <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{w.text}{w.sources && <SourceLinks sources={w.sources}/>}</span>
+                  <div>
+                    <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{w.text}{w.sources && <SourceLinks sources={w.sources}/>}</span>
+                    {w.why && <div style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic" }}>{w.why}</div>}
+                  </div>
                 </div>
               );
             })}
