@@ -88,7 +88,7 @@ sed -i '' "s/__BUILD_TIMESTAMP__/$TIMESTAMP/g" "$OUT"
 sed -i '' "s/__BUILD_YEAR__/$(date -u '+%Y')/g" "$OUT"
 
 # Inject GA measurement ID (set via environment or default placeholder)
-GA_ID="${GA_MEASUREMENT_ID:-G-XXXXXXXXXX}"
+GA_ID="${GA_MEASUREMENT_ID:-G-WDDF5XHR4Q}"
 sed -i '' "s/__GA_MEASUREMENT_ID__/$GA_ID/g" "$OUT"
 
 # Report
