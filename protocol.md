@@ -1,6 +1,6 @@
 # Iran War Goals Tracker — Research Protocol & Context
 
-**Version:** 2.5 — March 5, 2026 (Day 7 Afternoon)
+**Version:** 2.6 — March 7, 2026 (Day 8 Morning)
 **Artifact:** iran-war-goals.jsx / iran-war-goals.html
 **Framework:** Two Generals model tracking 106 goals (19 parents, 87 sub-goals)
 
@@ -99,7 +99,7 @@ These provide real-time operational data and should be checked first.
 
 **Difference between TBD status and no-tag trend:** TBD = goal hasn't been tested yet (e.g., mines not laid). No-tag = goal has been tested but result is unreadable (e.g., IRGC defections — zero at Day 6 is expected, not diagnostic).
 
-### Current Distribution (Day 7 Afternoon)
+### Current Distribution (Day 8 Morning)
 - 14 achieved
 - 29 in progress
 - 56 at risk (19 failing, 30 expanding, 7 no tag)
@@ -164,35 +164,43 @@ ONLY the "failing" trend goals. Specific, identifiable, correctable breakdowns. 
 ## 5. KEY DATA SERIES
 
 ### Military (update every cycle)
-- UAE BMs/day: D1:137, D2:28, D3:9, D4:12, D5:3, D6:7
-- UAE drones/day: D6:131 (SURGING)
-- Bahrain totals: 75 missiles + 123 drones
+- UAE BMs/day: D1:137, D2:28, D3:9, D4:12, D5:3, D6:7, D7:9
+- UAE drones/day: D6:131 (peak), D7:109+
+- UAE cumulative: ~205 BMs, ~1,180 drones
+- Bahrain totals: 75 missiles + 123 drones + BAPCO refinery struck D7
 - INSS total drones: 1,600+ across all theaters
-- CENTCOM strikes: 2,500 (IDF claim) / ships sunk: 20 / strike waves: 11 on 600 targets
+- CENTCOM: 2,500 strikes (IDF claim) / ships destroyed: 43 / 200 targets in 72hrs (B-2s)
 - Missile decline: 90% / Drone decline: 83% (but drone volume surging)
-- Phase: 2 (underground bunkers + industrial base)
+- Phase: 2 (underground bunkers + defense industrial base — Abbas Abad/Shenzar evacuation orders)
+- Iran→Israel attack waves: 148 total (D1:25, D2:64, D3:25, D4:9, D5:11, D6:9, D7:5)
+- Hezbollah attack waves: 116 total (D3:10, D4:20, D5:36, D6:25, D7:23)
 
 ### Casualties
-- Iran: 1,300+ (UNICEF/multiple) / 1,230 (Red Crescent) / 181 children (UNICEF) / 6,000+ wounded
-- Israel: 12 dead, 1,200+ injured
+- Iran: 1,332+ (Red Crescent/multiple) / 181 children (UNICEF) / 6,000+ wounded
+- Israel: 12 dead, 1,600+ injured (140 in past 24hrs)
 - US: 6 KIA, 18+ WIA
-- Lebanon: 77 dead, 527 wounded
-- Gulf: 5+ dead / Azerbaijan: drones hit
+- Lebanon: 217 dead, ~800 wounded (up from 123/600+)
+- Gulf: 3 dead (UAE) + others / Azerbaijan: drones hit airport
+- Americans evacuated: 20,000 from Middle East
 
 ### Economic
-- Brent: ~$74 (volatile) / Gas: up 20 cents/7% / Strait: CLOSED (warlike operations area)
-- Ships stalled: 150+ / P&I: removed / IRGC ban: expanded to European / DFC insurance: FICTION (JPMorgan: 6-9 months)
-- Gold: $5,100+ / KOSPI: -12%
+- Brent: $85.41 / WTI: $81.01 / Gas: up 20 cents/7% / Strait: CLOSED (warlike ops area)
+- Ships stalled: 150+ / P&I: removed / IRGC ban: expanded to European / DFC insurance: FICTION
+- Gold: $5,100+ / KOSPI: -12% / Supertanker rates: $423K/day (record)
+- NEW: 2 Iranian cargo ships transited Hormuz for Malaysia (first since war). 4 tankers loading 8M bbl at Kharg Island.
+- Qatar partially reopened airspace
 
 ### Political
-- War Powers: DEFEATED 47-53 / House vote Thursday
+- War Powers: DEFEATED both chambers (Senate 47-53, House 212-219)
 - Coalition: 7 NATO nations deployed/committed
-- Trump: "unconditional surrender" + "I must choose leader" + "no time limits"
+- Trump: "unconditional surrender" + "MIGA" + "I must choose leader" + "no time limits"
 
 ### Regime
-- Blackout: 100+ hours / Mojtaba elected / Israel vows to kill him
-- IRGC: zero defections in Iran BUT Quds Force officers FLEEING Lebanon (Axios). Ground forces committed. "First powerful steps."
-- Russia weapons: NOT requested
+- Blackout: 120+ hours / Mojtaba elected / Israel vows to kill him
+- IRGC: zero defections in Iran BUT Quds Force officers FLEEING Lebanon. Ground forces committed.
+- Russia: providing real-time intelligence on US positions (WaPo confirmed). Weapons NOT requested.
+- NEW: Sistan-Baluchistan insurgency — Mobarizoun Popular Front claimed first attack since war
+- Unknown forces landed Anbar Province, Iraq near Saudi border (CTP-ISW)
 
 ---
 
@@ -203,12 +211,14 @@ ONLY the "failing" trend goals. Specific, identifiable, correctable breakdowns. 
 3. Endgame: Trump demands role. Israel vows assassination. No transition plan.
 4. Ground Troops: US avoiding, Israel in Lebanon, IRGC entering, Kurdish proxy active
 5. Backchannel: CIA-Iran channel exists but US DISMISSED Iranian messages as "bull****" (Ravid direct source). Netanyahu suspicious. Markets over-priced it.
-6. Civilian Casualties: 1,332+ dead (Red Crescent), 181 children (UNICEF), 2nd school hit (Tehran Niloufar Square)
-7. Hormuz: Warlike ops area. Macron separate coalition. No US escort operational.
+6. Civilian Casualties: 1,332+ dead (Red Crescent), 181 children (UNICEF), 2nd school hit, UN investigation called
+7. Hormuz: Warlike ops area. But Iran testing own shipping (2 cargo ships transited). Macron coalition forming.
 8. Alliance: Expanding (7 NATO nations) while fracturing (no agreed endgame)
-9. **Drone Surge: Missiles ↓90% but drones adapting. UAE intercepting 120+/day. Key Week 2 metric.**
+9. **Drone Surge: Missiles ↓90% but drones adapting. UAE D7: 109+ drones. Key Week 2 metric.**
 10. **Cost: CSIS $891M/day, $3.5B unbudgeted. If 100 days = ~$62B. Congress hasn't authorized spending.**
-11. **Unconditional Surrender: Trump's demand eliminates off-ramps by design. Can't plan governance while demanding capitulation.**
+11. **Unconditional Surrender: Trump's demand eliminates off-ramps by design.**
+12. **Sistan-Baluchistan insurgency: Mobarizoun Popular Front active. Internal front opening.**
+13. **Russian intelligence: Confirmed providing targeting data on US forces. De facto co-belligerence threshold.**
 
 ---
 
@@ -331,16 +341,18 @@ Run these web searches to surface tweets cited by news outlets:
 ## 10. BLIND SPOTS
 
 0. **Campaign cost sustainability** — CSIS: $891M/day, $3.5B unbudgeted in 100hrs. If 100 days = ~$62B. Congress hasn't authorized. No supplemental requested.
-1. Iranian ground truth (blackout)
+1. Iranian ground truth (blackout 120+ hours)
 2. Drone production sustainability (key Week 2 question)
-3. Gulf interceptor stocks
-4. Chinese response
-5. Iraqi positioning
-6. Cyber dimension
+3. Gulf interceptor stocks (UAE cumulative ~1,180 drones intercepted — how much is left?)
+4. Chinese response (in talks with Iran for safe Hormuz passage — energy alignment deepening)
+5. Iraqi positioning (unknown forces in Anbar; parliament vs militias; sovereignty violated by both sides)
+6. Cyber dimension (60 hacktivist groups but actual damage modest vs physical)
 7. US munition sustainability
 8. Israeli domestic politics
-9. Insurance infrastructure
+9. Insurance infrastructure (DFC fiction confirmed by JPMorgan)
 10. Macron's separate Strait coalition structure
+11. **Sistan-Baluchistan insurgency** — internal front opening. Mobarizoun Popular Front active. Could become significant if regime weakens.
+12. **Russian intelligence sharing** — de facto co-belligerence. Escalation path if weapons follow intel.
 
 ---
 
