@@ -32,10 +32,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </style>
 </head>
 <body>
-<div id="build-timestamp">Generated: 2026-03-07 00:41 UTC</div>
+<div id="build-timestamp">Generated: 2026-03-07 00:48 UTC</div>
 <div id="root"></div>
 <script type="text/babel">
 const { useState } = React;
+
+const useIsMobile = (breakpoint = 768) => {
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.innerWidth < breakpoint);
+  if (typeof window !== "undefined") {
+    window.addEventListener("resize", () => setIsMobile(window.innerWidth < breakpoint));
+  }
+  return isMobile;
+};
 
 const C = {
   bg: "#0B1120", card: "#111B2E", cardAlt: "#162035",
@@ -82,10 +90,62 @@ const ImportanceBar = ({ value, label, color }) => (
   </div>
 );
 
-const GoalRow = ({ goal, depth = 0, expanded, onToggle }) => {
+const SourceLinks = ({ sources }) => (
+  sources && sources.length > 0 ? (
+    <div style={{ marginTop:3, display:"flex", flexWrap:"wrap", gap:3 }}>
+      {sources.map((s,i) => (
+        <a key={i} href={s.u} target="_blank" rel="noopener noreferrer" onClick={e=>e.stopPropagation()} style={{
+          fontSize:9, color:C.blueLt, textDecoration:"none", padding:"1px 4px",
+          background:`${C.blue}15`, borderRadius:3, border:`1px solid ${C.blue}30`,
+          whiteSpace:"nowrap",
+        }} onMouseEnter={e=>e.target.style.background=`${C.blue}30`}
+           onMouseLeave={e=>e.target.style.background=`${C.blue}15`}>{s.t}</a>
+      ))}
+    </div>
+  ) : null
+);
+
+const GoalRow = ({ goal, depth = 0, expanded, onToggle, mobile }) => {
   const hasChildren = goal.subgoals && goal.subgoals.length > 0;
   const isOpen = expanded[goal.id];
   const indent = depth * 24;
+
+  if (mobile) {
+    return (
+      <>
+        <div
+          onClick={() => hasChildren && onToggle(goal.id)}
+          style={{
+            padding:"10px 12px", paddingLeft:12 + depth*16,
+            background: depth===0 ? C.cardAlt : "transparent",
+            borderBottom:`1px solid ${C.border}30`,
+            borderLeft: depth>0 ? `2px solid ${partyColor[goal.party]}30` : "none",
+            cursor: hasChildren?"pointer":"default",
+          }}
+        >
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:6, marginBottom:6 }}>
+            <div style={{ display:"flex", alignItems:"center", gap:6, flex:1, minWidth:0 }}>
+              {hasChildren && <span style={{ color:C.textDim, fontSize:12, fontWeight:700, flexShrink:0 }}>{isOpen?"▼":"▶"}</span>}
+              <span style={{ color: depth===0?C.white:C.text, fontWeight: depth===0?700:500, fontSize: depth===0?13:12 }}>{goal.name}</span>
+            </div>
+            <div style={{ flexShrink:0 }}><StatusBadge status={goal.status} trend={goal.trend}/></div>
+          </div>
+          <div style={{ display:"flex", gap:4, flexWrap:"wrap", alignItems:"center", marginBottom:6 }}>
+            <PartyBadge party={goal.party}/>
+            <TypeBadge type={goal.type}/>
+            <span style={{ fontSize:9, color:C.textDim }}>I:{goal.importance} A:{goal.achievability}</span>
+          </div>
+          <div style={{ fontSize:11, color:C.text, lineHeight:1.4 }}>
+            {goal.outcomeNote}
+            <SourceLinks sources={goal.sources}/>
+          </div>
+        </div>
+        {isOpen && hasChildren && goal.subgoals.map(sg => (
+          <GoalRow key={sg.id} goal={sg} depth={depth+1} expanded={expanded} onToggle={onToggle} mobile={mobile}/>
+        ))}
+      </>
+    );
+  }
 
   return (
     <>
@@ -113,23 +173,12 @@ const GoalRow = ({ goal, depth = 0, expanded, onToggle }) => {
         <div><ImportanceBar value={goal.achievability} label="Achiev." color={goal.achievability>=4?C.green:goal.achievability<=2?C.red:C.amber}/></div>
         <div style={{ fontSize:11.5, color:C.text, lineHeight:1.4 }}>
           {goal.outcomeNote}
-          {goal.sources && goal.sources.length > 0 && (
-            <div style={{ marginTop:3, display:"flex", flexWrap:"wrap", gap:3 }}>
-              {goal.sources.map((s,i) => (
-                <a key={i} href={s.u} target="_blank" rel="noopener noreferrer" style={{
-                  fontSize:9, color:C.blueLt, textDecoration:"none", padding:"1px 4px",
-                  background:`${C.blue}15`, borderRadius:3, border:`1px solid ${C.blue}30`,
-                  whiteSpace:"nowrap",
-                }} onMouseEnter={e=>e.target.style.background=`${C.blue}30`}
-                   onMouseLeave={e=>e.target.style.background=`${C.blue}15`}>{s.t}</a>
-              ))}
-            </div>
-          )}
+          <SourceLinks sources={goal.sources}/>
         </div>
         <div><StatusBadge status={goal.status} trend={goal.trend}/></div>
       </div>
       {isOpen && hasChildren && goal.subgoals.map(sg => (
-        <GoalRow key={sg.id} goal={sg} depth={depth+1} expanded={expanded} onToggle={onToggle}/>
+        <GoalRow key={sg.id} goal={sg} depth={depth+1} expanded={expanded} onToggle={onToggle} mobile={mobile}/>
       ))}
     </>
   );
@@ -352,6 +401,7 @@ function IranWarGoalsTracker() {
   });
   const [filter, setFilter] = useState("all");
   const [expandAll, setExpandAll] = useState(false);
+  const mobile = useIsMobile();
 
   const toggleExpand = (id) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
@@ -395,17 +445,18 @@ function IranWarGoalsTracker() {
   return (
     <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"'SF Mono',SFMono-Regular,Menlo,Consolas,monospace" }}>
       {/* HEADER */}
-      <div style={{ background:`linear-gradient(135deg, ${C.navy} 0%, #0E1A30 100%)`, padding:"20px 24px 16px", borderBottom:`2px solid ${C.blue}` }}>
-        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:12 }}>
+      <div style={{ background:`linear-gradient(135deg, ${C.navy} 0%, #0E1A30 100%)`, padding:mobile?"14px 12px 10px":"20px 24px 16px", borderBottom:`2px solid ${C.blue}` }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:mobile?8:12 }}>
           <div>
-            <div style={{ fontSize:10, color:C.textDim, letterSpacing:3, textTransform:"uppercase", marginBottom:4 }}>Two Generals Framework</div>
-            <h1 style={{ color:C.white, fontSize:20, fontWeight:800, margin:0, letterSpacing:-0.5 }}>Iran War Goals Assessment</h1>
-            <div style={{ fontSize:11, color:C.textDim, marginTop:4 }}>
-              <span style={{color:C.us}}>■</span> Gen. Caine (CJCS/CENTCOM) &nbsp;
-              <span style={{color:C.israel}}>■</span> IDF Chief Halevi &nbsp;
+            <div style={{ fontSize:mobile?9:10, color:C.textDim, letterSpacing:3, textTransform:"uppercase", marginBottom:4 }}>Two Generals Framework</div>
+            <h1 style={{ color:C.white, fontSize:mobile?16:20, fontWeight:800, margin:0, letterSpacing:-0.5 }}>Iran War Goals Assessment</h1>
+            <div style={{ fontSize:mobile?10:11, color:C.textDim, marginTop:4 }}>
+              <span style={{color:C.us}}>■</span> {mobile?"US":"Gen. Caine (CJCS/CENTCOM)"} &nbsp;
+              <span style={{color:C.israel}}>■</span> {mobile?"ISR":"IDF Chief Halevi"} &nbsp;
               <span style={{color:C.purple}}>■</span> Shared &nbsp;
-              <span style={{color:C.oppose}}>■</span> Opposing &nbsp;|&nbsp; Day 7 — Hour 180+ — March 6, 2026 — Evening Update
+              <span style={{color:C.oppose}}>■</span> Opposing {!mobile && <>&nbsp;|&nbsp; Day 7 — Hour 180+ — March 6, 2026 — Evening Update</>}
             </div>
+            {mobile && <div style={{ fontSize:9, color:C.textDim, marginTop:2 }}>Day 7 — March 6, 2026 — Evening Update</div>}
           </div>
           <div style={{ display:"flex", gap:8, flexWrap:"wrap" }}>
             {[
@@ -426,8 +477,8 @@ function IranWarGoalsTracker() {
       </div>
 
       {/* FILTER BAR */}
-      <div style={{ display:"flex", gap:6, padding:"10px 24px", background:C.card, borderBottom:`1px solid ${C.border}`, overflowX:"auto", alignItems:"center" }}>
-        <span style={{ fontSize:10, color:C.textDim, marginRight:8, letterSpacing:1 }}>FILTER:</span>
+      <div style={{ display:"flex", gap:mobile?4:6, padding:mobile?"8px 12px":"10px 24px", background:C.card, borderBottom:`1px solid ${C.border}`, overflowX:"auto", alignItems:"center" }}>
+        {!mobile && <span style={{ fontSize:10, color:C.textDim, marginRight:8, letterSpacing:1 }}>FILTER:</span>}
         {[
           { key:"all", label:"All Goals" },
           { key:"us", label:"US Only" },
@@ -440,11 +491,11 @@ function IranWarGoalsTracker() {
           { key:"unachievable", label:"Unachievable" },
         ].map(f => (
           <button key={f.key} onClick={()=>setFilter(f.key)} style={{
-            padding:"5px 12px", cursor:"pointer", border:`1px solid ${filter===f.key?C.blue:C.border}`,
+            padding:mobile?"3px 8px":"5px 12px", cursor:"pointer", border:`1px solid ${filter===f.key?C.blue:C.border}`,
             background:filter===f.key?`${C.blue}30`:"transparent", color:filter===f.key?C.white:C.textDim,
-            borderRadius:6, fontSize:11, fontWeight:filter===f.key?700:500, transition:"all 0.15s",
-            fontFamily:"inherit",
-          }}>{f.label}</button>
+            borderRadius:6, fontSize:mobile?10:11, fontWeight:filter===f.key?700:500, transition:"all 0.15s",
+            fontFamily:"inherit", whiteSpace:"nowrap",
+          }}>{mobile ? f.label.replace(" (All)","").replace(" Only","") : f.label}</button>
         ))}
         <div style={{ flex:1 }}/>
         <button onClick={toggleAll} style={{
@@ -455,7 +506,7 @@ function IranWarGoalsTracker() {
       </div>
 
       {/* STATUS LEGEND */}
-      <div style={{ display:"flex", gap:16, padding:"6px 24px 6px", background:`${C.card}80`, borderBottom:`1px solid ${C.border}30`, flexWrap:"wrap", alignItems:"center" }}>
+      <div style={{ display:"flex", gap:mobile?8:16, padding:mobile?"6px 12px":"6px 24px 6px", background:`${C.card}80`, borderBottom:`1px solid ${C.border}30`, flexWrap:"wrap", alignItems:"center" }}>
         <span style={{ fontSize:9, color:C.textDim, letterSpacing:1 }}>STATUS KEY:</span>
         {[
           { s:"achieved", d:"Goal met", c:C.green },
@@ -481,9 +532,9 @@ function IranWarGoalsTracker() {
 
       {/* GOALS TABLE */}
       <div style={{ padding:"0", maxWidth:1400, margin:"0 auto" }}>
-        <div style={{ overflowX:"auto" }}>
-          {/* Column headers */}
-          <div style={{
+        <div style={{ overflowX:mobile?"hidden":"auto" }}>
+          {/* Column headers - desktop only */}
+          {!mobile && <div style={{
             display:"grid", gridTemplateColumns:"minmax(260px,2fr) 80px 70px 130px 130px minmax(180px,1.5fr) 90px",
             gap:8, padding:"10px 14px", background:C.navy, borderBottom:`2px solid ${C.blue}`,
             position:"sticky", top:0, zIndex:10,
@@ -491,10 +542,10 @@ function IranWarGoalsTracker() {
             {["Goal","Party","Type","Importance","Achievability","Outcome","Status"].map(h => (
               <span key={h} style={{ fontSize:10, fontWeight:700, color:C.textDim, letterSpacing:1, textTransform:"uppercase" }}>{h}</span>
             ))}
-          </div>
+          </div>}
 
           {filtered.map(goal => (
-            <GoalRow key={goal.id} goal={goal} depth={0} expanded={expanded} onToggle={toggleExpand}/>
+            <GoalRow key={goal.id} goal={goal} depth={0} expanded={expanded} onToggle={toggleExpand} mobile={mobile}/>
           ))}
         </div>
       </div>
