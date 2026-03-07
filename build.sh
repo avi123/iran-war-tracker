@@ -37,8 +37,24 @@ cat > "$OUT" << 'HTMLHEADER'
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Iran War Goals Tracker</title>
-<meta name="description" content="Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Military operations, regime stability, regional escalation, diplomatic dynamics, and economic impacts.">
+<title>Iran War Goals Tracker — 2026 US-Israel-Iran Conflict Analysis</title>
+<meta name="description" content="Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Military operations, regime stability, regional escalation, diplomatic dynamics, and economic impacts. Updated multiple times daily.">
+<meta property="og:title" content="Iran War Goals Tracker — 2026">
+<meta property="og:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Military, diplomatic, economic, and humanitarian analysis updated multiple times daily.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://2026iranwartracker.com">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Iran War Goals Tracker — 2026">
+<meta name="twitter:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Updated multiple times daily.">
+<link rel="canonical" href="https://2026iranwartracker.com">
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=__GA_MEASUREMENT_ID__"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', '__GA_MEASUREMENT_ID__');
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
@@ -70,6 +86,10 @@ HTMLFOOTER
 # Inject timestamp and year
 sed -i '' "s/__BUILD_TIMESTAMP__/$TIMESTAMP/g" "$OUT"
 sed -i '' "s/__BUILD_YEAR__/$(date -u '+%Y')/g" "$OUT"
+
+# Inject GA measurement ID (set via environment or default placeholder)
+GA_ID="${GA_MEASUREMENT_ID:-G-XXXXXXXXXX}"
+sed -i '' "s/__GA_MEASUREMENT_ID__/$GA_ID/g" "$OUT"
 
 # Report
 SRC_SIZE=$(wc -c < "$SRC")
