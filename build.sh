@@ -38,7 +38,7 @@ cat > "$OUT" << 'HTMLHEADER'
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Iran War Goals Tracker — 2026 US-Israel-Iran Conflict Analysis</title>
-<meta name="description" content="How is the Iran war actually going? 106 sourced goals tracked across the 2026 US-Israel-Iran conflict. Military, regime, diplomatic, and economic analysis — cut through the noise. Updated multiple times daily.">
+<meta name="description" content="Track the 2026 US-Israel-Iran war: 106 sourced goals across military, regime, diplomatic, and economic dimensions. Updated multiple times daily.">
 <meta property="og:title" content="Iran War Goals Tracker — 2026">
 <meta property="og:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Military, diplomatic, economic, and humanitarian analysis updated multiple times daily.">
 <meta property="og:type" content="website">
@@ -47,6 +47,7 @@ cat > "$OUT" << 'HTMLHEADER'
 <meta name="twitter:title" content="Iran War Goals Tracker — 2026">
 <meta name="twitter:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Updated multiple times daily.">
 <link rel="canonical" href="https://2026iranwartracker.com">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#127919;</text></svg>">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -81,7 +82,8 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 <body>
 <div id="build-timestamp">Generated: __BUILD_TIMESTAMP__</div>
 
-<div id="intro-toggle" style="max-width:900px;margin:0 auto;padding:28px 24px 0;">
+<h1 style="max-width:900px;margin:0 auto;padding:28px 24px 0;color:#E2E8F0;font-size:22px;font-weight:700;">Iran War Goals Tracker — 2026 US-Israel-Iran Conflict</h1>
+<div id="intro-toggle" style="max-width:900px;margin:0 auto;padding:12px 24px 0;">
   <button onclick="var el=document.getElementById('static-intro');var show=el.style.display==='none';el.style.display=show?'block':'none';this.textContent=show?'Hide: About This Tracker':'About This Tracker';try{localStorage.setItem('intro-dismissed',show?'0':'1')}catch(e){}" style="background:none;border:1px solid #475569;color:#4888CC;font-size:13px;cursor:pointer;padding:5px 14px;border-radius:4px;font-family:inherit;" onmouseenter="this.style.borderColor='#64748B';this.style.color='#60A5FA'" onmouseleave="this.style.borderColor='#475569';this.style.color='#4888CC'">Hide: About This Tracker</button>
 </div>
 <article id="static-intro" style="max-width:900px;margin:0 auto;padding:16px 24px 0;color:#94A3B8;font-size:13px;line-height:1.7;">
@@ -111,9 +113,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 
 <noscript>
   <div style="max-width:900px;margin:0 auto;padding:24px;color:#E2E8F0;">
-    <h1>Iran War Goals Tracker — 2026</h1>
-    <p>This interactive tracker requires JavaScript to display 106 goals across the 2026 US-Israel-Iran conflict.</p>
-    <h2>Goal Categories</h2>
+    <h2>Iran War Goals Tracker — 2026</h2>
+    <p>This interactive tracker requires JavaScript to display 106 goals across the 2026 US-Israel-Iran conflict. The tracker is updated multiple times daily using verified sources.</p>
+    <h3>Goal Categories</h3>
     <ul>
       <li><strong>Nuclear</strong>: Eliminate Iran's nuclear weapons capability (Natanz, Fordow, Isfahan, SPND)</li>
       <li><strong>Missiles &amp; Drones</strong>: Destroy missile launch sites, production, mobile launchers, drone factories</li>
@@ -130,6 +132,18 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
       <li><strong>Energy Markets</strong>: Oil prices, European gas, Iraqi oil, US gas prices</li>
       <li><strong>Gulf Protection</strong>: Air defense, energy infrastructure, civilian safety</li>
       <li><strong>Terrorism</strong>: Homeland threats, global retaliation, cyberattacks</li>
+    </ul>
+    <h3>Sources</h3>
+    <p>All claims are sourced to verifiable reports. Key sources include:</p>
+    <ul>
+      <li><a href="https://www.centcom.mil/MEDIA/PRESS-RELEASES/">CENTCOM Press Releases</a></li>
+      <li><a href="https://www.iaea.org/newscenter/pressreleases">IAEA Press Releases</a></li>
+      <li><a href="https://www.aljazeera.com/">Al Jazeera</a></li>
+      <li><a href="https://www.pbs.org/newshour/">PBS NewsHour</a></li>
+      <li><a href="https://www.reuters.com/">Reuters</a></li>
+      <li><a href="https://www.fdd.org/">Foundation for Defense of Democracies</a></li>
+      <li><a href="https://www.alma-center.org/">Alma Center</a></li>
+      <li><a href="https://www.timesofisrael.com/">Times of Israel</a></li>
     </ul>
     <p>Enable JavaScript for the full interactive experience with sourced claims, filtering, and real-time status tracking.</p>
   </div>
