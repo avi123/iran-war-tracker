@@ -147,6 +147,139 @@ const GoalRow = ({ goal, depth = 0, expanded, onToggle, mobile }) => {
   );
 };
 
+// ═══ HIGHLIGHTS: Updated each cycle by /iran-update ═══
+const HIGHLIGHTS = {
+  updatedAt: "2026-03-07T22:24Z",
+  keyDevelopments: [
+    { text: "First oil infrastructure strikes — 3 Tehran depots targeted (Kuhak, Shahran, Karaj). New target category escalation.", category: "military", goalIds: ["en-oil", "sco-theater"] },
+    { text: "Classified US intel: regime 'unlikely' to be ousted by military campaign — contradicts 'unconditional surrender' rhetoric.", category: "political", goalIds: ["reg-endgame"] },
+    { text: "Lebanon deaths jump to 294 (from 217), 300K+ displaced. Nabi Chit raid: 41 killed including 3 Lebanese soldiers.", category: "humanitarian", goalIds: ["hez", "cas-civ"] },
+    { text: "B-1B Lancers arriving at RAF Fairford (UK). Hegseth: firepower 'about to surge dramatically.' $151.8M emergency bomb sale.", category: "military", goalIds: ["all-base", "airsup"] },
+    { text: "Pezeshkian conditional ceasefire to neighbors collapsed — Dubai airport drone hit Concourse A within 1 hour of apology.", category: "political", goalIds: ["gulf-infra", "mis-drone"] },
+  ],
+  watchNext: [
+    { text: "B-1B sorties from Fairford — UK armed forces chief expects missions 'within days'", category: "military", timeframe: "imminent" },
+    { text: "Assembly of Experts formal announcement of Mojtaba — delayed by 8/88 refusal, but imminent", category: "regime", timeframe: "24-48h" },
+    { text: "Oil approaching $100/bbl — WTI at $90.90, Goldman says $100 if Hormuz disrupted 5 weeks", category: "economic", timeframe: "24-48h" },
+    { text: "Gulf interceptor depletion — at least one ally running low by Day 4, resupply lagging", category: "military", timeframe: "this week" },
+    { text: "Iran missile redirect to Israel — IDF assessment says Iran may concentrate BMs on Israel instead of Gulf", category: "military", timeframe: "this week" },
+    { text: "Do NCRI 'organized uprising' reports reflect ground reality or opposition framing?", category: "regime", timeframe: "open question" },
+  ],
+  watchResolved: [],
+};
+
+const categoryColor = { military: "#3B82F6", political: "#A78BFA", economic: "#F59E0B", regime: "#EF4444", humanitarian: "#EC4899" };
+const timeframeConfig = {
+  "imminent": { label: "IMMINENT", color: "#EF4444", bg: "#2E1010" },
+  "24-48h": { label: "24-48H", color: "#F59E0B", bg: "#2E2410" },
+  "this week": { label: "THIS WEEK", color: "#3B82F6", bg: "#0F1A2E" },
+  "open question": { label: "OPEN ?", color: "#6B7280", bg: "#1E2228" },
+};
+const resolvedConfig = {
+  "confirmed": { icon: "✓", color: "#22C55E" },
+  "partial": { icon: "~", color: "#F59E0B" },
+  "wrong": { icon: "✗", color: "#EF4444" },
+  "ongoing": { icon: "→", color: "#3B82F6" },
+};
+
+const HighlightsPanel = ({ mobile }) => {
+  const [open, setOpen] = useState(() => {
+    try { return localStorage.getItem("highlights-collapsed") !== "1"; } catch { return true; }
+  });
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    try { localStorage.setItem("highlights-collapsed", next ? "0" : "1"); } catch {}
+  };
+
+  const hasResolved = HIGHLIGHTS.watchResolved && HIGHLIGHTS.watchResolved.length > 0;
+
+  return (
+    <div style={{ borderBottom: `1px solid ${C.border}` }}>
+      <div
+        onClick={toggle}
+        style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: mobile ? "8px 12px" : "8px 24px", cursor: "pointer",
+          background: `linear-gradient(90deg, ${C.card} 0%, ${C.cardAlt} 100%)`,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ color: C.textDim, fontSize: 12, fontWeight: 700 }}>{open ? "▼" : "▶"}</span>
+          <span style={{ fontSize: 11, fontWeight: 700, color: C.white, letterSpacing: 1, textTransform: "uppercase" }}>Highlights & Watch</span>
+        </div>
+        <span style={{ fontSize: 9, color: C.textDim, fontFamily: "monospace" }}>
+          Updated: {HIGHLIGHTS.updatedAt}
+        </span>
+      </div>
+      {open && (
+        <div style={{
+          display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr",
+          gap: 0, background: C.bg,
+        }}>
+          {/* LEFT: Key Developments */}
+          <div style={{ padding: mobile ? "10px 12px" : "12px 24px", borderRight: mobile ? "none" : `1px solid ${C.border}30` }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
+              Key Developments
+            </div>
+            {HIGHLIGHTS.keyDevelopments.map((d, i) => (
+              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8, alignItems: "flex-start" }}>
+                <span style={{
+                  display: "inline-block", width: 6, height: 6, borderRadius: 3, flexShrink: 0, marginTop: 5,
+                  background: categoryColor[d.category] || C.textDim,
+                }}/>
+                <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{d.text}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* RIGHT: Watch */}
+          <div style={{ padding: mobile ? "10px 12px" : "12px 24px", borderTop: mobile ? `1px solid ${C.border}30` : "none" }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
+              Watching
+            </div>
+            {HIGHLIGHTS.watchNext.map((w, i) => {
+              const tf = timeframeConfig[w.timeframe] || timeframeConfig["open question"];
+              return (
+                <div key={i} style={{ display: "flex", gap: 6, marginBottom: 7, alignItems: "flex-start" }}>
+                  <span style={{
+                    display: "inline-block", padding: "1px 4px", borderRadius: 3, fontSize: 7, fontWeight: 700,
+                    background: tf.bg, color: tf.color, border: `1px solid ${tf.color}40`,
+                    letterSpacing: 0.3, whiteSpace: "nowrap", flexShrink: 0, marginTop: 3,
+                  }}>{tf.label}</span>
+                  <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{w.text}</span>
+                </div>
+              );
+            })}
+
+            {hasResolved && (
+              <>
+                <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginTop: 12, marginBottom: 6, borderTop: `1px solid ${C.border}30`, paddingTop: 8 }}>
+                  Previously Watching
+                </div>
+                {HIGHLIGHTS.watchResolved.map((r, i) => {
+                  const rc = resolvedConfig[r.status] || resolvedConfig["ongoing"];
+                  return (
+                    <div key={i} style={{ marginBottom: 6 }}>
+                      <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: rc.color, flexShrink: 0, width: 14, textAlign: "center" }}>{rc.icon}</span>
+                        <div>
+                          <span style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4 }}>{r.text}</span>
+                          <div style={{ fontSize: 10, color: rc.color, lineHeight: 1.4, marginTop: 1 }}>{r.resolved}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const GOALS = [
   // ═══ TIER 1: EXISTENTIAL / STRATEGIC ═══
   {
@@ -438,6 +571,9 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* HIGHLIGHTS & WATCH */}
+      <HighlightsPanel mobile={mobile}/>
 
       {/* FILTER BAR */}
       <div style={{ display:"flex", gap:mobile?4:6, padding:mobile?"8px 12px":"10px 24px", background:C.card, borderBottom:`1px solid ${C.border}`, overflowX:"auto", alignItems:"center" }}>

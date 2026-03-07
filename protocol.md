@@ -345,7 +345,7 @@ Run these web searches to surface tweets cited by news outlets:
 
 ## 9. UPDATE CHECKLIST
 
-**Before:** Read protocol → **Twitter Sweep (Steps 1-3)** → Tier 1 sources → Tier 2 → Update data series → 7 bias checks → Analogue fit → Status/trend changes (2+ sources) → Three verdicts → Source links
+**Before:** Read protocol → **Read HIGHLIGHTS.watchNext** (check what we were watching) → **Twitter Sweep (Steps 1-3)** → Tier 1 sources → Tier 2 → Update data series → 7 bias checks → Analogue fit → Status/trend changes (2+ sources) → Three verdicts → Source links → **Update HIGHLIGHTS** (§9b)
 
 **After:** Verify counts → **Spot-check (§9a)** → Rebuild HTML → Update this protocol
 
@@ -399,6 +399,51 @@ Track spot-check catches to improve the process:
 | Date | Error | Category | Subagent | Caught By |
 |------|-------|----------|----------|-----------|
 | Day 8 | Ron Arad search placed in Iran (was Lebanon — Nabi Chit, Baalbek district) | Geography | Tier 1 | User |
+
+---
+
+## 9b. HIGHLIGHTS UPDATE PROTOCOL
+
+**Purpose:** Maintain the `HIGHLIGHTS` constant in `iran-war-goals.jsx`. This carries analytical context between update cycles and gives readers a "what just happened / what to watch" summary.
+
+### When to Run
+After goal edits, BEFORE build. Takes ~3 minutes.
+
+### Steps
+
+**1. Resolve Previous Watch Items**
+Read the current `HIGHLIGHTS.watchNext` array. For each item:
+- Did it happen? → Move to `watchResolved` with `status: "confirmed"` and `resolved: "what happened"`
+- Partially? → `status: "partial"` with explanation
+- Didn't happen / wrong? → `status: "wrong"` with explanation
+- Still developing? → `status: "ongoing"` with latest update
+- Keep max 6 resolved items (drop oldest if over)
+
+**2. Write Key Developments (3-6 items)**
+Select from this cycle's findings. What makes the cut:
+- Status changes (goal moved between states)
+- New categories of action (first X of the war)
+- Contradictions (A said X, then Y happened)
+- Threshold crossings (approaching/crossing $100 oil, interceptor depletion)
+- Intelligence reveals (classified reports, leaked assessments)
+- NOT: routine metric updates, incremental numbers
+
+**3. Write Watch Items (3-6 items)**
+Timeframe categories:
+- `imminent` (6-12h): known upcoming events, expected military actions
+- `24-48h`: approaching thresholds, scheduled meetings, expected inflections
+- `this week`: developing situations, trend reversals, diplomatic windows
+- `open question`: testable analytical questions without time bound
+
+Good watch items are SPECIFIC and RESOLVABLE. Bad: "watch oil prices." Good: "Oil approaching $100/bbl — WTI at $90.90, Goldman threshold is 5 weeks of Hormuz disruption."
+
+**4. Update `updatedAt` timestamp**
+
+### Accountability Rule
+Every watch item must eventually be resolved. If an item sits as "ongoing" for 3+ cycles, either:
+- Sharpen it (make it more specific/testable)
+- Resolve it (conclude the signal wasn't diagnostic)
+- Elevate it to a new goal/subgoal if it's become significant enough
 
 ---
 
