@@ -47,6 +47,19 @@ cat > "$OUT" << 'HTMLHEADER'
 <meta name="twitter:title" content="Iran War Goals Tracker — 2026">
 <meta name="twitter:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Updated multiple times daily.">
 <link rel="canonical" href="https://2026iranwartracker.com">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Iran War Goals Tracker",
+  "url": "https://2026iranwartracker.com",
+  "description": "Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Updated multiple times daily.",
+  "applicationCategory": "News & Analysis",
+  "operatingSystem": "Web",
+  "author": { "@type": "Person", "name": "avi123" },
+  "dateModified": "__BUILD_ISO_DATE__"
+}
+</script>
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=__GA_MEASUREMENT_ID__"></script>
 <script>
@@ -67,7 +80,54 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </head>
 <body>
 <div id="build-timestamp">Generated: __BUILD_TIMESTAMP__</div>
+
+<article id="static-intro" style="max-width:900px;margin:0 auto;padding:32px 24px 0;color:#94A3B8;font-size:13px;line-height:1.7;">
+  <h2 style="color:#E2E8F0;font-size:18px;margin-bottom:12px;">What is this?</h2>
+  <p style="margin-bottom:10px;">
+    The Iran War Goals Tracker is an independent analytical framework tracking <strong style="color:#E2E8F0;">106 strategic goals</strong> across the 2026 US-Israel-Iran conflict. Each goal is assessed for importance, achievability, and current status based on open-source intelligence from verified reporting.
+  </p>
+  <p style="margin-bottom:10px;">
+    Goals span <strong style="color:#E2E8F0;">military operations</strong> (nuclear, missile, naval, air superiority), <strong style="color:#E2E8F0;">regime dynamics</strong> (leadership decapitation, IRGC cohesion, succession), <strong style="color:#E2E8F0;">regional escalation</strong> (Hezbollah, Houthis, Iraqi militias, Strait of Hormuz), <strong style="color:#E2E8F0;">diplomatic dimensions</strong> (domestic politics, alliance cohesion, great power intervention), and <strong style="color:#E2E8F0;">economic impacts</strong> (oil prices, energy disruption, Gulf infrastructure).
+  </p>
+  <p style="margin-bottom:10px;">
+    Every claim is sourced to at least one verifiable report from outlets including the IAEA, CENTCOM, PBS, CNN, Al Jazeera, Washington Post, FDD, Alma Center, and others. The tracker is updated multiple times daily as the conflict evolves.
+  </p>
+  <details style="margin-bottom:16px;">
+    <summary style="cursor:pointer;color:#4888CC;font-weight:600;">Methodology &amp; limitations</summary>
+    <p style="margin-top:8px;">
+      This tracker uses a "Two Generals Framework" — assessing goals from the perspectives of US CENTCOM and the IDF, while also tracking goals of opposing parties. Assessments are based exclusively on publicly available information: official government statements, verified journalist reporting, OSINT analysis, and institutional reports (IAEA, UNICEF, etc.). Fog of war applies. Battle damage assessments (BDA) are often unverifiable. Casualty figures are sourced to specific organizations (Red Crescent, UNICEF, Alma Center) and may lag reality. The tracker aims for analytical rigor and source transparency, not advocacy.
+    </p>
+  </details>
+</article>
+
 <div id="root"></div>
+
+<noscript>
+  <div style="max-width:900px;margin:0 auto;padding:24px;color:#E2E8F0;">
+    <h1>Iran War Goals Tracker — 2026</h1>
+    <p>This interactive tracker requires JavaScript to display 106 goals across the 2026 US-Israel-Iran conflict.</p>
+    <h2>Goal Categories</h2>
+    <ul>
+      <li><strong>Nuclear</strong>: Eliminate Iran's nuclear weapons capability (Natanz, Fordow, Isfahan, SPND)</li>
+      <li><strong>Missiles &amp; Drones</strong>: Destroy missile launch sites, production, mobile launchers, drone factories</li>
+      <li><strong>Regime</strong>: Leadership decapitation, IRGC cohesion, succession, internal repression</li>
+      <li><strong>Navy</strong>: Destroy Iranian naval forces, submarine threat, anti-ship missiles</li>
+      <li><strong>Strait of Hormuz</strong>: Keep shipping lanes open, escort operations, insurance, energy crisis</li>
+      <li><strong>Air Superiority</strong>: Air defense destruction, stealth operations, electronic warfare</li>
+      <li><strong>Hezbollah</strong>: Deterrence, leadership strikes, Lebanon operations</li>
+      <li><strong>Proxy Network</strong>: Houthis, Iraqi militias, Kurdish opposition</li>
+      <li><strong>Casualties</strong>: US, Israeli, and Iranian civilian casualties tracked separately</li>
+      <li><strong>Political</strong>: Domestic support, war powers, alliance cohesion, great power intervention</li>
+      <li><strong>Information War</strong>: Justification narrative, school strikes, Araghchi messaging</li>
+      <li><strong>Scope &amp; Duration</strong>: Timeline, theater expansion, exit criteria</li>
+      <li><strong>Energy Markets</strong>: Oil prices, European gas, Iraqi oil, US gas prices</li>
+      <li><strong>Gulf Protection</strong>: Air defense, energy infrastructure, civilian safety</li>
+      <li><strong>Terrorism</strong>: Homeland threats, global retaliation, cyberattacks</li>
+    </ul>
+    <p>Enable JavaScript for the full interactive experience with sourced claims, filtering, and real-time status tracking.</p>
+  </div>
+</noscript>
+
 <script type="text/babel">
 HTMLHEADER
 
@@ -86,6 +146,10 @@ HTMLFOOTER
 # Inject timestamp and year
 sed -i '' "s/__BUILD_TIMESTAMP__/$TIMESTAMP/g" "$OUT"
 sed -i '' "s/__BUILD_YEAR__/$(date -u '+%Y')/g" "$OUT"
+
+# Inject ISO date for structured data
+ISO_DATE=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+sed -i '' "s/__BUILD_ISO_DATE__/$ISO_DATE/g" "$OUT"
 
 # Inject GA measurement ID (set via environment or default placeholder)
 GA_ID="${GA_MEASUREMENT_ID:-G-WDDF5XHR4Q}"
