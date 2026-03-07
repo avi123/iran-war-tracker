@@ -23,7 +23,7 @@
   "applicationCategory": "News & Analysis",
   "operatingSystem": "Web",
   "author": { "@type": "Person", "name": "avi123" },
-  "dateModified": "2026-03-07T01:00:58Z"
+  "dateModified": "2026-03-07T01:03:19Z"
 }
 </script>
 <!-- Google tag (gtag.js) -->
@@ -45,13 +45,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </style>
 </head>
 <body>
-<div id="build-timestamp">Generated: 2026-03-07 01:00 UTC</div>
+<div id="build-timestamp">Generated: 2026-03-07 01:03 UTC</div>
 
-<article id="static-intro" style="max-width:900px;margin:0 auto;padding:32px 24px 0;color:#94A3B8;font-size:13px;line-height:1.7;position:relative;">
-  <button onclick="this.parentElement.style.display='none'" style="position:absolute;top:12px;right:12px;background:none;border:1px solid #475569;color:#94A3B8;font-size:18px;line-height:1;cursor:pointer;padding:2px 8px;border-radius:4px;" onmouseenter="this.style.color='#E2E8F0';this.style.borderColor='#64748B'" onmouseleave="this.style.color='#94A3B8';this.style.borderColor='#475569'">&times;</button>
-  <h2 style="color:#E2E8F0;font-size:18px;margin-bottom:12px;">How is the war actually going?</h2>
+<div id="intro-toggle" style="max-width:900px;margin:0 auto;padding:28px 24px 0;">
+  <button onclick="var el=document.getElementById('static-intro');var show=el.style.display==='none';el.style.display=show?'block':'none';this.textContent=show?'Hide: About This Tracker':'About This Tracker';try{localStorage.setItem('intro-dismissed',show?'0':'1')}catch(e){}" style="background:none;border:1px solid #475569;color:#4888CC;font-size:13px;cursor:pointer;padding:5px 14px;border-radius:4px;font-family:inherit;" onmouseenter="this.style.borderColor='#64748B';this.style.color='#60A5FA'" onmouseleave="this.style.borderColor='#475569';this.style.color='#4888CC'">Hide: About This Tracker</button>
+</div>
+<article id="static-intro" style="max-width:900px;margin:0 auto;padding:16px 24px 0;color:#94A3B8;font-size:13px;line-height:1.7;">
+  <h2 style="color:#E2E8F0;font-size:18px;margin-bottom:12px;">About This Tracker</h2>
   <p style="margin-bottom:10px;">
-    In an era of constantly shifting headlines and highly partisan coverage, it can be hard to answer that question. Cable news picks sides. Social media amplifies noise. The facts get buried under spin.
+    In an era of constantly shifting headlines and highly partisan coverage, it can be difficult to answer a simple question: <em style="color:#E2E8F0;">how is the war actually going?</em> Cable news picks sides. Social media amplifies noise. The facts get buried under spin.
   </p>
   <p style="margin-bottom:10px;">
     The <strong style="color:#E2E8F0;">Iran War Goals Tracker</strong> cuts through that noise. We define <strong style="color:#E2E8F0;">106 concrete strategic goals</strong> for the United States, Israel, and opposing parties across the 2026 conflict &mdash; then track each one against a diverse set of sources to extract what actually matters. No editorializing. No cheerleading. Just structured analysis of what's working, what's failing, and what's expanding beyond anyone's control.
@@ -69,6 +71,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
     </p>
   </details>
 </article>
+<script>try{if(localStorage.getItem('intro-dismissed')==='1'){document.getElementById('static-intro').style.display='none';document.querySelector('#intro-toggle button').textContent='About This Tracker'}}catch(e){}</script>
 
 <div id="root"></div>
 
