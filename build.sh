@@ -86,7 +86,7 @@ cat > "$OUT" << HTMLHEADER
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Iran War Goals Tracker — 2026 US-Israel-Iran Conflict Analysis</title>
 <meta name="description" content="Track the 2026 US-Israel-Iran war: 106 sourced goals across military, regime, diplomatic, and economic dimensions. Updated multiple times daily.">
-<meta property="og:title" content="Iran War Goals Tracker — 2026 US-Israel-Iran Conflict Analysis">
+<meta property="og:title" content="Iran War Goals Tracker — 2026 US-Israel-Iran Conflict">
 <meta property="og:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Military, diplomatic, economic, and humanitarian analysis updated multiple times daily.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://2026iranwartracker.com">
