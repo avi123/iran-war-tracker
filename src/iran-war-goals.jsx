@@ -223,7 +223,7 @@ const HighlightsPanel = ({ mobile }) => {
           <span style={{ fontSize: 11, fontWeight: 700, color: C.white, letterSpacing: 1, textTransform: "uppercase" }}>Highlights & Watch</span>
         </div>
         <span style={{ fontSize: 9, color: C.textDim, fontFamily: "monospace" }}>
-          Updated: {HIGHLIGHTS.updatedAt}
+          {HIGHLIGHTS.keyDevelopments.length} key | {HIGHLIGHTS.watchNext.length} watching
         </span>
       </div>
       {open && (
