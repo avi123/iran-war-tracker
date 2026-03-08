@@ -124,14 +124,7 @@ cat > "$OUT" << HTMLHEADER
   gtag('js', new Date());
   gtag('config', '$GA_ID');
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 HTMLHEADER
-
-# Add Babel CDN only if esbuild not available
-if [ ! -x "$ESBUILD" ]; then
-    echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>' >> "$OUT"
-fi
 
 cat >> "$OUT" << 'HTMLSTATIC'
 <style>
@@ -148,6 +141,7 @@ echo "<div id=\"build-timestamp\">Generated: $TIMESTAMP</div>" >> "$OUT"
 
 cat >> "$OUT" << 'HTMLINTRO'
 
+<main>
 <h1 style="max-width:900px;margin:0 auto;padding:28px 24px 0;color:#E2E8F0;font-size:22px;font-weight:700;">Iran War Goals Tracker — 2026 US-Israel-Iran Conflict</h1>
 <div id="intro-toggle" style="max-width:900px;margin:0 auto;padding:12px 24px 0;">
   <button onclick="var el=document.getElementById('static-intro');var show=el.style.display==='none';el.style.display=show?'block':'none';this.textContent=show?'Hide: About This Tracker':'About This Tracker';try{localStorage.setItem('intro-dismissed',show?'0':'1')}catch(e){}" style="background:none;border:1px solid #475569;color:#4888CC;font-size:13px;cursor:pointer;padding:5px 14px;border-radius:4px;font-family:inherit;" onmouseenter="this.style.borderColor='#64748B';this.style.color='#60A5FA'" onmouseleave="this.style.borderColor='#475569';this.style.color='#4888CC'">Hide: About This Tracker</button>
@@ -194,6 +188,18 @@ NOSCRIPT_FALLBACK
 fi
 
 echo "</noscript>" >> "$OUT"
+echo "</main>" >> "$OUT"
+
+# Load React/ReactDOM at end of body (non-render-blocking)
+cat >> "$OUT" << 'REACTSCRIPTS'
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+REACTSCRIPTS
+
+# Add Babel CDN only if esbuild not available
+if [ ! -x "$ESBUILD" ]; then
+    echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>' >> "$OUT"
+fi
 
 # Write the script tag and compiled JS
 echo "" >> "$OUT"
@@ -204,7 +210,7 @@ echo "$COMPILED_JS" >> "$OUT"
 cat >> "$OUT" << HTMLFOOTER
 ReactDOM.render(React.createElement(IranWarGoalsTracker), document.getElementById('root'));
 </script>
-<footer style="text-align:center;padding:16px;font-size:11px;color:#475569;font-family:monospace;border-top:1px solid #1E293B;">&copy; $BUILD_YEAR Avi Berkowitz</footer>
+<footer style="text-align:center;padding:16px;font-size:11px;color:#94A3B8;font-family:monospace;border-top:1px solid #1E293B;">&copy; $BUILD_YEAR Avi Berkowitz</footer>
 </body>
 </html>
 HTMLFOOTER

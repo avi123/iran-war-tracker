@@ -30,7 +30,7 @@
   "description": "Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Updated multiple times daily.",
   "specialty": "Conflict Analysis",
   "datePublished": "2026-03-01T00:00:00Z",
-  "dateModified": "2026-03-08T15:41:13Z",
+  "dateModified": "2026-03-08T15:54:15Z",
   "publisher": { "@type": "Person", "name": "Avi Berkowitz" },
   "author": { "@type": "Person", "name": "Avi Berkowitz" }
 }
@@ -43,8 +43,6 @@
   gtag('js', new Date());
   gtag('config', 'G-WDDF5XHR4Q');
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0F172A; color: #E2E8F0; }
@@ -53,8 +51,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </style>
 </head>
 <body>
-<div id="build-timestamp">Generated: 2026-03-08 15:41 UTC</div>
+<div id="build-timestamp">Generated: 2026-03-08 15:54 UTC</div>
 
+<main>
 <h1 style="max-width:900px;margin:0 auto;padding:28px 24px 0;color:#E2E8F0;font-size:22px;font-weight:700;">Iran War Goals Tracker — 2026 US-Israel-Iran Conflict</h1>
 <div id="intro-toggle" style="max-width:900px;margin:0 auto;padding:12px 24px 0;">
   <button onclick="var el=document.getElementById('static-intro');var show=el.style.display==='none';el.style.display=show?'block':'none';this.textContent=show?'Hide: About This Tracker':'About This Tracker';try{localStorage.setItem('intro-dismissed',show?'0':'1')}catch(e){}" style="background:none;border:1px solid #475569;color:#4888CC;font-size:13px;cursor:pointer;padding:5px 14px;border-radius:4px;font-family:inherit;" onmouseenter="this.style.borderColor='#64748B';this.style.color='#60A5FA'" onmouseleave="this.style.borderColor='#475569';this.style.color='#4888CC'">Hide: About This Tracker</button>
@@ -417,6 +416,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </section>
 </div>
 </noscript>
+</main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 
 <script>
 const { useState } = React;
@@ -451,7 +453,7 @@ const C = {
   amberBg: "#2E2410",
   red: "#EF4444",
   redBg: "#2E1010",
-  gray: "#6B7280",
+  gray: "#9CA3AF",
   grayBg: "#1E2228",
   purple: "#A78BFA",
   purpleBg: "#1E152E"
@@ -585,7 +587,7 @@ const timeframeConfig = {
   "imminent": { label: "IMMINENT", color: "#EF4444", bg: "#2E1010" },
   "24-48h": { label: "24-48H", color: "#F59E0B", bg: "#2E2410" },
   "this week": { label: "THIS WEEK", color: "#3B82F6", bg: "#0F1A2E" },
-  "open question": { label: "OPEN ?", color: "#6B7280", bg: "#1E2228" }
+  "open question": { label: "OPEN ?", color: "#9CA3AF", bg: "#1E2228" }
 };
 const resolvedConfig = {
   "confirmed": { icon: "\u2713", color: "#22C55E" },
@@ -1137,6 +1139,6 @@ function IranWarGoalsTracker() {
 }
 ReactDOM.render(React.createElement(IranWarGoalsTracker), document.getElementById('root'));
 </script>
-<footer style="text-align:center;padding:16px;font-size:11px;color:#475569;font-family:monospace;border-top:1px solid #1E293B;">&copy; 2026 Avi Berkowitz</footer>
+<footer style="text-align:center;padding:16px;font-size:11px;color:#94A3B8;font-family:monospace;border-top:1px solid #1E293B;">&copy; 2026 Avi Berkowitz</footer>
 </body>
 </html>

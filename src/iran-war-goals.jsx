@@ -16,7 +16,7 @@ const C = {
   us: "#3B82F6", israel: "#10B981", both: "#A78BFA", oppose: "#F59E0B",
   achieve: "#22C55E", avoid: "#EF4444",
   green: "#22C55E", greenBg: "#0F2918", amber: "#F59E0B", amberBg: "#2E2410",
-  red: "#EF4444", redBg: "#2E1010", gray: "#6B7280", grayBg: "#1E2228",
+  red: "#EF4444", redBg: "#2E1010", gray: "#9CA3AF", grayBg: "#1E2228",
   purple: "#A78BFA", purpleBg: "#1E152E",
 };
 
@@ -187,7 +187,7 @@ const timeframeConfig = {
   "imminent": { label: "IMMINENT", color: "#EF4444", bg: "#2E1010" },
   "24-48h": { label: "24-48H", color: "#F59E0B", bg: "#2E2410" },
   "this week": { label: "THIS WEEK", color: "#3B82F6", bg: "#0F1A2E" },
-  "open question": { label: "OPEN ?", color: "#6B7280", bg: "#1E2228" },
+  "open question": { label: "OPEN ?", color: "#9CA3AF", bg: "#1E2228" },
 };
 const resolvedConfig = {
   "confirmed": { icon: "✓", color: "#22C55E" },
