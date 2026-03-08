@@ -1,6 +1,6 @@
 # Iran War Goals Tracker — Research Protocol & Context
 
-**Version:** 2.7 — March 7, 2026 (Day 8 Evening)
+**Version:** 2.8 — March 8, 2026 (Day 9 Morning)
 **Artifact:** iran-war-goals.jsx / iran-war-goals.html
 **Framework:** Two Generals model tracking 106 goals (19 parents, 87 sub-goals)
 
@@ -99,12 +99,12 @@ These provide real-time operational data and should be checked first.
 
 **Difference between TBD status and no-tag trend:** TBD = goal hasn't been tested yet (e.g., mines not laid). No-tag = goal has been tested but result is unreadable (e.g., IRGC defections — zero at Day 6 is expected, not diagnostic).
 
-### Current Distribution (Day 8 Morning)
+### Current Distribution (Day 9 Morning)
 - 14 achieved
-- 29 in progress
+- 30 in progress
 - 56 at risk (19 failing, 30 expanding, 7 no tag)
 - 4 unachievable
-- 3 tbd
+- 2 tbd
 
 ### Status Change Rules
 - **To "achieved":** 2+ independent source confirmation.
@@ -164,74 +164,84 @@ ONLY the "failing" trend goals. Specific, identifiable, correctable breakdowns. 
 ## 5. KEY DATA SERIES
 
 ### Military (update every cycle)
-- UAE BMs/day: D1:137, D2:28, D3:9, D4:12, D5:3, D6:7, D7:9
+- UAE BMs/day: D1:137, D2:28, D3:9, D4:12, D5:3, D6:7, D7:9, D8:15(of16)
 - UAE drones/day: D6:131 (peak), D7:109+, D8:121 (119 intercepted, 98.3%)
-- UAE cumulative: ~205 BMs, ~1,300 drones
-- Saudi: intercepted 16 drones targeting Shaybah (D8)
-- Qatar: 9/10 BMs intercepted (D8)
-- Bahrain totals: 75 missiles + 123 drones + BAPCO refinery struck D7 + Manama hotel/residential hit
+- UAE cumulative: ~221 BMs, ~1,305 drones
+- Saudi: BM hit uninhabited area near Prince Sultan AB + 16 drones at Shaybah (all intercepted) + drones E of Riyadh
+- Qatar: 10 drones (9 intercepted, D8)
+- Bahrain totals: 86 missiles + 148 drones + BAPCO refinery struck D7 + Manama hotel/residential hit
 - INSS total drones: 1,600+ across all theaters
-- CENTCOM: 2,500 strikes (IDF claim) / ships destroyed: 43 / D8: 80+ jets, 230+ munitions/supply targets
-- 16 IRGC Quds Force aircraft destroyed at Isfahan (D8)
-- Underground missile factory hit in western Iran (D8)
+- IDF: ~3,400 strikes, ~7,500 munitions / CENTCOM: 3,000+ targets / ships destroyed: 43 (ZERO remaining in Gulf of Oman)
+- 150+ air defense systems disabled/destroyed
+- Khamenei underground bunker destroyed (~50 IAF jets, ~100 bombs)
+- B-2 Spirits confirmed engaged (PETRO41-44) — underground missile caves
+- Mehrabad airport: 12+ aircraft destroyed incl. IRIAF 747 from China
+- Parchin + Shahroud missile production struck. Raja Shimi propellant plant on fire.
 - Missile decline: 90% / Drone decline: 83% (but drone volume surging)
-- Phase: 2 (underground bunkers + defense industrial base — Abbas Abad/Shenzar evacuation orders)
-- Iran→Israel attack waves: 148+ total (D1:25, D2:64, D3:25, D4:9, D5:11, D6:9, D7:5)
-- Hezbollah attack waves: 116+ total (D3:10, D4:20, D5:36, D6:25, D7:23)
+- Phase: 2 (underground bunkers + defense industrial base + oil infrastructure)
+- Iran→Israel: 12 BM salvos on D8 alone. IRGC claims Haifa refinery hit (unverified)
+- IRIS Dena: 87 killed off Sri Lanka. IRIS Bushehr: seized by Sri Lanka. IRIS Lavan: to India.
+- Hezbollah: Quds Force Lebanon Corps decapitated (commander + CoS + deputy killed). 70+ operatives killed. 500 targets.
 
 ### Casualties
-- Iran: 1,332+ (Red Crescent/multiple) / 181 children (UNICEF) / 6,000+ wounded
-- Israel: 12 dead, 1,600+ injured (140 in past 24hrs)
+- Iran: 1,332+ (Red Crescent/multiple) / 170+ children (UNICEF/NBC) / 6,000+ wounded
+- Israel: 11-12 dead, 1,600+ injured
 - US: 6 KIA, 18+ WIA
-- Lebanon: 217+ dead, ~800 wounded, 110,162 displaced (UNHCR D8), 24,000 evacuated D8
-- Lebanon D8: Nabi Chit cemetery raid (IDF Ron Arad search) — 41 killed incl. 3 Lebanese soldiers
-- Gulf: 3 dead (UAE) + others / Azerbaijan: drones hit airport / Dubai airport drone D8
-- Americans evacuated: 20,000+ from Middle East
+- Lebanon: 294+ dead, 1,023 wounded, 300,000+ displaced (NRC), Nabi Chit: 41 killed
+- Gulf: 3 dead (UAE) + 1 Dubai (Pakistani) + 9 injured Kuwait airport T1
+- Iran Navy: 87 killed (IRIS Dena)
+- UNIFIL: 3 peacekeepers wounded (Qouzah)
+- Americans evacuated: 28,000+ from Middle East
+- School strike: NBC "increasingly likely" US munition. HRW: war crimes investigation demanded.
 
 ### Economic
 - Brent: $92.69 / WTI: $90.90 (D8) / WTI +35.63% weekly = largest weekly gain in history
-- Gas: up 20 cents/7% / Strait: CLOSED (warlike ops area)
+- Gas: $3.41/gal national avg (+$0.43/+14% weekly) / Strait: CLOSED (warlike ops area)
 - Ships stalled: 150+ / P&I: removed / IRGC ban: expanded to European / DFC insurance: FICTION
 - Gold: $5,100+ / KOSPI: -12% / Supertanker rates: $423K/day (record)
-- Kuwait cutting oil production (storage overflow + Hormuz closure, D8)
-- QatarEnergy LNG halt continues (D8)
-- 2 Iranian cargo ships transited Hormuz for Malaysia (first since war). 4 tankers loading 8M bbl at Kharg Island.
-- Qatar partially reopened airspace
+- ~9M bbl/day offline. Bloomberg: "$100 oil imminent"
+- Kuwait cutting production (storage overflow). Saudi largest refinery suspended.
+- QatarEnergy LNG halt continues. Qatar partially reopened airspace.
+- IRIAF 747 from China (military supplies) destroyed at Mehrabad. IRISL ships from China with missile components.
 
 ### Political
 - War Powers: DEFEATED both chambers (Senate 47-53, House 212-219)
 - Coalition: 7 NATO nations deployed/committed
-- Trump: "unconditional surrender" + "MIGA" + "I must choose leader" + "no time limits"
+- Trump: "unconditional surrender" + "MIGA" + rejected UK carrier ("we don't need them")
+- White House: 4-6 weeks. CENTCOM: 100+ day staffing. IRGC: 6-month capability.
+- Oslo: explosion at US embassy compound (minor damage). NYC: incendiary device near Gracie Mansion.
 
 ### Regime
-- Blackout: 120+ hours / Mojtaba elected / Israel vows to kill him
-- D8: Assembly of Experts preparing to meet within 24hrs to formalize Mojtaba investiture
-- D8: Shoot-to-kill orders on protesters. "Fifth column" warning. Police chief: shoot thieves on sight.
-- IRGC: zero defections in Iran BUT Quds Force officers FLEEING Lebanon. Ground forces committed.
-- Russia: providing real-time intelligence on US positions (WaPo/CBS confirmed). Weapons NOT requested.
-- Sistan-Baluchistan insurgency — Mobarizoun Popular Front active
-- Unknown forces landed Anbar Province, Iraq near Saudi border (CTP-ISW)
+- Blackout: internet at 1% of normal. Costing economy $35.7M/day.
+- Mojtaba elected but Expediency Council intervening to suspend Assembly of Experts. Power struggle.
+- Shoot-to-kill orders. "Fifth column" warning. Police chief: shoot on sight.
+- IRGC: zero defections in Iran. Quds Force Lebanon Corps decapitated (commander + CoS killed). Dozens fleeing Lebanon.
+- Russia: "pretty comprehensive" satellite imagery of US positions (WaPo/CNN). Weapons NOT requested.
+- China: supply line exposed (747 cargo + IRISL ships). Possible financial assistance + missile components.
+- Houthis: still NOT engaged militarily. Internal debate. Stimson: weakened Iran "detrimental."
 
 ---
 
 ## 6. FAULT LINES (track every cycle)
 
 1. War Aims: US puppet model vs. Israel kill every leader vs. Iran survival
-2. Timeline: 2wk / 4-5wk / 8wk / "very early" / "deeper"
-3. Endgame: Trump demands role. Israel vows assassination. No transition plan.
+2. Timeline: 2wk / 4-5wk / 8wk / 100 days / "no time limits" / IRGC "6 months"
+3. Endgame: NIC classified: regime "unlikely" to fall. Trump demands unconditional surrender. No transition plan.
 4. Ground Troops: US avoiding, Israel in Lebanon, IRGC entering, Kurdish proxy active
-5. Backchannel: CIA-Iran channel exists but US DISMISSED Iranian messages as "bull****" (Ravid direct source). Netanyahu suspicious. Markets over-priced it.
-6. Civilian Casualties: 1,332+ dead (Red Crescent), 181 children (UNICEF), 2nd school hit, UN investigation called
-7. Hormuz: Warlike ops area. But Iran testing own shipping (2 cargo ships transited). Macron coalition forming.
-8. Alliance: Expanding (7 NATO nations) while fracturing (no agreed endgame)
-9. **Drone Surge: Missiles ↓90% but drones adapting. UAE D7: 109+ drones. Key Week 2 metric.**
-10. **Cost: CSIS $891M/day, $3.5B unbudgeted. If 100 days = ~$62B. Congress hasn't authorized spending.**
+5. Backchannel: CIA-Iran channel exists but DISMISSED. Netanyahu suspicious. Markets over-priced it.
+6. **School strike: NBC "increasingly likely" US munition. HRW demands war crimes investigation. Trump blamed Iran — own govt's findings contradict.**
+7. Hormuz: Warlike ops area. Traffic down ~80%. Macron coalition forming but no escort operational.
+8. Alliance: Expanding (7 NATO) while Trump rejects UK carrier ("we don't need them"). Using UK bases while insulting UK.
+9. **Interceptor depletion: US "stonewalling" Gulf replenishment. "Years of production shot in days." Rates holding but stocks unsustainable.**
+10. **Cost: CSIS $891M/day, $3.5B unbudgeted. CENTCOM requesting 100+ day staffing. Congress hasn't authorized.**
 11. **Unconditional Surrender: Trump's demand eliminates off-ramps by design.**
-12. **Sistan-Baluchistan insurgency: Mobarizoun Popular Front active. Internal front opening.**
-13. **Russian intelligence: Confirmed providing targeting data on US forces. De facto co-belligerence threshold.**
-14. **Oil approaching $100: WTI $90.90, Brent $92.69. +35.63% weekly = record. $100 threshold = political crisis.**
-15. **Iran threatening Europe: European basing nations declared 'legitimate targets.' Could fracture coalition.**
-16. **Lebanon anger: Nabi Chit raid (41 killed) + 110K displaced + 3 Lebanese soldiers killed. Ron Arad search inflaming Lebanese opinion.**
+12. **Chinese supply line: IRIAF 747 from China destroyed. IRISL ships with missile components. Possible financial assistance. Crossing material support threshold.**
+13. **Russian intelligence: "Pretty comprehensive" satellite imagery of US positions. De facto co-belligerence.**
+14. **Oil $100 imminent: WTI $90.90, Bloomberg traders warning. $3.41 gas (+14% weekly). Approaching political crisis.**
+15. **Iran threatening Europe: European basing nations "legitimate targets." Oslo embassy explosion — first attack outside Middle East.**
+16. **Lebanon: 294 dead, 300K displaced. Quds Force Lebanon Corps decapitated. Lebanese gov banned IRGC — but unenforceable.**
+17. **Houthi non-entry: Still not engaged. Stimson: weakened Iran makes joining "detrimental." Their absence is a major strategic win.**
+18. **Succession power struggle: Assembly of Experts vs Expediency Council. Constitutional crisis under bombardment.**
 
 ---
 
