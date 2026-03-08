@@ -423,11 +423,14 @@ After goal edits, BEFORE build. Takes ~3 minutes.
 
 **1. Resolve Previous Watch Items**
 Read the current `HIGHLIGHTS.watchNext` array. For each item:
-- Did it happen? → Move to `watchResolved` with `status: "confirmed"` and `resolved: "what happened"`
-- Partially? → `status: "partial"` with explanation
-- Didn't happen / wrong? → `status: "wrong"` with explanation
-- Still developing? → `status: "ongoing"` with latest update
-- Keep max 6 resolved items (drop oldest if over)
+- Did it happen? → **Remove from `watchNext`**, add to `watchResolved` with `status: "confirmed"` and `resolved: "what happened"`
+- Was it wrong? → **Remove from `watchNext`**, add to `watchResolved` with `status: "wrong"` and explanation
+- Partially? → **Keep in `watchNext`** (update text if needed), ALSO add to `watchResolved` with `status: "partial"` and explanation
+- Still developing? → **Keep in `watchNext`** (update text if needed), ALSO add to `watchResolved` with `status: "ongoing"` and latest update
+
+**RULE: Items only leave `watchNext` when status is "confirmed" or "wrong". Partial/ongoing items stay in BOTH lists.**
+
+- Keep max 8 resolved items (drop oldest confirmed/wrong first)
 
 **2. Write Key Developments (3-6 items)**
 Select from this cycle's findings. What makes the cut:
@@ -460,6 +463,7 @@ Each item requires:
 - `category`, `timeframe`, `sources`: same format as key developments
 
 **4. Update `updatedAt` timestamp**
+Use `date -u +"%Y-%m-%dT%H:%MZ"` or the build.sh output timestamp. NEVER approximate or guess.
 
 ### Accountability Rule
 Every watch item must eventually be resolved. If an item sits as "ongoing" for 3+ cycles, either:
