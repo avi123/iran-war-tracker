@@ -428,6 +428,13 @@ Select from this cycle's findings. What makes the cut:
 - Intelligence reveals (classified reports, leaked assessments)
 - NOT: routine metric updates, incremental numbers
 
+Each item requires:
+- `text`: What happened (factual, concise)
+- `why`: One sentence on strategic significance — why a reader should care. Not editorializing; explain the *implication* or *mechanism*. Good: "Gap between stated war aims and intel assessment is the central tension — if regime change isn't achievable, what's the exit?" Bad: "This is very concerning."
+- `category`: military | political | economic | regime | humanitarian
+- `goalIds`: array of related goal IDs
+- `sources`: array of `{t:"Label",u:"url"}` — same format as goal sources. At least one per item.
+
 **3. Write Watch Items (3-6 items)**
 Timeframe categories:
 - `imminent` (6-12h): known upcoming events, expected military actions
@@ -436,6 +443,11 @@ Timeframe categories:
 - `open question`: testable analytical questions without time bound
 
 Good watch items are SPECIFIC and RESOLVABLE. Bad: "watch oil prices." Good: "Oil approaching $100/bbl — WTI at $90.90, Goldman threshold is 5 weeks of Hormuz disruption."
+
+Each item requires:
+- `text`: What to watch (specific, testable)
+- `why`: One sentence on why this matters — what changes if it resolves one way vs another
+- `category`, `timeframe`, `sources`: same format as key developments
 
 **4. Update `updatedAt` timestamp**
 
