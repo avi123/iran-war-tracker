@@ -10,7 +10,7 @@ const useIsMobile = (breakpoint = 768) => {
 
 const C = {
   bg: "#0B1120", card: "#111B2E", cardAlt: "#162035",
-  navy: "#1A2744", blue: "#2D5FA0", blueLt: "#4888CC",
+  navy: "#1A2744", blue: "#2D5FA0", blueLt: "#6AADDB",
   border: "#243450", borderLt: "#2E4468",
   text: "#D8DFE8", textDim: "#7A8FA8", white: "#F0F3F7",
   us: "#3B82F6", israel: "#10B981", both: "#A78BFA", oppose: "#F59E0B",
