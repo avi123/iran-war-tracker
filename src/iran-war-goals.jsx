@@ -13,10 +13,10 @@ const C = {
   navy: "#1A2744", blue: "#2D5FA0", blueLt: "#6AADDB",
   border: "#243450", borderLt: "#2E4468",
   text: "#D8DFE8", textDim: "#7A8FA8", white: "#F0F3F7",
-  us: "#3B82F6", israel: "#10B981", both: "#A78BFA", oppose: "#F59E0B",
-  achieve: "#22C55E", avoid: "#EF4444",
+  us: "#60A5FA", israel: "#10B981", both: "#A78BFA", oppose: "#F59E0B",
+  achieve: "#22C55E", avoid: "#F87171",
   green: "#22C55E", greenBg: "#0F2918", amber: "#F59E0B", amberBg: "#2E2410",
-  red: "#EF4444", redBg: "#2E1010", gray: "#9CA3AF", grayBg: "#1E2228",
+  red: "#F87171", redBg: "#2E1010", gray: "#9CA3AF", grayBg: "#1E2228",
   purple: "#A78BFA", purpleBg: "#1E152E",
 };
 
@@ -32,7 +32,7 @@ const TypeBadge = ({ type }) => (
   <span style={{ display:"inline-block", padding:"1px 6px", borderRadius:10, fontSize:9, fontWeight:700, letterSpacing:0.5, background: type==="achieve"?`${C.achieve}15`:`${C.avoid}15`, color: type==="achieve"?C.achieve:C.avoid, border:`1px solid ${type==="achieve"?C.achieve:C.avoid}40`, textTransform:"uppercase" }}>{type==="achieve"?"ACHIEVE":"AVOID"}</span>
 );
 
-const trendColor = { "failing":"#EF4444", "expanding":"#F59E0B" };
+const trendColor = { "failing":"#F87171", "expanding":"#F59E0B" };
 const trendLabel = { "failing":"FAILING", "expanding":"EXPANDING" };
 
 const StatusBadge = ({ status, trend }) => {

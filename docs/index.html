@@ -30,7 +30,7 @@
   "description": "Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Updated multiple times daily.",
   "specialty": "Conflict Analysis",
   "datePublished": "2026-03-01T00:00:00Z",
-  "dateModified": "2026-03-08T16:56:12Z",
+  "dateModified": "2026-03-08T18:45:07Z",
   "publisher": { "@type": "Person", "name": "Avi Berkowitz" },
   "author": { "@type": "Person", "name": "Avi Berkowitz" }
 }
@@ -51,7 +51,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </style>
 </head>
 <body>
-<div id="build-timestamp">Generated: 2026-03-08 16:56 UTC</div>
+<div id="build-timestamp">Generated: 2026-03-08 18:45 UTC</div>
 
 <main>
 <h1 style="max-width:900px;margin:0 auto;padding:28px 24px 0;color:#E2E8F0;font-size:22px;font-weight:700;">Iran War Goals Tracker — 2026 US-Israel-Iran Conflict</h1>
@@ -441,17 +441,17 @@ const C = {
   text: "#D8DFE8",
   textDim: "#7A8FA8",
   white: "#F0F3F7",
-  us: "#3B82F6",
+  us: "#60A5FA",
   israel: "#10B981",
   both: "#A78BFA",
   oppose: "#F59E0B",
   achieve: "#22C55E",
-  avoid: "#EF4444",
+  avoid: "#F87171",
   green: "#22C55E",
   greenBg: "#0F2918",
   amber: "#F59E0B",
   amberBg: "#2E2410",
-  red: "#EF4444",
+  red: "#F87171",
   redBg: "#2E1010",
   gray: "#9CA3AF",
   grayBg: "#1E2228",
@@ -463,7 +463,7 @@ const partyColor = { us: C.us, israel: C.israel, both: C.purple, opposing: C.opp
 const statusColor = { "achieved": C.green, "in progress": C.amber, "at risk": C.red, "unachievable": C.gray, "tbd": C.gray };
 const PartyBadge = ({ party }) => /* @__PURE__ */ React.createElement("span", { style: { display: "inline-block", padding: "1px 8px", borderRadius: 10, fontSize: 10, fontWeight: 700, letterSpacing: 0.8, background: `${partyColor[party]}20`, color: partyColor[party], border: `1px solid ${partyColor[party]}50`, textTransform: "uppercase" } }, partyLabel[party]);
 const TypeBadge = ({ type }) => /* @__PURE__ */ React.createElement("span", { style: { display: "inline-block", padding: "1px 6px", borderRadius: 10, fontSize: 9, fontWeight: 700, letterSpacing: 0.5, background: type === "achieve" ? `${C.achieve}15` : `${C.avoid}15`, color: type === "achieve" ? C.achieve : C.avoid, border: `1px solid ${type === "achieve" ? C.achieve : C.avoid}40`, textTransform: "uppercase" } }, type === "achieve" ? "ACHIEVE" : "AVOID");
-const trendColor = { "failing": "#EF4444", "expanding": "#F59E0B" };
+const trendColor = { "failing": "#F87171", "expanding": "#F59E0B" };
 const trendLabel = { "failing": "FAILING", "expanding": "EXPANDING" };
 const StatusBadge = ({ status, trend }) => {
   const c = statusColor[status] || C.gray;
