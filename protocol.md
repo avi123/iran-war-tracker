@@ -1,8 +1,15 @@
 # Iran War Goals Tracker — Research Protocol & Context
 
-**Version:** 2.8 — March 8, 2026 (Day 9 Morning)
+**Version:** 2.9 — March 8, 2026 (Day 9 Evening)
 **Artifact:** iran-war-goals.jsx / iran-war-goals.html
 **Framework:** Two Generals model tracking 106 goals (19 parents, 87 sub-goals)
+
+### Build Dependencies
+- `esbuild` (`brew install esbuild`) — pre-compiles JSX at build time, eliminates ~750 KB Babel download
+- `rsvg-convert` (`brew install librsvg`) — generates OG image from SVG template
+- `python3` — extracts goal data from JSX for static crawler content
+- `src/extract-static.py` — Python script that generates noscript HTML from goal data
+- `src/og-image-template.svg` — SVG template for social sharing preview image
 
 ---
 

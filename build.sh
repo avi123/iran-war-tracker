@@ -5,10 +5,18 @@ set -euo pipefail
 # Transforms src/iran-war-goals.jsx → docs/index.html
 # The JSX uses import/export for Claude.ai artifact compatibility.
 # This script converts those to browser globals for standalone HTML.
+#
+# Dependencies:
+#   - esbuild (brew install esbuild) — JSX pre-compilation
+#   - rsvg-convert (brew install librsvg) — OG image generation
+#   - python3 — static content extraction for crawlers
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SRC="$SCRIPT_DIR/src/iran-war-goals.jsx"
 OUT="$SCRIPT_DIR/docs/index.html"
+OG_SVG="$SCRIPT_DIR/src/og-image-template.svg"
+OG_PNG="$SCRIPT_DIR/docs/og-image.png"
+EXTRACT_PY="$SCRIPT_DIR/src/extract-static.py"
 
 if [ ! -f "$SRC" ]; then
     echo "ERROR: Source file not found: $SRC"
@@ -17,21 +25,60 @@ fi
 
 echo "Building docs/index.html from src/iran-war-goals.jsx..."
 
-# Read JSX source
-JSX_CONTENT=$(cat "$SRC")
-
-# Transform for browser:
-# 1. import { useState } from "react" → const { useState } = React;
-# 2. export default function App() → function IranWarGoalsTracker()
-BROWSER_JSX=$(echo "$JSX_CONTENT" \
-    | sed 's/^import { useState } from "react";/const { useState } = React;/' \
-    | sed 's/^export default function App() {/function IranWarGoalsTracker() {/')
-
-# Get current timestamp for the title
+# Get timestamps
 TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M UTC')
+ISO_DATE=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
+BUILD_YEAR=$(date -u '+%Y')
+GA_ID="${GA_MEASUREMENT_ID:-G-WDDF5XHR4Q}"
 
-# Write the HTML wrapper
-cat > "$OUT" << 'HTMLHEADER'
+# ── Step 1: Pre-compile JSX → JS via esbuild ──
+ESBUILD="/opt/homebrew/bin/esbuild"
+TMPJSX=$(mktemp /tmp/iran-tracker-XXXXXX.jsx)
+trap "rm -f $TMPJSX" EXIT
+
+# Transform imports for browser
+sed 's/^import { useState } from "react";/const { useState } = React;/' "$SRC" \
+    | sed 's/^export default function App() {/function IranWarGoalsTracker() {/' \
+    > "$TMPJSX"
+
+# Compile JSX → JS (eliminates need for Babel in browser)
+if [ -x "$ESBUILD" ]; then
+    COMPILED_JS=$("$ESBUILD" "$TMPJSX" --bundle=false --jsx=transform 2>&1)
+    echo "  JSX pre-compiled via esbuild"
+else
+    echo "WARNING: esbuild not found at $ESBUILD — falling back to Babel in browser"
+    COMPILED_JS=$(cat "$TMPJSX")
+fi
+
+# ── Step 2: Generate OG image ──
+RSVG="/opt/homebrew/bin/rsvg-convert"
+if [ -x "$RSVG" ] && [ -f "$OG_SVG" ]; then
+    "$RSVG" -w 1200 -h 630 "$OG_SVG" -o "$OG_PNG" 2>/dev/null
+    echo "  OG image generated (1200x630)"
+else
+    echo "  Skipping OG image (rsvg-convert or template not found)"
+fi
+
+# ── Step 3: Extract static content for crawlers ──
+NOSCRIPT_CONTENT=""
+if [ -f "$EXTRACT_PY" ]; then
+    NOSCRIPT_CONTENT=$(python3 "$EXTRACT_PY" "$SRC" 2>/dev/null || echo "")
+    if [ -n "$NOSCRIPT_CONTENT" ]; then
+        echo "  Static content extracted for crawlers"
+    fi
+fi
+
+# ── Step 4: Determine script tag type ──
+if [ -x "$ESBUILD" ]; then
+    SCRIPT_OPEN='<script>'
+else
+    SCRIPT_OPEN='<script type="text/babel">'
+fi
+
+# ── Step 5: Assemble HTML ──
+
+# Write header
+cat > "$OUT" << HTMLHEADER
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -43,35 +90,50 @@ cat > "$OUT" << 'HTMLHEADER'
 <meta property="og:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Military, diplomatic, economic, and humanitarian analysis updated multiple times daily.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://2026iranwartracker.com">
-<meta name="twitter:card" content="summary">
+<meta property="og:image" content="https://2026iranwartracker.com/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Iran War Goals Tracker — 2026">
 <meta name="twitter:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Updated multiple times daily.">
+<meta name="twitter:image" content="https://2026iranwartracker.com/og-image.png">
 <link rel="canonical" href="https://2026iranwartracker.com">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>&#127919;</text></svg>">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebApplication",
+  "@type": "WebPage",
   "name": "Iran War Goals Tracker",
+  "headline": "Iran War Goals Tracker — 2026 US-Israel-Iran Conflict Analysis",
   "url": "https://2026iranwartracker.com",
   "description": "Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Updated multiple times daily.",
-  "applicationCategory": "News & Analysis",
-  "operatingSystem": "Web",
-  "author": { "@type": "Person", "name": "avi123" },
-  "dateModified": "__BUILD_ISO_DATE__"
+  "specialty": "Conflict Analysis",
+  "datePublished": "2026-03-01T00:00:00Z",
+  "dateModified": "$ISO_DATE",
+  "publisher": { "@type": "Person", "name": "Avi Berkowitz" },
+  "author": { "@type": "Person", "name": "Avi Berkowitz" }
 }
 </script>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=__GA_MEASUREMENT_ID__"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=$GA_ID"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', '__GA_MEASUREMENT_ID__');
+  gtag('config', '$GA_ID');
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+HTMLHEADER
+
+# Add Babel CDN only if esbuild not available
+if [ ! -x "$ESBUILD" ]; then
+    echo '<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>' >> "$OUT"
+fi
+
+cat >> "$OUT" << 'HTMLSTATIC'
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0F172A; color: #E2E8F0; }
@@ -80,7 +142,11 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 </style>
 </head>
 <body>
-<div id="build-timestamp">Generated: __BUILD_TIMESTAMP__</div>
+HTMLSTATIC
+
+echo "<div id=\"build-timestamp\">Generated: $TIMESTAMP</div>" >> "$OUT"
+
+cat >> "$OUT" << 'HTMLINTRO'
 
 <h1 style="max-width:900px;margin:0 auto;padding:28px 24px 0;color:#E2E8F0;font-size:22px;font-weight:700;">Iran War Goals Tracker — 2026 US-Israel-Iran Conflict</h1>
 <div id="intro-toggle" style="max-width:900px;margin:0 auto;padding:12px 24px 0;">
@@ -112,69 +178,49 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-
 <div id="root"></div>
 
 <noscript>
+HTMLINTRO
+
+# Inject static content for crawlers
+if [ -n "$NOSCRIPT_CONTENT" ]; then
+    echo "$NOSCRIPT_CONTENT" >> "$OUT"
+else
+    # Fallback: basic category list
+    cat >> "$OUT" << 'NOSCRIPT_FALLBACK'
   <div style="max-width:900px;margin:0 auto;padding:24px;color:#E2E8F0;">
     <h2>Iran War Goals Tracker — 2026</h2>
-    <p>This interactive tracker requires JavaScript to display 106 goals across the 2026 US-Israel-Iran conflict. The tracker is updated multiple times daily using verified sources.</p>
-    <h3>Goal Categories</h3>
-    <ul>
-      <li><strong>Nuclear</strong>: Eliminate Iran's nuclear weapons capability (Natanz, Fordow, Isfahan, SPND)</li>
-      <li><strong>Missiles &amp; Drones</strong>: Destroy missile launch sites, production, mobile launchers, drone factories</li>
-      <li><strong>Regime</strong>: Leadership decapitation, IRGC cohesion, succession, internal repression</li>
-      <li><strong>Navy</strong>: Destroy Iranian naval forces, submarine threat, anti-ship missiles</li>
-      <li><strong>Strait of Hormuz</strong>: Keep shipping lanes open, escort operations, insurance, energy crisis</li>
-      <li><strong>Air Superiority</strong>: Air defense destruction, stealth operations, electronic warfare</li>
-      <li><strong>Hezbollah</strong>: Deterrence, leadership strikes, Lebanon operations</li>
-      <li><strong>Proxy Network</strong>: Houthis, Iraqi militias, Kurdish opposition</li>
-      <li><strong>Casualties</strong>: US, Israeli, and Iranian civilian casualties tracked separately</li>
-      <li><strong>Political</strong>: Domestic support, war powers, alliance cohesion, great power intervention</li>
-      <li><strong>Information War</strong>: Justification narrative, school strikes, Araghchi messaging</li>
-      <li><strong>Scope &amp; Duration</strong>: Timeline, theater expansion, exit criteria</li>
-      <li><strong>Energy Markets</strong>: Oil prices, European gas, Iraqi oil, US gas prices</li>
-      <li><strong>Gulf Protection</strong>: Air defense, energy infrastructure, civilian safety</li>
-      <li><strong>Terrorism</strong>: Homeland threats, global retaliation, cyberattacks</li>
-    </ul>
-    <h3>Sources</h3>
-    <p>All claims are sourced to verifiable reports. Key sources include:</p>
-    <ul>
-      <li><a href="https://www.centcom.mil/MEDIA/PRESS-RELEASES/">CENTCOM Press Releases</a></li>
-      <li><a href="https://www.iaea.org/newscenter/pressreleases">IAEA Press Releases</a></li>
-      <li><a href="https://www.aljazeera.com/">Al Jazeera</a></li>
-      <li><a href="https://www.pbs.org/newshour/">PBS NewsHour</a></li>
-      <li><a href="https://www.reuters.com/">Reuters</a></li>
-      <li><a href="https://www.fdd.org/">Foundation for Defense of Democracies</a></li>
-      <li><a href="https://www.alma-center.org/">Alma Center</a></li>
-      <li><a href="https://www.timesofisrael.com/">Times of Israel</a></li>
-    </ul>
-    <p>Enable JavaScript for the full interactive experience with sourced claims, filtering, and real-time status tracking.</p>
+    <p>This interactive tracker requires JavaScript to display 106 goals across the 2026 US-Israel-Iran conflict. Enable JavaScript for the full interactive experience.</p>
   </div>
-</noscript>
+NOSCRIPT_FALLBACK
+fi
 
-<script type="text/babel">
-HTMLHEADER
+echo "</noscript>" >> "$OUT"
 
-# Append the transformed JSX
-echo "$BROWSER_JSX" >> "$OUT"
+# Write the script tag and compiled JS
+echo "" >> "$OUT"
+echo "$SCRIPT_OPEN" >> "$OUT"
+echo "$COMPILED_JS" >> "$OUT"
 
 # Append the React render call and closing tags
-cat >> "$OUT" << 'HTMLFOOTER'
+cat >> "$OUT" << HTMLFOOTER
 ReactDOM.render(React.createElement(IranWarGoalsTracker), document.getElementById('root'));
 </script>
-<footer style="text-align:center;padding:16px;font-size:11px;color:#475569;font-family:monospace;border-top:1px solid #1E293B;">&copy; __BUILD_YEAR__ avi123</footer>
+<footer style="text-align:center;padding:16px;font-size:11px;color:#475569;font-family:monospace;border-top:1px solid #1E293B;">&copy; $BUILD_YEAR Avi Berkowitz</footer>
 </body>
 </html>
 HTMLFOOTER
 
-# Inject timestamp and year
-sed -i '' "s/__BUILD_TIMESTAMP__/$TIMESTAMP/g" "$OUT"
-sed -i '' "s/__BUILD_YEAR__/$(date -u '+%Y')/g" "$OUT"
-
-# Inject ISO date for structured data
-ISO_DATE=$(date -u '+%Y-%m-%dT%H:%M:%SZ')
-sed -i '' "s/__BUILD_ISO_DATE__/$ISO_DATE/g" "$OUT"
-
-# Inject GA measurement ID (set via environment or default placeholder)
-GA_ID="${GA_MEASUREMENT_ID:-G-WDDF5XHR4Q}"
-sed -i '' "s/__GA_MEASUREMENT_ID__/$GA_ID/g" "$OUT"
+# ── Step 6: Regenerate sitemap with lastmod ──
+cat > "$SCRIPT_DIR/docs/sitemap.xml" << SITEMAP
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://2026iranwartracker.com/</loc>
+    <lastmod>$ISO_DATE</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
+SITEMAP
 
 # Report
 SRC_SIZE=$(wc -c < "$SRC")
