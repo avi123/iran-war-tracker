@@ -227,6 +227,88 @@ def get_first_commit():
 def get_jsx_at_commit(commit_hash):
     return git_run(['show', f'{commit_hash}:{JSX_PATH}'])
 
+def get_week_commits(start_date, end_date):
+    """Get all commits modifying JSX within a date range."""
+    after = (start_date - timedelta(days=1)).strftime("%Y-%m-%d")
+    until = end_date.strftime("%Y-%m-%dT23:59:59")
+    output = git_run([
+        'log', '--format=%H',
+        f'--after={after}', f'--until={until}',
+        '--', JSX_PATH
+    ])
+    return [h for h in output.split('\n') if h] if output else []
+
+def collect_week_highlights(start_date, end_date):
+    """Walk all commits in the week, extract keyDevelopments, dedupe and rank.
+
+    Returns a list of the most important developments, ranked by:
+    1. Persistence: items that appear across multiple commits are more important
+    2. Category diversity: ensure coverage across domains
+    3. Recency: later items break ties
+    """
+    commits = get_week_commits(start_date, end_date)
+    if not commits:
+        return []
+
+    # Extract keyDevelopments from each commit
+    seen_texts = {}  # text_prefix -> {text, category, count, last_commit_idx}
+    all_resolved = []
+
+    for idx, commit in enumerate(reversed(commits)):  # oldest first
+        jsx = get_jsx_at_commit(commit)
+        if not jsx:
+            continue
+        highlights = extract_highlights(jsx)
+        for h in highlights:
+            # Use first 60 chars as dedup key (handles minor edits)
+            prefix = h['text'][:60]
+            if prefix in seen_texts:
+                seen_texts[prefix]['count'] += 1
+                seen_texts[prefix]['last_idx'] = idx
+            else:
+                seen_texts[prefix] = {
+                    'text': h['text'],
+                    'category': h.get('category', ''),
+                    'count': 1,
+                    'last_idx': idx,
+                }
+
+        resolved = extract_watch_resolved(jsx)
+        for r in resolved:
+            prefix = r['text'][:40]
+            if not any(prefix == er['text'][:40] for er in all_resolved):
+                all_resolved.append(r)
+
+    if not seen_texts:
+        return [], all_resolved
+
+    # Rank: persistence (count) * 2 + recency (last_idx)
+    ranked = sorted(seen_texts.values(),
+                    key=lambda x: x['count'] * 2 + x['last_idx'],
+                    reverse=True)
+
+    # Ensure category diversity: take top items but limit 2 per category
+    result = []
+    cat_counts = {}
+    for item in ranked:
+        cat = item['category'] or 'other'
+        if cat_counts.get(cat, 0) >= 2 and len(result) < 7:
+            continue
+        result.append(item)
+        cat_counts[cat] = cat_counts.get(cat, 0) + 1
+        if len(result) >= 7:
+            break
+
+    # If we didn't get 7, fill from remaining
+    if len(result) < 7:
+        for item in ranked:
+            if item not in result:
+                result.append(item)
+                if len(result) >= 7:
+                    break
+
+    return result, all_resolved
+
 # ═══ Diff Logic ═══
 
 def flatten_goals(goals):
@@ -392,10 +474,24 @@ def generate_week_html(week_num, start_day, end_day, start_date, end_date,
     status_label = "Complete" if is_complete else f"Through Day {end_day}"
     page_title = f"Week {week_num}: Iran War Days {start_day}\u2013{end_day} | 2026 Iran War Tracker"
 
-    # Build description from top changes
-    top_changes = [c['name'] for c in changes[:3]]
-    desc_changes = ", ".join(top_changes) if top_changes else "goal tracking"
-    description = f"Week {week_num} review: {len(changes)} goals changed \u2014 {desc_changes}. {stats_end['total']} sourced goals tracked. Updated analysis."
+    # Build description from top highlights (not goal names)
+    def snippet(text, max_len=35):
+        for sep in [' \u2014 ', ' - ']:
+            idx = text.find(sep)
+            if 0 < idx <= max_len:
+                return text[:idx].strip().rstrip(',.')
+        if len(text) > max_len:
+            sp = text[:max_len].rfind(' ')
+            if sp > max_len - 12:
+                return text[:sp].strip().rstrip(',.')
+        return text[:max_len].strip().rstrip(',.')
+
+    if highlights:
+        snips = [snippet(h['text']) for h in highlights[:3]]
+        desc_snips = ", ".join(snips)
+        description = f"Week {week_num}: {desc_snips}. {len(changes)} goal changes across {stats_end['total']} tracked objectives. Updated analysis."
+    else:
+        description = f"Week {week_num}: {len(changes)} goal changes across the 2026 Iran war. {stats_end['total']} sourced goals. Updated analysis."
     if len(description) > 160:
         description = f"Week {week_num}: {len(changes)} goal changes across the 2026 Iran war. {stats_end['total']} sourced goals. Updated analysis."
 
@@ -492,12 +588,39 @@ td {{ padding:8px; border-bottom:1px solid {C['border']}30; font-size:12px; vert
         lines.append(f'<div class="stat-box"><div class="stat-val" style="color:{color}">{val_end}</div><div class="stat-label">{label}</div>{delta_str}</div>')
     lines.append('</div>')
 
-    # [3] NARRATIVE
-    lines.append(f'<div class="card" style="border-left:4px solid {C["blue"]}">')
-    lines.append(f'<p style="font-size:13px;line-height:1.65;color:{C["text"]}">{html.escape(narrative)}</p>')
+    # [3] WHAT HAPPENED THIS WEEK — curated highlights (the narrative lead)
+    if highlights:
+        cat_colors = {'military':'#3B82F6', 'political':'#A78BFA', 'economic':'#F59E0B', 'regime':'#EF4444', 'humanitarian':'#EC4899'}
+        lines.append('<div class="section">')
+        lines.append(f'<h3 style="color:{C["white"]}">What Happened This Week</h3>')
+        for h in highlights:
+            cat = h.get('category', '')
+            dot_color = cat_colors.get(cat, C['textDim'])
+            # Truncate to first sentence or em-dash for the headline, show rest as context
+            text = h['text']
+            headline = text
+            context = ''
+            for sep in [' \u2014 ', '. ']:
+                idx = text.find(sep)
+                if idx > 0 and idx < len(text) - 5:
+                    headline = text[:idx].rstrip('.')
+                    context = text[idx + len(sep):].strip()
+                    break
+            lines.append(f'<div class="card" style="border-left:3px solid {dot_color};padding:10px 14px">')
+            lines.append(f'<div style="font-size:13px;font-weight:600;color:{C["white"]};line-height:1.4">{html.escape(headline)}</div>')
+            if context:
+                lines.append(f'<div style="font-size:11px;color:{C["textDim"]};line-height:1.5;margin-top:4px">{html.escape(context)}</div>')
+            if h.get('count', 1) > 1:
+                lines.append(f'<div style="font-size:9px;color:{C["textDim"]};margin-top:4px;font-style:italic">Persisted across {h["count"]} update cycles</div>')
+            lines.append('</div>')
+        lines.append('</div>')
+
+    # [4] SUMMARY STATS (mechanical narrative — secondary to the bullets above)
+    lines.append(f'<div style="padding:8px 14px;background:{C["card"]};border-radius:6px;font-size:12px;color:{C["textDim"]};line-height:1.5;margin:8px 0">')
+    lines.append(f'{html.escape(narrative)}')
     lines.append('</div>')
 
-    # [4] STATUS CHANGES TABLE
+    # [5] STATUS CHANGES TABLE
     if changes:
         lines.append('<div class="section">')
         lines.append(f'<h3 style="color:{C["white"]}">Status & Trend Changes ({len(changes)})</h3>')
@@ -509,20 +632,6 @@ td {{ padding:8px; border-bottom:1px solid {C['border']}30; font-size:12px; vert
             note = html.escape(c['outcomeNote'][:200]) + '...' if len(c.get('outcomeNote', '')) > 200 else html.escape(c.get('outcomeNote', ''))
             lines.append(f'<tr><td style="font-weight:600;color:{C["white"]}">{html.escape(c["name"])}</td><td>{prev}</td><td>{curr}</td><td style="color:{C["textDim"]};font-size:11px;line-height:1.5">{note}</td></tr>')
         lines.append('</table>')
-        lines.append('</div>')
-
-    # [5] KEY DEVELOPMENTS
-    if highlights:
-        cat_colors = {'military':'#3B82F6', 'political':'#A78BFA', 'economic':'#F59E0B', 'regime':'#EF4444', 'humanitarian':'#EC4899'}
-        lines.append('<div class="section">')
-        lines.append(f'<h3 style="color:{C["blueLt"]}">Key Developments</h3>')
-        for h in highlights:
-            cat = h.get('category', '')
-            dot_color = cat_colors.get(cat, C['textDim'])
-            lines.append(f'<div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-start">')
-            lines.append(f'<span style="display:inline-block;width:6px;height:6px;border-radius:3px;flex-shrink:0;margin-top:6px;background:{dot_color}"></span>')
-            lines.append(f'<span style="font-size:12px;color:{C["text"]};line-height:1.5">{html.escape(h["text"])}</span>')
-            lines.append('</div>')
         lines.append('</div>')
 
     # [6] PREDICTION SCORECARD
@@ -644,11 +753,23 @@ def generate_week(week_num, current_day):
     end_stats = compute_stats(end_goals)
 
     changes = diff_goals(start_goals, end_goals)
-    highlights = extract_highlights(end_jsx)
-    watch_resolved = extract_watch_resolved(end_jsx)
+
+    # Collect highlights across ALL commits in the week (not just end-of-week)
+    week_end = end_date if is_complete else WAR_START + timedelta(days=actual_end_day - 1)
+    aggregated = collect_week_highlights(start_date, week_end)
+    if isinstance(aggregated, tuple):
+        week_highlights, watch_resolved = aggregated
+    else:
+        week_highlights, watch_resolved = aggregated, []
+
+    # Fallback: if no aggregated highlights, use end-of-week snapshot
+    if not week_highlights:
+        highlights_raw = extract_highlights(end_jsx)
+        week_highlights = [{'text': h['text'], 'category': h.get('category', ''), 'count': 1} for h in highlights_raw]
+        watch_resolved = extract_watch_resolved(end_jsx)
 
     # Quality check: at least 1 change for complete weeks
-    if is_complete and len(changes) == 0:
+    if is_complete and len(changes) == 0 and len(week_highlights) == 0:
         print(f"  Week {week_num}: skipped (no changes detected)", file=sys.stderr)
         return False
 
@@ -658,7 +779,7 @@ def generate_week(week_num, current_day):
         week_num, start_day, actual_end_day,
         start_date, end_date if is_complete else WAR_START + timedelta(days=actual_end_day - 1),
         is_complete, start_stats, end_stats,
-        changes, highlights, watch_resolved, narrative
+        changes, week_highlights, watch_resolved, narrative
     )
 
     # Write output
@@ -668,7 +789,7 @@ def generate_week(week_num, current_day):
     with open(out_path, 'w') as f:
         f.write(html_content)
 
-    print(f"  Week {week_num}: {len(changes)} changes, {len(highlights)} highlights → docs/week-{week_num}/index.html", file=sys.stderr)
+    print(f"  Week {week_num}: {len(changes)} changes, {len(week_highlights)} highlights → docs/week-{week_num}/index.html", file=sys.stderr)
     return True
 
 
