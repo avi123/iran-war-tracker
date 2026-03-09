@@ -68,6 +68,24 @@ if [ -f "$EXTRACT_PY" ]; then
     fi
 fi
 
+# ── Step 3b: Extract dynamic SEO meta ──
+DYNAMIC_TITLE="Iran War Goals Tracker — 2026 US-Israel-Iran Conflict Analysis"
+DYNAMIC_DESC="Track the 2026 US-Israel-Iran war: 106 sourced goals across military, regime, diplomatic, and economic dimensions. Updated multiple times daily."
+DYNAMIC_OG_TITLE="Iran War Goals Tracker — 2026 US-Israel-Iran Conflict"
+DYNAMIC_GOAL_COUNT="106"
+if [ -f "$EXTRACT_PY" ]; then
+    META_JSON=$(python3 "$EXTRACT_PY" "$SRC" --meta 2>/dev/null || echo '{}')
+    _title=$(echo "$META_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('title',''))" 2>/dev/null)
+    _desc=$(echo "$META_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('description',''))" 2>/dev/null)
+    _og_title=$(echo "$META_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('og_title',''))" 2>/dev/null)
+    _goal_count=$(echo "$META_JSON" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('goal_count','106'))" 2>/dev/null)
+    [ -n "$_title" ] && DYNAMIC_TITLE="$_title"
+    [ -n "$_desc" ] && DYNAMIC_DESC="$_desc"
+    [ -n "$_og_title" ] && DYNAMIC_OG_TITLE="$_og_title"
+    [ -n "$_goal_count" ] && DYNAMIC_GOAL_COUNT="$_goal_count"
+    echo "  SEO meta: $DYNAMIC_TITLE"
+fi
+
 # ── Step 4: Determine script tag type ──
 if [ -x "$ESBUILD" ]; then
     SCRIPT_OPEN='<script>'
@@ -84,18 +102,18 @@ cat > "$OUT" << HTMLHEADER
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Iran War Goals Tracker — 2026 US-Israel-Iran Conflict Analysis</title>
-<meta name="description" content="Track the 2026 US-Israel-Iran war: 106 sourced goals across military, regime, diplomatic, and economic dimensions. Updated multiple times daily.">
-<meta property="og:title" content="Iran War Goals Tracker — 2026 US-Israel-Iran Conflict">
-<meta property="og:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Military, diplomatic, economic, and humanitarian analysis updated multiple times daily.">
+<title>$DYNAMIC_TITLE</title>
+<meta name="description" content="$DYNAMIC_DESC">
+<meta property="og:title" content="$DYNAMIC_OG_TITLE">
+<meta property="og:description" content="$DYNAMIC_DESC">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://2026iranwartracker.com">
 <meta property="og:image" content="https://2026iranwartracker.com/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Iran War Goals Tracker — 2026">
-<meta name="twitter:description" content="106 goals tracked across the 2026 US-Israel-Iran war. Updated multiple times daily.">
+<meta name="twitter:title" content="$DYNAMIC_OG_TITLE">
+<meta name="twitter:description" content="$DYNAMIC_DESC">
 <meta name="twitter:image" content="https://2026iranwartracker.com/og-image.png">
 <link rel="canonical" href="https://2026iranwartracker.com">
 <link rel="preconnect" href="https://cdnjs.cloudflare.com">
@@ -104,12 +122,13 @@ cat > "$OUT" << HTMLHEADER
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebPage",
+  "@type": "LiveBlogPosting",
   "name": "Iran War Goals Tracker",
-  "headline": "Iran War Goals Tracker — 2026 US-Israel-Iran Conflict Analysis",
+  "headline": "$DYNAMIC_TITLE",
   "url": "https://2026iranwartracker.com",
-  "description": "Analytical framework tracking 106 goals across the 2026 US-Israel-Iran war. Updated multiple times daily.",
-  "specialty": "Conflict Analysis",
+  "description": "$DYNAMIC_DESC",
+  "coverageStartsDate": "2026-02-28T00:00:00Z",
+  "coverageEndsDate": "$ISO_DATE",
   "datePublished": "2026-03-01T00:00:00Z",
   "dateModified": "$ISO_DATE",
   "publisher": { "@type": "Person", "name": "Avi Berkowitz" },
@@ -179,10 +198,10 @@ if [ -n "$NOSCRIPT_CONTENT" ]; then
     echo "$NOSCRIPT_CONTENT" >> "$OUT"
 else
     # Fallback: basic category list
-    cat >> "$OUT" << 'NOSCRIPT_FALLBACK'
+    cat >> "$OUT" << NOSCRIPT_FALLBACK
   <div style="max-width:900px;margin:0 auto;padding:24px;color:#E2E8F0;">
     <h2>Iran War Goals Tracker — 2026</h2>
-    <p>This interactive tracker requires JavaScript to display 106 goals across the 2026 US-Israel-Iran conflict. Enable JavaScript for the full interactive experience.</p>
+    <p>This interactive tracker requires JavaScript to display $DYNAMIC_GOAL_COUNT goals across the 2026 US-Israel-Iran conflict. Enable JavaScript for the full interactive experience.</p>
   </div>
 NOSCRIPT_FALLBACK
 fi
@@ -215,18 +234,37 @@ ReactDOM.render(React.createElement(IranWarGoalsTracker), document.getElementByI
 </html>
 HTMLFOOTER
 
-# ── Step 6: Regenerate sitemap with lastmod ──
-cat > "$SCRIPT_DIR/docs/sitemap.xml" << SITEMAP
-<?xml version="1.0" encoding="UTF-8"?>
+# ── Step 6: Generate weekly review pages ──
+WEEKLY_PY="$SCRIPT_DIR/src/generate-weekly-review.py"
+if [ -f "$WEEKLY_PY" ]; then
+    python3 "$WEEKLY_PY" --all 2>&1 | while read line; do echo "  $line"; done
+fi
+
+# ── Step 7: Regenerate sitemap with all pages ──
+SITEMAP_HEADER='<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://2026iranwartracker.com/</loc>
-    <lastmod>$ISO_DATE</lastmod>
+    <lastmod>'"$ISO_DATE"'</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
-  </url>
-</urlset>
-SITEMAP
+  </url>'
+SITEMAP_WEEKS=""
+for WEEK_DIR in "$SCRIPT_DIR"/docs/week-*/; do
+    if [ -d "$WEEK_DIR" ]; then
+        WEEK_NAME=$(basename "$WEEK_DIR")
+        SITEMAP_WEEKS="$SITEMAP_WEEKS
+  <url>
+    <loc>https://2026iranwartracker.com/$WEEK_NAME/</loc>
+    <lastmod>$ISO_DATE</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>"
+    fi
+done
+echo "$SITEMAP_HEADER$SITEMAP_WEEKS
+</urlset>" > "$SCRIPT_DIR/docs/sitemap.xml"
+echo "  Sitemap updated with $(echo "$SCRIPT_DIR"/docs/week-*/ | wc -w | tr -d ' ') week pages"
 
 # Report
 SRC_SIZE=$(wc -c < "$SRC")

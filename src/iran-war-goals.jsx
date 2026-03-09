@@ -507,6 +507,78 @@ const GOALS = [
   },
 ];
 
+const CollapsibleSection = ({ title, id, defaultOpen = true, children, mobile, borderColor }) => {
+  const [open, setOpen] = useState(() => {
+    try {
+      const stored = localStorage.getItem(`section-${id}`);
+      if (stored !== null) return stored !== "0";
+    } catch {}
+    return defaultOpen;
+  });
+  const toggle = () => {
+    const next = !open;
+    setOpen(next);
+    try { localStorage.setItem(`section-${id}`, next ? "1" : "0"); } catch {}
+  };
+  return (
+    <section style={{ maxWidth:1400, margin:"0 auto" }}>
+      <div
+        onClick={toggle}
+        style={{
+          display:"flex", alignItems:"center", gap:8, padding:mobile?"10px 12px":"12px 24px",
+          cursor:"pointer", borderBottom:`1px solid ${C.border}30`,
+          background:`linear-gradient(90deg, ${C.card} 0%, ${C.cardAlt} 100%)`,
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = `${C.navy}`}
+        onMouseLeave={e => e.currentTarget.style.background = `linear-gradient(90deg, ${C.card} 0%, ${C.cardAlt} 100%)`}
+      >
+        <span style={{ color:C.textDim, fontSize:12, fontWeight:700 }}>{open ? "▼" : "▶"}</span>
+        <span style={{ fontSize:11, fontWeight:700, color:borderColor||C.white, letterSpacing:1, textTransform:"uppercase" }}>{title}</span>
+      </div>
+      {open && children}
+    </section>
+  );
+};
+
+const WeeksInReview = ({ mobile }) => {
+  const warStart = new Date("2026-02-28T00:00:00Z");
+  const updated = new Date(HIGHLIGHTS.updatedAt);
+  const currentDay = Math.floor((updated - warStart) / 86400000) + 1;
+  const currentWeek = Math.ceil(currentDay / 7);
+  const weeks = [];
+  for (let w = 1; w <= currentWeek; w++) {
+    const startDay = (w - 1) * 7 + 1;
+    const endDay = w * 7;
+    const startDate = new Date(warStart.getTime() + (startDay - 1) * 86400000);
+    const endDate = new Date(warStart.getTime() + (endDay - 1) * 86400000);
+    const fmt = d => d.toLocaleDateString("en-US", { month:"short", day:"numeric", timeZone:"UTC" });
+    const isComplete = currentDay > endDay;
+    const isCurrent = !isComplete && currentDay >= startDay;
+    weeks.push({ num:w, startDay, endDay:Math.min(endDay, currentDay), startDate:fmt(startDate), endDate:fmt(isComplete ? endDate : updated), isComplete, isCurrent });
+  }
+  return (
+    <CollapsibleSection title="Weeks in Review" id="weeks" mobile={mobile} borderColor={C.blueLt}>
+      <div style={{ padding:mobile?"10px 12px":"12px 24px", display:"flex", flexWrap:"wrap", gap:8 }}>
+        {weeks.map(w => (
+          <a key={w.num} href={`/week-${w.num}/`} style={{
+            display:"inline-block", padding:"6px 14px", borderRadius:6, fontSize:12, fontWeight:600,
+            background:w.isCurrent?`${C.blue}30`:C.card, color:w.isCurrent?C.white:C.text,
+            border:`1px solid ${w.isCurrent?C.blue:C.border}`, textDecoration:"none",
+            transition:"all 0.15s",
+          }}
+            onMouseEnter={e => { e.target.style.borderColor=C.blue; e.target.style.color=C.white; }}
+            onMouseLeave={e => { e.target.style.borderColor=w.isCurrent?C.blue:C.border; e.target.style.color=w.isCurrent?C.white:C.text; }}
+          >
+            Week {w.num} <span style={{ color:C.textDim, fontSize:10 }}>Days {w.startDay}–{w.endDay} ({w.startDate}–{w.endDate})</span>
+            {w.isCurrent && <span style={{ marginLeft:6, fontSize:9, color:C.amber, fontWeight:700 }}>IN PROGRESS</span>}
+            {w.isComplete && <span style={{ marginLeft:6, fontSize:9, color:C.green, fontWeight:700 }}>✓</span>}
+          </a>
+        ))}
+      </div>
+    </CollapsibleSection>
+  );
+};
+
 export default function App() {
   const [expanded, setExpanded] = useState(() => {
     const init = {};
@@ -590,170 +662,172 @@ export default function App() {
         </div>
       </div>
 
+      {/* WEEKS IN REVIEW */}
+      <WeeksInReview mobile={mobile}/>
+
       {/* HIGHLIGHTS & WATCH */}
       <HighlightsPanel mobile={mobile}/>
 
-      {/* FILTER BAR */}
-      <div style={{ display:"flex", gap:mobile?4:6, padding:mobile?"8px 12px":"10px 24px", background:C.card, borderBottom:`1px solid ${C.border}`, overflowX:"auto", alignItems:"center" }}>
-        {!mobile && <span style={{ fontSize:10, color:C.textDim, marginRight:8, letterSpacing:1 }}>FILTER:</span>}
-        {[
-          { key:"all", label:"All Goals" },
-          { key:"us", label:"US Only" },
-          { key:"israel", label:"Israel Only" },
-          { key:"opposing", label:"Opposing" },
-          { key:"atrisk", label:"At Risk (All)" },
-          { key:"failing", label:"Failing" },
-          { key:"expanding", label:"Expanding" },
-          { key:"achieved", label:"Achieved" },
-          { key:"unachievable", label:"Unachievable" },
-        ].map(f => (
-          <button key={f.key} onClick={()=>setFilter(f.key)} style={{
-            padding:mobile?"3px 8px":"5px 12px", cursor:"pointer", border:`1px solid ${filter===f.key?C.blue:C.border}`,
-            background:filter===f.key?`${C.blue}30`:"transparent", color:filter===f.key?C.white:C.textDim,
-            borderRadius:6, fontSize:mobile?10:11, fontWeight:filter===f.key?700:500, transition:"all 0.15s",
-            fontFamily:"inherit", whiteSpace:"nowrap",
-          }}>{mobile ? f.label.replace(" (All)","").replace(" Only","") : f.label}</button>
-        ))}
-        <div style={{ flex:1 }}/>
-        <button onClick={toggleAll} style={{
-          padding:"5px 12px", cursor:"pointer", border:`1px solid ${C.border}`,
-          background:"transparent", color:C.textDim, borderRadius:6, fontSize:11,
-          fontFamily:"inherit",
-        }}>{expandAll?"Collapse All":"Expand All"}</button>
-      </div>
-
-      {/* STATUS LEGEND */}
-      <div style={{ display:"flex", gap:mobile?8:16, padding:mobile?"6px 12px":"6px 24px 6px", background:`${C.card}80`, borderBottom:`1px solid ${C.border}30`, flexWrap:"wrap", alignItems:"center" }}>
-        <span style={{ fontSize:9, color:C.textDim, letterSpacing:1 }}>STATUS KEY:</span>
-        {[
-          { s:"achieved", d:"Goal met", c:C.green },
-          { s:"in progress", d:"Underway, outcome uncertain", c:C.amber },
-          { s:"at risk", d:"Still achievable but trajectory negative", c:C.red },
-          { s:"unachievable", d:"Structurally impossible", c:C.gray },
-          { s:"tbd", d:"Too early to assess", c:C.gray },
-        ].map(x => (
-          <span key={x.s} style={{ fontSize:10, color:x.c }} title={x.d}>
-            <span style={{ fontWeight:700 }}>●</span> {x.s}
-          </span>
-        ))}
-        <span style={{ fontSize:9, color:C.textDim, letterSpacing:1, marginLeft:8 }}>TREND:</span>
-        {[
-          { s:"failing", d:"Approach not working", c:"#EF4444" },
-          { s:"expanding", d:"Scope growing — could be positive or negative", c:"#F59E0B" },
-        ].map(x => (
-          <span key={x.s} style={{ fontSize:10, color:x.c }} title={x.d}>
-            <span style={{ fontWeight:700 }}>◆</span> {x.s}
-          </span>
-        ))}
-      </div>
-
-      {/* GOALS TABLE */}
-      <div style={{ padding:"0", maxWidth:1400, margin:"0 auto" }}>
-        <div style={{ overflowX:mobile?"hidden":"auto" }}>
-          {/* Column headers - desktop only */}
-          {!mobile && <div style={{
-            display:"grid", gridTemplateColumns:"minmax(260px,2fr) 80px 70px 130px 130px minmax(180px,1.5fr) 90px",
-            gap:8, padding:"10px 14px", background:C.navy, borderBottom:`2px solid ${C.blue}`,
-            position:"sticky", top:0, zIndex:10,
-          }}>
-            {["Goal","Party","Type","Importance","Achievability","Outcome","Status"].map(h => (
-              <span key={h} style={{ fontSize:10, fontWeight:700, color:C.textDim, letterSpacing:1, textTransform:"uppercase" }}>{h}</span>
-            ))}
-          </div>}
-
-          {filtered.map(goal => (
-            <GoalRow key={goal.id} goal={goal} depth={0} expanded={expanded} onToggle={toggleExpand} mobile={mobile}/>
-          ))}
-        </div>
-      </div>
-
-      {/* OPPOSING GOALS ANALYSIS */}
-      <div style={{ padding:"24px", maxWidth:1400, margin:"0 auto" }}>
-        <h3 style={{ color:C.oppose, fontSize:15, fontWeight:700, marginBottom:12, borderBottom:`2px solid ${C.oppose}40`, paddingBottom:6 }}>
-          US–Israel Fault Lines
-        </h3>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))", gap:12 }}>
+      {/* OVERALL OBJECTIVES */}
+      <CollapsibleSection title="Overall Objectives" id="objectives" mobile={mobile} borderColor={C.blueLt}>
+        {/* FILTER BAR */}
+        <div style={{ display:"flex", gap:mobile?4:6, padding:mobile?"8px 12px":"10px 24px", background:C.card, borderBottom:`1px solid ${C.border}`, overflowX:"auto", alignItems:"center" }}>
+          {!mobile && <span style={{ fontSize:10, color:C.textDim, marginRight:8, letterSpacing:1 }}>FILTER:</span>}
           {[
-            { title:"Regime Change Endgame", us:"Trump told Axios: 'I must be involved in the appointment, like with Delcy' (Venezuela). Called Mojtaba 'a lightweight.' Six contradictory justifications. Pentagon requesting critical minerals. CIA backchannel exists but Trump demanding puppet-state model.", israel:"Vowed to kill Mojtaba. Phase 2 underground targeting. 11 strike waves on 600 targets. Destroyed Assembly of Experts building — regime met virtually and elected successor anyway.", risk:"Assembly of Experts reached CONSENSUS on successor despite bombardment — regime demonstrating institutional continuity. Trump comparing Iran to Venezuela puppet-state model while Israel promises infinite assassination. Pezeshkian publicly broke with IRGC over Gulf attacks — first civilian-military split could create negotiation channel OR accelerate military takeover. Coalition can't agree on what should replace the regime it's trying to destroy." },
-            { title:"War Duration & Escalation", us:"Senate War Powers DEFEATED 47-53. House vote Thursday. Hegseth: 8 weeks, 'very early.' Pentagon requesting critical minerals. Defense execs at WH Friday. IRGC hit US oil tanker Day 6. Missile decline 86% but IRGC promises escalation.", israel:"Entering PHASE 2 — shifting to deep underground missile bunkers (Haaretz). Phase 1 surface targets largely complete. IDF ordered Dahiyeh evacuation. Radwan force deployed against IDF tanks. F-35 air-to-air kill. No wind-down.", risk:"Phase 2 = campaign deepening, not concluding. Underground targets are harder, take longer, require heavier munitions. IRGC adapting to asymmetric warfare (small craft, drone boats, ground forces). NEW: Russia providing real-time intelligence on US warship/aircraft locations (WaPo) — Iran hasn't requested weapons but is receiving targeting data. The 90% missile decline is genuine but Russia ISR could extend Iran's ability to target effectively with remaining assets. Oil up 20% to ~$80. China negotiating safe Hormuz passage with Iran. Great power support shifting from rhetorical to operational." },
-            { title:"Ground Troops", us:"Senate vote gives Trump free hand for 60 days. Cassidy: admin 'left open' ground troops. Hawley: 'ground troops will require authorization.' Hegseth: 8 weeks + 'just getting started.' No ground forces in Iran yet but IRGC entering battlefield changes calculus.", israel:"Already deployed ground forces into Lebanon. IDF chief Zamir: won't stop 'until Hezbollah disarmed.' Expanding deeper. Mossad potentially inside Iran.", risk:"IRGC ground force entry is the trigger. If IRGC commits conventional ground forces + 230 drone swarms, air campaign alone may prove insufficient. Senate constraint gone. Hawley's 'authorization required' line = last Republican red line on ground troops." },
-            { title:"Civilian Casualties", us:"Iran: 1,332+ dead (Red Crescent), 181 children (UNICEF). CNN: US responsible for Minab school strike — targeting data failure, JDAM evidence. CENTCOM issues rare civilian safety warning. 100,000 fled Tehran (UNHCR). 20,000 Americans evacuated.", israel:"IDF ordered 500,000+ Dahiyeh evacuation. Lebanon: 394 dead, 600+ wounded, 95,000+ displaced. ~200 Hezbollah operatives killed Day 9. Ramada Hotel strike in Rawche. 2 IDF soldiers killed.", risk:"Multi-theater toll now 1,500+ across 9+ countries. CNN school attribution = confirmed US legal liability. Iran using cluster bomb warheads (27th wave, 6 wounded) — area-effect weapons banned by 111 nations. Escalation spiral: each side's civilian toll justifies the other's retaliation. CENTCOM civilian warning suggests US military recognizes the political cost." },
-            { title:"Hormuz vs. Global Shipping", us:"NEAR-TOTAL SHUTDOWN: Only 3 transits March 7 (97.8% decline from ~130/day). GPS/AIS interference confirmed. Insurance cancelled across Persian Gulf. DFC insurance in 'infancy.' Macron building European naval coalition — separate from US command.", israel:"Phase 2 underground targeting. Dahiyeh evacuation ordered. Hormuz remains US problem — Israel focused on Lebanon + Tehran. But Israel's first oil infrastructure strikes on Iran add bilateral energy dimension.", risk:"The insurance market — not the military — is now enforcing the blockade. 3 transits/day = effective closure regardless of naval presence. Energy war now BILATERAL: Israel struck 5 Iranian oil facilities, Iran hitting Gulf infrastructure. Kuwait airport fuel tanks, Bahrain desalination plant struck. Recovery timeline extends even if fighting stops tomorrow." },
-            { title:"Alliance Management", us:"CIA backchannel exists but US DISMISSED Iranian messages as 'bull****' (Ravid direct source). Ukraine drone counter-experts deploying to Gulf 'next week.' Wang Yi declared support for Iran — unverified $5B weapons reports. Spain anti-war protests. Araghchi on NBC Meet the Press rejects ceasefire.", israel:"Netanyahu called WH demanding answers on Iran contacts. Operating independently — Phase 2 underground + Dahiyeh evacuation. Vowing to kill Mojtaba. 810 Brigade expanding Lebanon ground positions.", risk:"Alliance EXPANDING militarily (Spain, France, Italy, Greece, UK, Germany + Ukraine drone experts) while FRACTURING politically (Netanyahu suspicious, Trump 'MIGA' puppet model, Italy calling strikes illegal, Spain protests). China moving from rhetorical to material support. Araghchi's NBC appearance = Iran rejecting any diplomatic off-ramp publicly. More nations drawn in = harder to stop." },
+            { key:"all", label:"All Goals" },
+            { key:"us", label:"US Only" },
+            { key:"israel", label:"Israel Only" },
+            { key:"opposing", label:"Opposing" },
+            { key:"atrisk", label:"At Risk (All)" },
+            { key:"failing", label:"Failing" },
+            { key:"expanding", label:"Expanding" },
+            { key:"achieved", label:"Achieved" },
+            { key:"unachievable", label:"Unachievable" },
           ].map(f => (
-            <div key={f.title} style={{ background:C.card, borderRadius:8, padding:14, border:`1px solid ${C.border}`, borderTop:`3px solid ${C.oppose}` }}>
-              <div style={{ fontWeight:700, color:C.white, fontSize:13, marginBottom:8 }}>{f.title}</div>
-              <div style={{ fontSize:11.5, marginBottom:6 }}><span style={{ color:C.us, fontWeight:700 }}>US: </span><span style={{ color:C.text }}>{f.us}</span></div>
-              <div style={{ fontSize:11.5, marginBottom:6 }}><span style={{ color:C.israel, fontWeight:700 }}>ISR: </span><span style={{ color:C.text }}>{f.israel}</span></div>
-              <div style={{ fontSize:11.5, borderTop:`1px solid ${C.border}`, paddingTop:6, marginTop:4 }}><span style={{ color:C.red, fontWeight:700 }}>RISK: </span><span style={{ color:C.amber }}>{f.risk}</span></div>
-            </div>
+            <button key={f.key} onClick={()=>setFilter(f.key)} style={{
+              padding:mobile?"3px 8px":"5px 12px", cursor:"pointer", border:`1px solid ${filter===f.key?C.blue:C.border}`,
+              background:filter===f.key?`${C.blue}30`:"transparent", color:filter===f.key?C.white:C.textDim,
+              borderRadius:6, fontSize:mobile?10:11, fontWeight:filter===f.key?700:500, transition:"all 0.15s",
+              fontFamily:"inherit", whiteSpace:"nowrap",
+            }}>{mobile ? f.label.replace(" (All)","").replace(" Only","") : f.label}</button>
+          ))}
+          <div style={{ flex:1 }}/>
+          <button onClick={toggleAll} style={{
+            padding:"5px 12px", cursor:"pointer", border:`1px solid ${C.border}`,
+            background:"transparent", color:C.textDim, borderRadius:6, fontSize:11,
+            fontFamily:"inherit",
+          }}>{expandAll?"Collapse All":"Expand All"}</button>
+        </div>
+
+        {/* STATUS LEGEND */}
+        <div style={{ display:"flex", gap:mobile?8:16, padding:mobile?"6px 12px":"6px 24px 6px", background:`${C.card}80`, borderBottom:`1px solid ${C.border}30`, flexWrap:"wrap", alignItems:"center" }}>
+          <span style={{ fontSize:9, color:C.textDim, letterSpacing:1 }}>STATUS KEY:</span>
+          {[
+            { s:"achieved", d:"Goal met", c:C.green },
+            { s:"in progress", d:"Underway, outcome uncertain", c:C.amber },
+            { s:"at risk", d:"Still achievable but trajectory negative", c:C.red },
+            { s:"unachievable", d:"Structurally impossible", c:C.gray },
+            { s:"tbd", d:"Too early to assess", c:C.gray },
+          ].map(x => (
+            <span key={x.s} style={{ fontSize:10, color:x.c }} title={x.d}>
+              <span style={{ fontWeight:700 }}>●</span> {x.s}
+            </span>
+          ))}
+          <span style={{ fontSize:9, color:C.textDim, letterSpacing:1, marginLeft:8 }}>TREND:</span>
+          {[
+            { s:"failing", d:"Approach not working", c:"#EF4444" },
+            { s:"expanding", d:"Scope growing — could be positive or negative", c:"#F59E0B" },
+          ].map(x => (
+            <span key={x.s} style={{ fontSize:10, color:x.c }} title={x.d}>
+              <span style={{ fontWeight:700 }}>◆</span> {x.s}
+            </span>
           ))}
         </div>
-      </div>
+
+        {/* GOALS TABLE */}
+        <div style={{ padding:"0", maxWidth:1400, margin:"0 auto" }}>
+          <div style={{ overflowX:mobile?"hidden":"auto" }}>
+            {/* Column headers - desktop only */}
+            {!mobile && <div style={{
+              display:"grid", gridTemplateColumns:"minmax(260px,2fr) 80px 70px 130px 130px minmax(180px,1.5fr) 90px",
+              gap:8, padding:"10px 14px", background:C.navy, borderBottom:`2px solid ${C.blue}`,
+              position:"sticky", top:0, zIndex:10,
+            }}>
+              {["Goal","Party","Type","Importance","Achievability","Outcome","Status"].map(h => (
+                <span key={h} style={{ fontSize:10, fontWeight:700, color:C.textDim, letterSpacing:1, textTransform:"uppercase" }}>{h}</span>
+              ))}
+            </div>}
+
+            {filtered.map(goal => (
+              <GoalRow key={goal.id} goal={goal} depth={0} expanded={expanded} onToggle={toggleExpand} mobile={mobile}/>
+            ))}
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* ALIGNMENT / FRICTION POINTS */}
+      <CollapsibleSection title="Alignment & Friction Points" id="friction" mobile={mobile} borderColor={C.oppose}>
+        <div style={{ padding:"24px", maxWidth:1400, margin:"0 auto" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))", gap:12 }}>
+            {[
+              { title:"Regime Change Endgame", us:"Trump told Axios: 'I must be involved in the appointment, like with Delcy' (Venezuela). Called Mojtaba 'a lightweight.' Six contradictory justifications. Pentagon requesting critical minerals. CIA backchannel exists but Trump demanding puppet-state model.", israel:"Vowed to kill Mojtaba. Phase 2 underground targeting. 11 strike waves on 600 targets. Destroyed Assembly of Experts building — regime met virtually and elected successor anyway.", risk:"Assembly of Experts reached CONSENSUS on successor despite bombardment — regime demonstrating institutional continuity. Trump comparing Iran to Venezuela puppet-state model while Israel promises infinite assassination. Pezeshkian publicly broke with IRGC over Gulf attacks — first civilian-military split could create negotiation channel OR accelerate military takeover. Coalition can't agree on what should replace the regime it's trying to destroy." },
+              { title:"War Duration & Escalation", us:"Senate War Powers DEFEATED 47-53. House vote Thursday. Hegseth: 8 weeks, 'very early.' Pentagon requesting critical minerals. Defense execs at WH Friday. IRGC hit US oil tanker Day 6. Missile decline 86% but IRGC promises escalation.", israel:"Entering PHASE 2 — shifting to deep underground missile bunkers (Haaretz). Phase 1 surface targets largely complete. IDF ordered Dahiyeh evacuation. Radwan force deployed against IDF tanks. F-35 air-to-air kill. No wind-down.", risk:"Phase 2 = campaign deepening, not concluding. Underground targets are harder, take longer, require heavier munitions. IRGC adapting to asymmetric warfare (small craft, drone boats, ground forces). NEW: Russia providing real-time intelligence on US warship/aircraft locations (WaPo) — Iran hasn't requested weapons but is receiving targeting data. The 90% missile decline is genuine but Russia ISR could extend Iran's ability to target effectively with remaining assets. Oil up 20% to ~$80. China negotiating safe Hormuz passage with Iran. Great power support shifting from rhetorical to operational." },
+              { title:"Ground Troops", us:"Senate vote gives Trump free hand for 60 days. Cassidy: admin 'left open' ground troops. Hawley: 'ground troops will require authorization.' Hegseth: 8 weeks + 'just getting started.' No ground forces in Iran yet but IRGC entering battlefield changes calculus.", israel:"Already deployed ground forces into Lebanon. IDF chief Zamir: won't stop 'until Hezbollah disarmed.' Expanding deeper. Mossad potentially inside Iran.", risk:"IRGC ground force entry is the trigger. If IRGC commits conventional ground forces + 230 drone swarms, air campaign alone may prove insufficient. Senate constraint gone. Hawley's 'authorization required' line = last Republican red line on ground troops." },
+              { title:"Civilian Casualties", us:"Iran: 1,332+ dead (Red Crescent), 181 children (UNICEF). CNN: US responsible for Minab school strike — targeting data failure, JDAM evidence. CENTCOM issues rare civilian safety warning. 100,000 fled Tehran (UNHCR). 20,000 Americans evacuated.", israel:"IDF ordered 500,000+ Dahiyeh evacuation. Lebanon: 394 dead, 600+ wounded, 95,000+ displaced. ~200 Hezbollah operatives killed Day 9. Ramada Hotel strike in Rawche. 2 IDF soldiers killed.", risk:"Multi-theater toll now 1,500+ across 9+ countries. CNN school attribution = confirmed US legal liability. Iran using cluster bomb warheads (27th wave, 6 wounded) — area-effect weapons banned by 111 nations. Escalation spiral: each side's civilian toll justifies the other's retaliation. CENTCOM civilian warning suggests US military recognizes the political cost." },
+              { title:"Hormuz vs. Global Shipping", us:"NEAR-TOTAL SHUTDOWN: Only 3 transits March 7 (97.8% decline from ~130/day). GPS/AIS interference confirmed. Insurance cancelled across Persian Gulf. DFC insurance in 'infancy.' Macron building European naval coalition — separate from US command.", israel:"Phase 2 underground targeting. Dahiyeh evacuation ordered. Hormuz remains US problem — Israel focused on Lebanon + Tehran. But Israel's first oil infrastructure strikes on Iran add bilateral energy dimension.", risk:"The insurance market — not the military — is now enforcing the blockade. 3 transits/day = effective closure regardless of naval presence. Energy war now BILATERAL: Israel struck 5 Iranian oil facilities, Iran hitting Gulf infrastructure. Kuwait airport fuel tanks, Bahrain desalination plant struck. Recovery timeline extends even if fighting stops tomorrow." },
+              { title:"Alliance Management", us:"CIA backchannel exists but US DISMISSED Iranian messages as 'bull****' (Ravid direct source). Ukraine drone counter-experts deploying to Gulf 'next week.' Wang Yi declared support for Iran — unverified $5B weapons reports. Spain anti-war protests. Araghchi on NBC Meet the Press rejects ceasefire.", israel:"Netanyahu called WH demanding answers on Iran contacts. Operating independently — Phase 2 underground + Dahiyeh evacuation. Vowing to kill Mojtaba. 810 Brigade expanding Lebanon ground positions.", risk:"Alliance EXPANDING militarily (Spain, France, Italy, Greece, UK, Germany + Ukraine drone experts) while FRACTURING politically (Netanyahu suspicious, Trump 'MIGA' puppet model, Italy calling strikes illegal, Spain protests). China moving from rhetorical to material support. Araghchi's NBC appearance = Iran rejecting any diplomatic off-ramp publicly. More nations drawn in = harder to stop." },
+            ].map(f => (
+              <div key={f.title} style={{ background:C.card, borderRadius:8, padding:14, border:`1px solid ${C.border}`, borderTop:`3px solid ${C.oppose}` }}>
+                <div style={{ fontWeight:700, color:C.white, fontSize:13, marginBottom:8 }}>{f.title}</div>
+                <div style={{ fontSize:11.5, marginBottom:6 }}><span style={{ color:C.us, fontWeight:700 }}>US: </span><span style={{ color:C.text }}>{f.us}</span></div>
+                <div style={{ fontSize:11.5, marginBottom:6 }}><span style={{ color:C.israel, fontWeight:700 }}>ISR: </span><span style={{ color:C.text }}>{f.israel}</span></div>
+                <div style={{ fontSize:11.5, borderTop:`1px solid ${C.border}`, paddingTop:6, marginTop:4 }}><span style={{ color:C.red, fontWeight:700 }}>RISK: </span><span style={{ color:C.amber }}>{f.risk}</span></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </CollapsibleSection>
+
+      {/* THREE READINGS — POSITIVE / NEGATIVE / NEUTRAL */}
+      <CollapsibleSection title="Three Readings — Succeeding / Expanding / Failing" id="verdicts" mobile={mobile} borderColor={C.amber}>
+        <div style={{ padding:"12px 24px 12px", maxWidth:1400, margin:"0 auto" }}>
+          <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.green}`, marginBottom:12 }}>
+            <h3 style={{ color:C.green, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Succeeding — Day 7</h3>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+              <span style={{color:C.green,fontWeight:700}}>30+ ships sunk. BMs down 90%. Drones down 83%. 80% of air defense destroyed. 300+ launchers destroyed. 2,500 strikes. 113 IDF strike waves.</span> IDF claims "near-complete air superiority." Day 7 bombing most intense yet — campaign ACCELERATING, not winding down. CENTCOM released Shahid Bagheri drone carrier strike video. Internal security apparatus now being systematically targeted — police HQs, Basij bases, IRGC command centers in Tehran suburbs. Kish Island radars and Parchin military-industrial complex struck. Iran→Israel attack waves collapsing: D1:25, D2:64, D3:25, D4:9, D5:11, D6:9, D7:5. The military machine is performing at a historically extraordinary level.
+            </p>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+              The proxy network is cracking: <span style={{color:C.green,fontWeight:700}}>IRGC Quds Force officers fleeing Lebanon</span> (Axios). Kurdish forces: "those moments are not far." 7 NATO nations deployed. Both chambers rejected War Powers — Trump has complete freedom. UAE Friday alone: intercepted 109 drones + 9 BMs — interception rates holding above 90%. Cooper: Iran's navy "today they have ZERO." The conventional military fight is won; Phase 2 underground targeting proceeding uncontested. Kosovo prior: Day 7 of 78. The campaign hasn't peaked yet.
+            </p>
+          </div>
+
+          <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid #F59E0B`, marginBottom:12 }}>
+            <h3 style={{ color:"#F59E0B", fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Expanding — Day 7</h3>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+              <span style={{color:"#F59E0B",fontWeight:700}}>{stats.expanding} goals growing beyond plan</span>. Trump demands "unconditional surrender." CENTCOM planning 100 days. CSIS: <span style={{color:"#F59E0B",fontWeight:700}}>$891M/day, $3.5B unbudgeted in first 100 hours alone</span>. If 100-day war: ~$62B total. Second school hit (Tehran Niloufar Square). UNICEF: 181 children killed. IDF issuing Gaza-style evacuation orders inside Iran (Qom). 500,000-person Beirut evacuation. Smotrich: "Dahieh will look like Khan Younis." Day 7 most intense bombing yet. The war is expanding in cost, duration, civilian toll, geographic scope, and ambition simultaneously.
+            </p>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+              Six timelines from one coalition: Israel 2 weeks, Trump 4-5, Hegseth 8, CENTCOM 100 days, Trump "no time limits," Hegseth "only just begun." Oil up 20% to ~$80/barrel. Gas up 20 cents/7%. 100,000 fled Tehran in first 2 days (UNHCR). Lebanon: 123 dead, 95,000+ displaced. 20,000 Americans evacuated from region. Russia confirmed providing Iran real-time intelligence on US warship/aircraft locations (WaPo) — de facto co-belligerence. China in talks with Iran on safe Hormuz passage — potential parallel transit regime. Tug crew killed in Hormuz (UKMTO). US Treasury issuing emergency waivers for Indian refineries to buy Russian oil. The expansion is no longer ambiguous in one respect: <span style={{color:"#F59E0B",fontWeight:700}}>great power involvement is no longer hypothetical</span>. Russia = intelligence. China = economic alignment. Cost = $891M/day unbudgeted. Key question: does "MIGA" produce capitulation (WWII Japan) or does Russian/Chinese support give Iran enough ISR and economic oxygen to outlast the 60-day War Powers clock?
+            </p>
+          </div>
+
+          <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.red}` }}>
+            <h3 style={{ color:C.red, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Failing — Day 7</h3>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+              <span style={{color:C.red,fontWeight:700}}>{stats.failing} goals are genuinely failing</span>. Three compounding failures: (1) US "likely" struck first school, now a SECOND school hit in Tehran. UNICEF documenting 181 dead children — permanent accountability record. (2) DFC insurance is fiction — JPMorgan: 6-9 months to approve, can't cover 300+ tankers. Strait blockade has no economic solution on the table. (3) "Unconditional surrender" demand eliminates any off-ramp. You can't negotiate unconditional surrender with a regime that says "no reason to negotiate." These aren't expanding — they're broken.
+            </p>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+              The failing bucket is growing. Russia providing targeting intelligence to Iran (WaPo) — the "prevent great power support" goal just crossed from "expanding" toward "failing." The Hormuz insurance gap is confirmed structural (JPMorgan). Oil up 20% in one week to ~$80. Tug crew killed in Strait = civilian maritime casualties now. The school accountability is institutional (UNICEF: 181 children, 1,332+ dead). "MIGA" + "unconditional surrender" have moved governance/exit goals from "politically neglected" toward genuinely unachievable — you can't plan post-war governance while demanding total capitulation. Italy's defense minister calling strikes illegal while sending a destroyer = alliance incoherence in miniature. The $891M/day with $3.5B unbudgeted creates a fiscal cliff. China negotiating Hormuz passage with Iran — parallel transit regime could emerge that excludes US/allies. Backchannel dead (Ravid: "bull****"). Lebanon toll accelerating (123 dead, 600+ wounded, 95,000+ displaced). Everything in the failing bucket got harder on Day 7, not easier.
+            </p>
+          </div>
+        </div>
+      </CollapsibleSection>
 
       {/* HISTORICAL ANALOGUES */}
-      <div style={{ padding:"24px", maxWidth:1400, margin:"0 auto" }}>
-        <h3 style={{ color:C.blueLt, fontSize:15, fontWeight:700, marginBottom:12, borderBottom:`2px solid ${C.blue}40`, paddingBottom:6 }}>
-          Historical Analogues Assessment
-        </h3>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:12 }}>
-          {[
-            { name:"Kosovo 1999", fit:"HIGH", fitColor:C.green, note:"Air campaign alone forced political outcome. No ground troops. NATO unity strained but held. ~78 days. Key parallel: sustained air pressure changed regime calculus without invasion. Key difference: Milosevic was rational actor with defined territory to concede; Iran's IRGC has no Kosovo to give up." },
-            { name:"Panama 1989", fit:"MEDIUM", fitColor:C.amber, note:"Decapitation + regime change achieved rapidly. Noriega captured, democracy installed. Key parallel: leadership removal as primary objective. Key difference: Panama had no retaliatory capability, no regional proxy network, no nuclear dimension, and US had 10,000 troops pre-positioned." },
-            { name:"Desert Storm 1991", fit:"MEDIUM", fitColor:C.amber, note:"Limited objectives, overwhelming force, declared victory, stopped. Coalition held. Key parallel: air superiority achieved rapidly, coalition management critical. Key difference: Bush defined clear exit criteria (Kuwait liberated) and stopped. Current operation has no equivalent 'done' marker." },
-            { name:"Iraq 2003", fit:"MEDIUM", fitColor:C.amber, note:"Military brilliance → political catastrophe. Regime collapsed faster than expected; governance vacuum filled by insurgency. Key parallel: no post-war governance plan, de-Baathification parallel to IRGC targeting. Key CAUTION: this is the dominant media frame and may be over-applied. Iraq had no internet-era opposition movement; Iran does." },
-            { name:"Libya 2011", fit:"MEDIUM", fitColor:C.amber, note:"Air campaign → regime collapse → state failure → ongoing civil war. Key parallel: no ground troops, regime fell but nothing replaced it. Key difference: Iran has stronger institutions (IRGC, judiciary, Assembly of Experts) that survived bombing — Libya's were one-man rule." },
-            { name:"June 2025 12-Day War", fit:"HIGH", fitColor:C.green, note:"Israeli strikes on Iran's nuclear sites + limited US participation. Nuclear facilities damaged but not destroyed. Iran reconstituted some capacity before Feb 2026 strikes. Key lesson: single-wave strikes bought time but didn't eliminate programs. This operation is explicitly designed to go further." },
-            { name:"Israel-Hezbollah 2006", fit:"LOW", fitColor:C.red, note:"Air campaign failed to achieve political objectives. Ground invasion inconclusive. Hezbollah declared victory. Key parallel: limits of air power against dispersed non-state actors. Key difference: current operation targets a state, not just a militia, with vastly superior ISR and precision." },
-            { name:"Osirak 1981", fit:"LOW", fitColor:C.red, note:"Surgical strike delayed Iraq's nuclear program ~10 years. Key parallel: counter-proliferation objective. Key difference: this is not a surgical strike — it's a sustained multi-week campaign across multiple countries with regime change as a stated goal." },
-          ].map(a => (
-            <div key={a.name} style={{ background:C.card, borderRadius:8, padding:12, border:`1px solid ${C.border}`, borderLeft:`3px solid ${a.fitColor}` }}>
-              <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
-                <span style={{ fontWeight:700, color:C.white, fontSize:13 }}>{a.name}</span>
-                <span style={{ fontSize:9, fontWeight:700, padding:"2px 6px", borderRadius:8, background:`${a.fitColor}20`, color:a.fitColor, border:`1px solid ${a.fitColor}40` }}>FIT: {a.fit}</span>
+      <CollapsibleSection title="Historical Analogues" id="analogues" defaultOpen={false} mobile={mobile} borderColor={C.blueLt}>
+        <div style={{ padding:"24px", maxWidth:1400, margin:"0 auto" }}>
+          <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(280px, 1fr))", gap:12 }}>
+            {[
+              { name:"Kosovo 1999", fit:"HIGH", fitColor:C.green, note:"Air campaign alone forced political outcome. No ground troops. NATO unity strained but held. ~78 days. Key parallel: sustained air pressure changed regime calculus without invasion. Key difference: Milosevic was rational actor with defined territory to concede; Iran's IRGC has no Kosovo to give up." },
+              { name:"Panama 1989", fit:"MEDIUM", fitColor:C.amber, note:"Decapitation + regime change achieved rapidly. Noriega captured, democracy installed. Key parallel: leadership removal as primary objective. Key difference: Panama had no retaliatory capability, no regional proxy network, no nuclear dimension, and US had 10,000 troops pre-positioned." },
+              { name:"Desert Storm 1991", fit:"MEDIUM", fitColor:C.amber, note:"Limited objectives, overwhelming force, declared victory, stopped. Coalition held. Key parallel: air superiority achieved rapidly, coalition management critical. Key difference: Bush defined clear exit criteria (Kuwait liberated) and stopped. Current operation has no equivalent 'done' marker." },
+              { name:"Iraq 2003", fit:"MEDIUM", fitColor:C.amber, note:"Military brilliance → political catastrophe. Regime collapsed faster than expected; governance vacuum filled by insurgency. Key parallel: no post-war governance plan, de-Baathification parallel to IRGC targeting. Key CAUTION: this is the dominant media frame and may be over-applied. Iraq had no internet-era opposition movement; Iran does." },
+              { name:"Libya 2011", fit:"MEDIUM", fitColor:C.amber, note:"Air campaign → regime collapse → state failure → ongoing civil war. Key parallel: no ground troops, regime fell but nothing replaced it. Key difference: Iran has stronger institutions (IRGC, judiciary, Assembly of Experts) that survived bombing — Libya's were one-man rule." },
+              { name:"June 2025 12-Day War", fit:"HIGH", fitColor:C.green, note:"Israeli strikes on Iran's nuclear sites + limited US participation. Nuclear facilities damaged but not destroyed. Iran reconstituted some capacity before Feb 2026 strikes. Key lesson: single-wave strikes bought time but didn't eliminate programs. This operation is explicitly designed to go further." },
+              { name:"Israel-Hezbollah 2006", fit:"LOW", fitColor:C.red, note:"Air campaign failed to achieve political objectives. Ground invasion inconclusive. Hezbollah declared victory. Key parallel: limits of air power against dispersed non-state actors. Key difference: current operation targets a state, not just a militia, with vastly superior ISR and precision." },
+              { name:"Osirak 1981", fit:"LOW", fitColor:C.red, note:"Surgical strike delayed Iraq's nuclear program ~10 years. Key parallel: counter-proliferation objective. Key difference: this is not a surgical strike — it's a sustained multi-week campaign across multiple countries with regime change as a stated goal." },
+            ].map(a => (
+              <div key={a.name} style={{ background:C.card, borderRadius:8, padding:12, border:`1px solid ${C.border}`, borderLeft:`3px solid ${a.fitColor}` }}>
+                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:6 }}>
+                  <span style={{ fontWeight:700, color:C.white, fontSize:13 }}>{a.name}</span>
+                  <span style={{ fontSize:9, fontWeight:700, padding:"2px 6px", borderRadius:8, background:`${a.fitColor}20`, color:a.fitColor, border:`1px solid ${a.fitColor}40` }}>FIT: {a.fit}</span>
+                </div>
+                <div style={{ fontSize:11, color:C.text, lineHeight:1.5 }}>{a.note}</div>
               </div>
-              <div style={{ fontSize:11, color:C.text, lineHeight:1.5 }}>{a.note}</div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* VERDICT — THREE READINGS */}
-      <div style={{ padding:"0 24px 12px", maxWidth:1400, margin:"0 auto" }}>
-        <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.green}` }}>
-          <h3 style={{ color:C.green, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Succeeding — Day 7</h3>
-          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
-            <span style={{color:C.green,fontWeight:700}}>30+ ships sunk. BMs down 90%. Drones down 83%. 80% of air defense destroyed. 300+ launchers destroyed. 2,500 strikes. 113 IDF strike waves.</span> IDF claims "near-complete air superiority." Day 7 bombing most intense yet — campaign ACCELERATING, not winding down. CENTCOM released Shahid Bagheri drone carrier strike video. Internal security apparatus now being systematically targeted — police HQs, Basij bases, IRGC command centers in Tehran suburbs. Kish Island radars and Parchin military-industrial complex struck. Iran→Israel attack waves collapsing: D1:25, D2:64, D3:25, D4:9, D5:11, D6:9, D7:5. The military machine is performing at a historically extraordinary level.
-          </p>
-          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
-            The proxy network is cracking: <span style={{color:C.green,fontWeight:700}}>IRGC Quds Force officers fleeing Lebanon</span> (Axios). Kurdish forces: "those moments are not far." 7 NATO nations deployed. Both chambers rejected War Powers — Trump has complete freedom. UAE Friday alone: intercepted 109 drones + 9 BMs — interception rates holding above 90%. Cooper: Iran's navy "today they have ZERO." The conventional military fight is won; Phase 2 underground targeting proceeding uncontested. Kosovo prior: Day 7 of 78. The campaign hasn't peaked yet.
-          </p>
-        </div>
-      </div>
-
-      <div style={{ padding:"0 24px 12px", maxWidth:1400, margin:"0 auto" }}>
-        <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid #F59E0B` }}>
-          <h3 style={{ color:"#F59E0B", fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Expanding — Day 7</h3>
-          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
-            <span style={{color:"#F59E0B",fontWeight:700}}>{stats.expanding} goals growing beyond plan</span>. Trump demands "unconditional surrender." CENTCOM planning 100 days. CSIS: <span style={{color:"#F59E0B",fontWeight:700}}>$891M/day, $3.5B unbudgeted in first 100 hours alone</span>. If 100-day war: ~$62B total. Second school hit (Tehran Niloufar Square). UNICEF: 181 children killed. IDF issuing Gaza-style evacuation orders inside Iran (Qom). 500,000-person Beirut evacuation. Smotrich: "Dahieh will look like Khan Younis." Day 7 most intense bombing yet. The war is expanding in cost, duration, civilian toll, geographic scope, and ambition simultaneously.
-          </p>
-          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
-            Six timelines from one coalition: Israel 2 weeks, Trump 4-5, Hegseth 8, CENTCOM 100 days, Trump "no time limits," Hegseth "only just begun." Oil up 20% to ~$80/barrel. Gas up 20 cents/7%. 100,000 fled Tehran in first 2 days (UNHCR). Lebanon: 123 dead, 95,000+ displaced. 20,000 Americans evacuated from region. Russia confirmed providing Iran real-time intelligence on US warship/aircraft locations (WaPo) — de facto co-belligerence. China in talks with Iran on safe Hormuz passage — potential parallel transit regime. Tug crew killed in Hormuz (UKMTO). US Treasury issuing emergency waivers for Indian refineries to buy Russian oil. The expansion is no longer ambiguous in one respect: <span style={{color:"#F59E0B",fontWeight:700}}>great power involvement is no longer hypothetical</span>. Russia = intelligence. China = economic alignment. Cost = $891M/day unbudgeted. Key question: does "MIGA" produce capitulation (WWII Japan) or does Russian/Chinese support give Iran enough ISR and economic oxygen to outlast the 60-day War Powers clock?
-          </p>
-        </div>
-      </div>
-
-      <div style={{ padding:"0 24px 40px", maxWidth:1400, margin:"0 auto" }}>
-        <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.red}` }}>
-          <h3 style={{ color:C.red, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Failing — Day 7</h3>
-          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
-            <span style={{color:C.red,fontWeight:700}}>{stats.failing} goals are genuinely failing</span>. Three compounding failures: (1) US "likely" struck first school, now a SECOND school hit in Tehran. UNICEF documenting 181 dead children — permanent accountability record. (2) DFC insurance is fiction — JPMorgan: 6-9 months to approve, can't cover 300+ tankers. Strait blockade has no economic solution on the table. (3) "Unconditional surrender" demand eliminates any off-ramp. You can't negotiate unconditional surrender with a regime that says "no reason to negotiate." These aren't expanding — they're broken.
-          </p>
-          <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
-            The failing bucket is growing. Russia providing targeting intelligence to Iran (WaPo) — the "prevent great power support" goal just crossed from "expanding" toward "failing." The Hormuz insurance gap is confirmed structural (JPMorgan). Oil up 20% in one week to ~$80. Tug crew killed in Strait = civilian maritime casualties now. The school accountability is institutional (UNICEF: 181 children, 1,332+ dead). "MIGA" + "unconditional surrender" have moved governance/exit goals from "politically neglected" toward genuinely unachievable — you can't plan post-war governance while demanding total capitulation. Italy's defense minister calling strikes illegal while sending a destroyer = alliance incoherence in miniature. The $891M/day with $3.5B unbudgeted creates a fiscal cliff. China negotiating Hormuz passage with Iran — parallel transit regime could emerge that excludes US/allies. Backchannel dead (Ravid: "bull****"). Lebanon toll accelerating (123 dead, 600+ wounded, 95,000+ displaced). Everything in the failing bucket got harder on Day 7, not easier.
-          </p>
-        </div>
-      </div>
+      </CollapsibleSection>
     </div>
   );
 }
