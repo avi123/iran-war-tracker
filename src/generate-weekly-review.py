@@ -707,7 +707,13 @@ td {{ padding:8px; border-bottom:1px solid {C['border']}30; font-size:12px; vert
 
     # [3] WHAT HAPPENED THIS WEEK — curated highlights (the narrative lead)
     if highlights:
-        cat_colors = {'military':'#3B82F6', 'political':'#A78BFA', 'economic':'#F59E0B', 'regime':'#EF4444', 'humanitarian':'#EC4899'}
+        cat_colors = {
+            'military':'#3B82F6', 'nuclear':'#3B82F6', 'missiles':'#3B82F6',
+            'naval':'#3B82F6', 'air':'#3B82F6', 'security':'#3B82F6',
+            'political':'#A78BFA', 'economic':'#F59E0B',
+            'regime':'#EF4444', 'proxies':'#EF4444',
+            'humanitarian':'#EC4899',
+        }
         lines.append('<div class="section">')
         lines.append(f'<h3 style="color:{C["white"]}">What Happened This Week</h3>')
         for h in highlights:
@@ -754,7 +760,7 @@ td {{ padding:8px; border-bottom:1px solid {C['border']}30; font-size:12px; vert
     # [6] PREDICTION SCORECARD
     if watch_resolved:
         lines.append('<div class="section">')
-        lines.append(f'<h3 style="color:{C["amber"]}">Prediction Scorecard</h3>')
+        lines.append(f'<h3 style="color:{C["white"]}">Prediction Scorecard</h3>')
         lines.append('<table>')
         lines.append('<tr><th>Prediction</th><th>Result</th><th>Status</th></tr>')
         for w in watch_resolved:
