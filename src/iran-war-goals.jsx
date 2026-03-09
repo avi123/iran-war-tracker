@@ -636,8 +636,8 @@ export default function App() {
       {/* WEEKS IN REVIEW */}
       <WeeksInReview mobile={mobile}/>
 
-      {/* HIGHLIGHTS & WATCH */}
-      <CollapsibleSection title="Highlights & Watch" id="highlights" mobile={mobile} borderColor={C.blueLt}
+      {/* KEY DEVELOPMENTS & WATCH */}
+      <CollapsibleSection title="Key Developments & Items to Monitor" id="highlights" mobile={mobile} borderColor={C.blueLt}
         rightContent={`${HIGHLIGHTS.keyDevelopments.length} key | ${HIGHLIGHTS.watchNext.length} watching`}>
         <HighlightsContent mobile={mobile}/>
       </CollapsibleSection>
