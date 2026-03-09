@@ -83,10 +83,13 @@ def parse_goal(goal_text):
                     if sub:
                         subgoals.append(sub)
                     obj_start = None
+    importance_m = re.search(r'importance\s*:\s*(\d+)', goal_text)
+    importance = int(importance_m.group(1)) if importance_m else 3
+    goal_type = extract_field(goal_text, 'type')
     return {
         'id': goal_id, 'name': name, 'status': status,
-        'trend': trend, 'party': party,
-        'outcomeNote': outcome_note, 'subgoals': subgoals,
+        'trend': trend, 'party': party, 'importance': importance,
+        'type': goal_type, 'outcomeNote': outcome_note, 'subgoals': subgoals,
     }
 
 def extract_goals(jsx_text):
@@ -309,6 +312,120 @@ def collect_week_highlights(start_date, end_date):
 
     return result, all_resolved
 
+def synthesize_highlights_from_goals(changes, end_goals):
+    """When HIGHLIGHTS data doesn't exist (e.g. Week 1), synthesize the most
+    important developments from ALL goals — not just changed ones.
+
+    Thinks editorially: "What are the 7 most important things that happened?"
+    Uses importance field × outcome significance for ranking, and extracts
+    the newsworthy lead from each outcomeNote.
+    """
+    flat = flatten_goals(end_goals)
+
+    # Outcome significance multiplier
+    SIG = {
+        'achieved': 3, 'unachievable': 3,  # Big definitive outcomes
+        'at risk': 2, 'in progress': 1, 'tbd': 0,
+    }
+    TREND_BONUS = {'failing': 2, 'expanding': 1}
+
+    # For diversity, group fine-grained categories into broad domains
+    DOMAIN_MAP = {
+        'nuclear': 'military', 'missiles': 'military', 'naval': 'military',
+        'air': 'military', 'security': 'military',
+        'proxies': 'proxies', 'regime': 'regime',
+        'economic': 'economic', 'political': 'political',
+        'humanitarian': 'humanitarian',
+    }
+
+    # Goals with "avoid" in the name or type are avoidance goals.
+    # Achieved avoidance = "bad thing didn't happen" = less newsworthy than an event.
+
+    # Collect parent goal IDs to skip subgoals when parent is included
+    parent_ids = {g['id'] for g in end_goals}  # top-level goals
+    subgoal_parent = {}  # subgoal_id -> parent_id
+    for g in end_goals:
+        for sg in g.get('subgoals', []):
+            subgoal_parent[sg['id']] = g['id']
+
+    candidates = []
+    for g in flat.values():
+        note = g.get('outcomeNote', '')
+        if not note:
+            continue
+        importance = g.get('importance', 3)
+        sig = SIG.get(g['status'], 1)
+        trend_bonus = TREND_BONUS.get(g.get('trend', ''), 0)
+        score = importance * sig + trend_bonus
+
+        # Penalty for avoidance goals (the absence of something isn't the headline)
+        is_avoid = g.get('type') == 'avoid' or 'avoid' in g['name'].lower()
+        if is_avoid and g['status'] == 'achieved':
+            score = max(1, score - 5)
+
+        cat = goal_category(g['id'])
+        text = f"{g['name']}: {note}"
+
+        candidates.append({
+            'text': text,
+            'category': cat.lower(),
+            'count': 1,
+            'score': score,
+            'goal_id': g['id'],
+            'is_subgoal': g['id'] in subgoal_parent,
+            'parent_id': subgoal_parent.get(g['id']),
+        })
+
+    # Sort by score
+    candidates.sort(key=lambda x: x['score'], reverse=True)
+
+    # Two-pass selection for editorial diversity:
+    # Pass 1: Take the highest-scoring item per domain (breadth-first)
+    # Pass 2: Fill remaining slots with the highest-scoring unused items
+    result = []
+    domain_used = {}
+    selected_ids = set()
+
+    def can_select(item):
+        if item['goal_id'] in selected_ids:
+            return False
+        if item['is_subgoal'] and item['parent_id'] in selected_ids:
+            return False
+        if any(subgoal_parent.get(r['goal_id']) == item['goal_id'] for r in result):
+            return False
+        return True
+
+    # Pass 1: one per domain (guarantees Hezbollah, oil, political, etc. get a slot)
+    for item in candidates:
+        if not can_select(item):
+            continue
+        cat = item['category'] or 'other'
+        domain = DOMAIN_MAP.get(cat, 'other')
+        if domain in domain_used:
+            continue
+        result.append(item)
+        selected_ids.add(item['goal_id'])
+        domain_used[domain] = True
+        if len(result) >= 7:
+            break
+
+    # Pass 2: fill remaining from highest scoring, max 2 per domain
+    domain_counts = {d: 1 for d in domain_used}
+    for item in candidates:
+        if len(result) >= 7:
+            break
+        if not can_select(item):
+            continue
+        cat = item['category'] or 'other'
+        domain = DOMAIN_MAP.get(cat, 'other')
+        if domain_counts.get(domain, 0) >= 2:
+            continue
+        result.append(item)
+        selected_ids.add(item['goal_id'])
+        domain_counts[domain] = domain_counts.get(domain, 0) + 1
+
+    return result
+
 # ═══ Diff Logic ═══
 
 def flatten_goals(goals):
@@ -426,13 +543,13 @@ def generate_narrative(changes, stats_start, stats_end, week_num, is_complete, e
 # ═══ Category helpers ═══
 
 CATEGORY_MAP = {
-    'nuke': 'Nuclear', 'missile': 'Military', 'regime': 'Regime',
-    'navy': 'Military', 'hormuz': 'Economic', 'airsup': 'Military',
-    'hez': 'Military', 'prx': 'Military', 'cas': 'Humanitarian',
+    'nuke': 'Nuclear', 'missile': 'Missiles', 'regime': 'Regime',
+    'navy': 'Naval', 'hormuz': 'Economic', 'airsup': 'Air', 'air': 'Air',
+    'hez': 'Proxies', 'prx': 'Proxies', 'cas': 'Humanitarian',
     'sco': 'Political', 'alliance': 'Political', 'all': 'Political',
     'nar': 'Political', 'en': 'Economic', 'gulf': 'Economic',
-    'hor': 'Economic', 'terror': 'Military', 'ter': 'Military',
-    'reg': 'Regime',
+    'hor': 'Economic', 'terror': 'Security', 'ter': 'Security',
+    'reg': 'Regime', 'dom': 'Political',
 }
 
 def goal_category(goal_id):
@@ -629,7 +746,7 @@ td {{ padding:8px; border-bottom:1px solid {C['border']}30; font-size:12px; vert
         for c in changes:
             prev = status_badge_html(c['old_status'], c['old_trend']) if c['old_status'] else '<span style="color:#9CA3AF;font-size:11px">new</span>'
             curr = status_badge_html(c['new_status'], c['new_trend']) if c['new_status'] else '<span style="color:#9CA3AF;font-size:11px">removed</span>'
-            note = html.escape(c['outcomeNote'][:200]) + '...' if len(c.get('outcomeNote', '')) > 200 else html.escape(c.get('outcomeNote', ''))
+            note = html.escape(c.get('outcomeNote', ''))
             lines.append(f'<tr><td style="font-weight:600;color:{C["white"]}">{html.escape(c["name"])}</td><td>{prev}</td><td>{curr}</td><td style="color:{C["textDim"]};font-size:11px;line-height:1.5">{note}</td></tr>')
         lines.append('</table>')
         lines.append('</div>')
@@ -658,7 +775,7 @@ td {{ padding:8px; border-bottom:1px solid {C['border']}30; font-size:12px; vert
             lines.append(f'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px">')
             for cat in sorted(cat_changes.keys()):
                 items = cat_changes[cat]
-                names = ", ".join(c['name'][:30] for c in items[:3])
+                names = ", ".join(c['name'] for c in items[:3])
                 if len(items) > 3:
                     names += f", +{len(items)-3} more"
                 lines.append(f'<div class="card"><div style="font-weight:700;color:{C["white"]};font-size:13px;margin-bottom:4px">{html.escape(cat)}</div>')
@@ -673,9 +790,7 @@ td {{ padding:8px; border-bottom:1px solid {C['border']}30; font-size:12px; vert
         lines.append('<div class="section">')
         lines.append(f'<h3 style="color:{C["white"]}">Biggest Movers</h3>')
         for c in top_movers:
-            note_short = c.get('outcomeNote', '')[:300]
-            if len(c.get('outcomeNote', '')) > 300:
-                note_short += '...'
+            note_short = c.get('outcomeNote', '')
             lines.append(f'<div class="card" style="border-left:3px solid {C["blue"]}">')
             lines.append(f'<div style="font-weight:700;color:{C["white"]};font-size:13px;margin-bottom:4px">{html.escape(c["name"])}</div>')
             lines.append(f'<div style="margin-bottom:4px">{status_badge_html(c["old_status"], c["old_trend"])} \u2192 {status_badge_html(c["new_status"], c["new_trend"])}</div>')
@@ -762,11 +877,15 @@ def generate_week(week_num, current_day):
     else:
         week_highlights, watch_resolved = aggregated, []
 
-    # Fallback: if no aggregated highlights, use end-of-week snapshot
+    # Fallback: if no aggregated highlights, try end-of-week snapshot, then synthesize from goals
     if not week_highlights:
         highlights_raw = extract_highlights(end_jsx)
-        week_highlights = [{'text': h['text'], 'category': h.get('category', ''), 'count': 1} for h in highlights_raw]
-        watch_resolved = extract_watch_resolved(end_jsx)
+        if highlights_raw:
+            week_highlights = [{'text': h['text'], 'category': h.get('category', ''), 'count': 1} for h in highlights_raw]
+        else:
+            week_highlights = synthesize_highlights_from_goals(changes, end_goals)
+        if not watch_resolved:
+            watch_resolved = extract_watch_resolved(end_jsx)
 
     # Quality check: at least 1 change for complete weeks
     if is_complete and len(changes) == 0 and len(week_highlights) == 0:
