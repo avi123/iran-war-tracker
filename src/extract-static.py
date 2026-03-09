@@ -7,6 +7,8 @@ and outputs a semantic HTML fragment for the <noscript> block.
 import re
 import sys
 import html
+import json
+from datetime import datetime
 
 def extract_between(text, start_marker, end_marker):
     """Extract text between two markers."""
@@ -275,14 +277,138 @@ def generate_html(highlights, goals):
     lines.append('</div>')
     return '\n'.join(lines)
 
+def extract_updated_at(jsx_text):
+    """Extract updatedAt timestamp from HIGHLIGHTS."""
+    m = re.search(r'updatedAt\s*:\s*"([^"]+)"', jsx_text)
+    return m.group(1) if m else ""
+
+
+def snippet_from_text(text, max_len=40):
+    """Extract a short headline snippet from a keyDevelopment text.
+    Takes the portion before the first em-dash or period, truncated."""
+    # Split on em-dash, period+space, or comma+space (after reasonable length)
+    for sep in [' — ', ' - ']:
+        idx = text.find(sep)
+        if idx != -1 and idx <= max_len:
+            snippet = text[:idx].strip()
+            return snippet.rstrip(',.')
+    # Try period
+    idx = text.find('. ')
+    if idx != -1 and idx <= max_len:
+        snippet = text[:idx].strip()
+        return snippet.rstrip(',.')
+    # Just truncate at word boundary
+    if len(text) > max_len:
+        truncated = text[:max_len]
+        last_space = truncated.rfind(' ')
+        if last_space > max_len - 15:
+            snippet = truncated[:last_space].strip()
+            return snippet.rstrip(',.')
+    return text[:max_len].strip().rstrip(',.')
+
+
+def count_goals(goals):
+    """Count total goals including subgoals."""
+    total = 0
+    for g in goals:
+        total += 1
+        total += len(g.get('subgoals', []))
+    return total
+
+
+def generate_meta(jsx_text):
+    """Generate dynamic SEO title and description from HIGHLIGHTS data."""
+    WAR_START = datetime(2026, 2, 28)
+
+    updated_at = extract_updated_at(jsx_text)
+    highlights = extract_highlights(jsx_text)
+    goals = extract_goals(jsx_text)
+    goal_count = count_goals(goals)
+
+    # Calculate war day
+    day_num = None
+    if updated_at:
+        try:
+            # Parse ISO timestamp (handle various formats)
+            ts = updated_at.replace('Z', '+00:00')
+            if '+' not in ts and '-' not in ts[10:]:
+                ts += '+00:00'
+            dt = datetime.fromisoformat(ts.replace('Z', '+00:00'))
+            day_num = (dt.replace(tzinfo=None) - WAR_START).days + 1
+        except (ValueError, TypeError):
+            pass
+
+    # Extract headline snippets from first 3 keyDevelopments
+    snippets = []
+    for item in highlights[:3]:
+        s = snippet_from_text(item['text'])
+        if s:
+            snippets.append(s)
+
+    # Make short snippets for title (max 20 chars each)
+    short_snippets = [snippet_from_text(item['text'], max_len=22) for item in highlights[:3] if item.get('text')]
+
+    # Build title: "Iran War Tracker — Day N: snippet1, snippet2 | {goal_count} Goals"
+    day_prefix = f"Day {day_num}" if day_num else "Live"
+
+    # Try 2 short snippets first
+    if len(short_snippets) >= 2:
+        title_snips = ", ".join(short_snippets[:2])
+        title = f"Iran War Tracker — {day_prefix}: {title_snips} | {goal_count} Goals"
+    elif short_snippets:
+        title = f"Iran War Tracker — {day_prefix}: {short_snippets[0]} | {goal_count} Goals"
+    else:
+        title = f"Iran War Tracker — {day_prefix} | {goal_count} Goals Live"
+
+    # If still too long, fall back
+    if len(title) > 70 and short_snippets:
+        title = f"Iran War Tracker — {day_prefix}: {short_snippets[0]} | {goal_count} Goals"
+    if len(title) > 70:
+        title = f"Iran War Tracker — {day_prefix} | {goal_count} Goals Live"
+
+    # Build description using longer snippets
+    desc_snippets_str = ", ".join(snippets[:3])
+    description = f"{day_prefix}: {desc_snippets_str}. Track {goal_count} sourced goals across military, nuclear, oil & casualties. Updated multiple times daily."
+    if len(description) > 160:
+        desc_snippets_str = ", ".join(snippets[:2])
+        description = f"{day_prefix}: {desc_snippets_str}. Track {goal_count} sourced war goals — military, nuclear, oil, casualties. Updated daily."
+    if len(description) > 160:
+        description = f"{day_prefix}: {snippets[0]}. {goal_count} sourced goals across the 2026 US-Israel-Iran war. Updated daily."
+
+    # OG title can be longer (up to ~95 chars)
+    og_title_snips = ", ".join(snippets[:2])
+    og_title = f"Iran War Tracker — {day_prefix}: {og_title_snips}"
+    if len(og_title) > 95:
+        og_title = f"Iran War Tracker — {day_prefix}: {snippets[0]}"
+
+    # Value prop for description suffix
+    value_prop = f"{goal_count} sourced goals across military, nuclear, oil & casualties"
+
+    return json.dumps({
+        "day": day_num,
+        "goal_count": goal_count,
+        "title": title,
+        "description": description,
+        "og_title": og_title,
+        "snippets": snippets,
+        "value_prop": value_prop,
+    })
+
+
 def main():
     if len(sys.argv) < 2:
-        print("Usage: extract-static.py <path-to-jsx>", file=sys.stderr)
+        print("Usage: extract-static.py <path-to-jsx> [--meta]", file=sys.stderr)
         sys.exit(1)
 
     jsx_path = sys.argv[1]
+    meta_mode = '--meta' in sys.argv
+
     with open(jsx_path, 'r') as f:
         jsx_text = f.read()
+
+    if meta_mode:
+        print(generate_meta(jsx_text))
+        return
 
     highlights = extract_highlights(jsx_text)
     goals = extract_goals(jsx_text)
