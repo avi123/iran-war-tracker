@@ -637,7 +637,7 @@ export default function App() {
       <WeeksInReview mobile={mobile}/>
 
       {/* HIGHLIGHTS & WATCH */}
-      <CollapsibleSection title="Highlights & Watch" id="highlights" mobile={mobile} borderColor={C.white}
+      <CollapsibleSection title="Highlights & Watch" id="highlights" mobile={mobile} borderColor={C.blueLt}
         rightContent={`${HIGHLIGHTS.keyDevelopments.length} key | ${HIGHLIGHTS.watchNext.length} watching`}>
         <HighlightsContent mobile={mobile}/>
       </CollapsibleSection>
@@ -720,7 +720,7 @@ export default function App() {
       </CollapsibleSection>
 
       {/* ALIGNMENT / FRICTION POINTS */}
-      <CollapsibleSection title="Alignment & Friction Points" id="friction" mobile={mobile} borderColor={C.oppose}>
+      <CollapsibleSection title="Alignment & Friction Points" id="friction" mobile={mobile} borderColor={C.blueLt}>
         <div style={{ padding:"24px", maxWidth:1400, margin:"0 auto" }}>
           <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(300px, 1fr))", gap:12 }}>
             {[
@@ -743,7 +743,7 @@ export default function App() {
       </CollapsibleSection>
 
       {/* THREE READINGS — POSITIVE / NEGATIVE / NEUTRAL */}
-      <CollapsibleSection title="Three Readings — Succeeding / Expanding / Failing" id="verdicts" mobile={mobile} borderColor={C.amber}>
+      <CollapsibleSection title="Three Readings — Succeeding / Expanding / Failing" id="verdicts" mobile={mobile} borderColor={C.blueLt}>
         <div style={{ padding:"12px 24px 12px", maxWidth:1400, margin:"0 auto" }}>
           <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.green}`, marginBottom:12 }}>
             <h3 style={{ color:C.green, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Succeeding — Day 7</h3>
