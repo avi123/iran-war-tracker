@@ -194,106 +194,76 @@ const resolvedConfig = {
   "ongoing": { icon: "→", color: "#3B82F6" },
 };
 
-const HighlightsPanel = ({ mobile }) => {
-  const [open, setOpen] = useState(() => {
-    try { return localStorage.getItem("highlights-collapsed") !== "1"; } catch { return true; }
-  });
-  const toggle = () => {
-    const next = !open;
-    setOpen(next);
-    try { localStorage.setItem("highlights-collapsed", next ? "0" : "1"); } catch {}
-  };
-
+const HighlightsContent = ({ mobile }) => {
   const hasResolved = HIGHLIGHTS.watchResolved && HIGHLIGHTS.watchResolved.length > 0;
-
   return (
-    <div style={{ borderBottom: `1px solid ${C.border}` }}>
-      <div
-        onClick={toggle}
-        style={{
-          display: "flex", alignItems: "center", justifyContent: "space-between",
-          padding: mobile ? "8px 12px" : "8px 24px", cursor: "pointer",
-          background: `linear-gradient(90deg, ${C.card} 0%, ${C.cardAlt} 100%)`,
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ color: C.textDim, fontSize: 12, fontWeight: 700 }}>{open ? "▼" : "▶"}</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: C.white, letterSpacing: 1, textTransform: "uppercase" }}>Highlights & Watch</span>
+    <div style={{
+      display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr",
+      gap: 0, background: C.bg,
+    }}>
+      {/* LEFT: Key Developments */}
+      <div style={{ padding: mobile ? "10px 12px" : "12px 24px", borderRight: mobile ? "none" : `1px solid ${C.border}30` }}>
+        <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
+          Key Developments
         </div>
-        <span style={{ fontSize: 9, color: C.textDim, fontFamily: "monospace" }}>
-          {HIGHLIGHTS.keyDevelopments.length} key | {HIGHLIGHTS.watchNext.length} watching
-        </span>
-      </div>
-      {open && (
-        <div style={{
-          display: "grid", gridTemplateColumns: mobile ? "1fr" : "1fr 1fr",
-          gap: 0, background: C.bg,
-        }}>
-          {/* LEFT: Key Developments */}
-          <div style={{ padding: mobile ? "10px 12px" : "12px 24px", borderRight: mobile ? "none" : `1px solid ${C.border}30` }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
-              Key Developments
+        {HIGHLIGHTS.keyDevelopments.map((d, i) => (
+          <div key={i} style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "flex-start" }}>
+            <span style={{
+              display: "inline-block", width: 6, height: 6, borderRadius: 3, flexShrink: 0, marginTop: 5,
+              background: categoryColor[d.category] || C.textDim,
+            }}/>
+            <div>
+              <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{d.text}{d.sources && <SourceLinks sources={d.sources}/>}</span>
+              {d.why && <div style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic" }}>{d.why}</div>}
             </div>
-            {HIGHLIGHTS.keyDevelopments.map((d, i) => (
-              <div key={i} style={{ display: "flex", gap: 8, marginBottom: 10, alignItems: "flex-start" }}>
-                <span style={{
-                  display: "inline-block", width: 6, height: 6, borderRadius: 3, flexShrink: 0, marginTop: 5,
-                  background: categoryColor[d.category] || C.textDim,
-                }}/>
-                <div>
-                  <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{d.text}{d.sources && <SourceLinks sources={d.sources}/>}</span>
-                  {d.why && <div style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic" }}>{d.why}</div>}
-                </div>
-              </div>
-            ))}
           </div>
+        ))}
+      </div>
 
-          {/* RIGHT: Watch */}
-          <div style={{ padding: mobile ? "10px 12px" : "12px 24px", borderTop: mobile ? `1px solid ${C.border}30` : "none" }}>
-            <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
-              Watching
+      {/* RIGHT: Watch */}
+      <div style={{ padding: mobile ? "10px 12px" : "12px 24px", borderTop: mobile ? `1px solid ${C.border}30` : "none" }}>
+        <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginBottom: 8 }}>
+          Watching
+        </div>
+        {HIGHLIGHTS.watchNext.map((w, i) => {
+          const tf = timeframeConfig[w.timeframe] || timeframeConfig["open question"];
+          return (
+            <div key={i} style={{ display: "flex", gap: 6, marginBottom: 9, alignItems: "flex-start" }}>
+              <span style={{
+                display: "inline-block", padding: "1px 4px", borderRadius: 3, fontSize: 7, fontWeight: 700,
+                background: tf.bg, color: tf.color, border: `1px solid ${tf.color}40`,
+                letterSpacing: 0.3, whiteSpace: "nowrap", flexShrink: 0, marginTop: 3,
+              }}>{tf.label}</span>
+              <div>
+                <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{w.text}{w.sources && <SourceLinks sources={w.sources}/>}</span>
+                {w.why && <div style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic" }}>{w.why}</div>}
+              </div>
             </div>
-            {HIGHLIGHTS.watchNext.map((w, i) => {
-              const tf = timeframeConfig[w.timeframe] || timeframeConfig["open question"];
+          );
+        })}
+
+        {hasResolved && (
+          <>
+            <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginTop: 12, marginBottom: 6, borderTop: `1px solid ${C.border}30`, paddingTop: 8 }}>
+              Previously Watching
+            </div>
+            {HIGHLIGHTS.watchResolved.map((r, i) => {
+              const rc = resolvedConfig[r.status] || resolvedConfig["ongoing"];
               return (
-                <div key={i} style={{ display: "flex", gap: 6, marginBottom: 9, alignItems: "flex-start" }}>
-                  <span style={{
-                    display: "inline-block", padding: "1px 4px", borderRadius: 3, fontSize: 7, fontWeight: 700,
-                    background: tf.bg, color: tf.color, border: `1px solid ${tf.color}40`,
-                    letterSpacing: 0.3, whiteSpace: "nowrap", flexShrink: 0, marginTop: 3,
-                  }}>{tf.label}</span>
-                  <div>
-                    <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{w.text}{w.sources && <SourceLinks sources={w.sources}/>}</span>
-                    {w.why && <div style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic" }}>{w.why}</div>}
+                <div key={i} style={{ marginBottom: 6 }}>
+                  <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: rc.color, flexShrink: 0, width: 14, textAlign: "center" }}>{rc.icon}</span>
+                    <div>
+                      <span style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4 }}>{r.text}</span>
+                      <div style={{ fontSize: 10, color: rc.color, lineHeight: 1.4, marginTop: 1 }}>{r.resolved}</div>
+                    </div>
                   </div>
                 </div>
               );
             })}
-
-            {hasResolved && (
-              <>
-                <div style={{ fontSize: 9, fontWeight: 700, color: C.textDim, letterSpacing: 1.5, textTransform: "uppercase", marginTop: 12, marginBottom: 6, borderTop: `1px solid ${C.border}30`, paddingTop: 8 }}>
-                  Previously Watching
-                </div>
-                {HIGHLIGHTS.watchResolved.map((r, i) => {
-                  const rc = resolvedConfig[r.status] || resolvedConfig["ongoing"];
-                  return (
-                    <div key={i} style={{ marginBottom: 6 }}>
-                      <div style={{ display: "flex", gap: 6, alignItems: "flex-start" }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: rc.color, flexShrink: 0, width: 14, textAlign: "center" }}>{rc.icon}</span>
-                        <div>
-                          <span style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4 }}>{r.text}</span>
-                          <div style={{ fontSize: 10, color: rc.color, lineHeight: 1.4, marginTop: 1 }}>{r.resolved}</div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </>
-            )}
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </div>
   );
 };
@@ -507,7 +477,7 @@ const GOALS = [
   },
 ];
 
-const CollapsibleSection = ({ title, id, defaultOpen = true, children, mobile, borderColor }) => {
+const CollapsibleSection = ({ title, id, defaultOpen = true, children, mobile, borderColor, rightContent }) => {
   const [open, setOpen] = useState(() => {
     try {
       const stored = localStorage.getItem(`section-${id}`);
@@ -521,7 +491,7 @@ const CollapsibleSection = ({ title, id, defaultOpen = true, children, mobile, b
     try { localStorage.setItem(`section-${id}`, next ? "1" : "0"); } catch {}
   };
   return (
-    <section style={{ maxWidth:1400, margin:"0 auto" }}>
+    <section>
       <div
         onClick={toggle}
         style={{
@@ -534,6 +504,7 @@ const CollapsibleSection = ({ title, id, defaultOpen = true, children, mobile, b
       >
         <span style={{ color:C.textDim, fontSize:12, fontWeight:700 }}>{open ? "▼" : "▶"}</span>
         <span style={{ fontSize:11, fontWeight:700, color:borderColor||C.white, letterSpacing:1, textTransform:"uppercase" }}>{title}</span>
+        {rightContent && <span style={{ marginLeft:"auto", fontSize:9, color:C.textDim, fontFamily:"monospace" }}>{rightContent}</span>}
       </div>
       {open && children}
     </section>
@@ -666,7 +637,10 @@ export default function App() {
       <WeeksInReview mobile={mobile}/>
 
       {/* HIGHLIGHTS & WATCH */}
-      <HighlightsPanel mobile={mobile}/>
+      <CollapsibleSection title="Highlights & Watch" id="highlights" mobile={mobile} borderColor={C.white}
+        rightContent={`${HIGHLIGHTS.keyDevelopments.length} key | ${HIGHLIGHTS.watchNext.length} watching`}>
+        <HighlightsContent mobile={mobile}/>
+      </CollapsibleSection>
 
       {/* OVERALL OBJECTIVES */}
       <CollapsibleSection title="Overall Objectives" id="objectives" mobile={mobile} borderColor={C.blueLt}>
