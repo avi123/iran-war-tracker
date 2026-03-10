@@ -122,13 +122,12 @@ cat > "$OUT" << HTMLHEADER
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "LiveBlogPosting",
+  "@type": "WebPage",
   "name": "Iran War Goals Tracker",
   "headline": "$DYNAMIC_TITLE",
   "url": "https://2026iranwartracker.com",
   "description": "$DYNAMIC_DESC",
-  "coverageStartsDate": "2026-02-28T00:00:00Z",
-  "coverageEndsDate": "$ISO_DATE",
+  "specialty": "Conflict Analysis",
   "datePublished": "2026-03-01T00:00:00Z",
   "dateModified": "$ISO_DATE",
   "publisher": { "@type": "Person", "name": "Avi Berkowitz" },

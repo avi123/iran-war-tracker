@@ -348,25 +348,14 @@ def generate_meta(jsx_text):
     # Make short snippets for title (max 20 chars each)
     short_snippets = [snippet_from_text(item['text'], max_len=22) for item in highlights[:3] if item.get('text')]
 
-    # Build title: "Iran War Tracker — Day N: snippet1, snippet2 | {goal_count} Goals"
+    # Build STABLE title — only day number changes, no volatile snippets
+    # Google penalizes rapidly-changing titles by re-evaluating the page
     day_prefix = f"Day {day_num}" if day_num else "Live"
-
-    # Try 2 short snippets first
-    if len(short_snippets) >= 2:
-        title_snips = ", ".join(short_snippets[:2])
-        title = f"Iran War Tracker — {day_prefix}: {title_snips} | {goal_count} Goals"
-    elif short_snippets:
-        title = f"Iran War Tracker — {day_prefix}: {short_snippets[0]} | {goal_count} Goals"
-    else:
-        title = f"Iran War Tracker — {day_prefix} | {goal_count} Goals Live"
-
-    # If still too long, fall back
-    if len(title) > 70 and short_snippets:
-        title = f"Iran War Tracker — {day_prefix}: {short_snippets[0]} | {goal_count} Goals"
+    title = f"Iran War Tracker — {day_prefix} | {goal_count} Goals | 2026 US-Israel-Iran Conflict"
     if len(title) > 70:
-        title = f"Iran War Tracker — {day_prefix} | {goal_count} Goals Live"
+        title = f"Iran War Tracker — {day_prefix} | {goal_count} Goals Updated Daily"
 
-    # Build description using longer snippets
+    # Dynamic DESCRIPTION is fine — Google handles desc changes well
     desc_snippets_str = ", ".join(snippets[:3])
     description = f"{day_prefix}: {desc_snippets_str}. Track {goal_count} sourced goals across military, nuclear, oil & casualties. Updated multiple times daily."
     if len(description) > 160:
@@ -375,7 +364,7 @@ def generate_meta(jsx_text):
     if len(description) > 160:
         description = f"{day_prefix}: {snippets[0]}. {goal_count} sourced goals across the 2026 US-Israel-Iran war. Updated daily."
 
-    # OG title can be longer (up to ~95 chars)
+    # OG title can be longer and more dynamic (social shares, not search ranking)
     og_title_snips = ", ".join(snippets[:2])
     og_title = f"Iran War Tracker — {day_prefix}: {og_title_snips}"
     if len(og_title) > 95:
