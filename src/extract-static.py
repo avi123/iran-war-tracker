@@ -209,7 +209,8 @@ def generate_html(highlights, goals):
     """Generate semantic HTML fragment."""
     lines = []
     lines.append('<div style="max-width:900px;margin:0 auto;padding:24px;color:#E2E8F0;">')
-    lines.append('<h2 style="color:#E2E8F0;font-size:20px;margin-bottom:16px;">Iran War Goals Tracker &mdash; 2026 US-Israel-Iran Conflict</h2>')
+    lines.append('<h2 style="color:#E2E8F0;font-size:20px;margin-bottom:16px;">Iran War Tracker 2026 &mdash; Status, Casualties &amp; Damage Assessment</h2>')
+    lines.append('<p style="color:#94A3B8;font-size:13px;margin-bottom:16px;">Live tracking of the 2026 US-Israel-Iran conflict &mdash; who&#39;s winning, casualty figures, damage assessment, and duration forecasts. All claims sourced to verifiable reports.</p>')
 
     # Key developments
     if highlights:
@@ -229,7 +230,7 @@ def generate_html(highlights, goals):
 
     # Goals
     lines.append('<section>')
-    lines.append('<h3 style="color:#E2E8F0;font-size:16px;margin:20px 0 8px;">All Goals</h3>')
+    lines.append('<h3 style="color:#E2E8F0;font-size:16px;margin:20px 0 8px;">2026 Iran War Goals &mdash; Current Status &amp; Assessment</h3>')
 
     party_labels = {'us': 'US', 'israel': 'Israel', 'both': 'US/Israel', 'opposing': 'Opposing'}
 
@@ -270,8 +271,8 @@ def generate_html(highlights, goals):
 
     # Sources
     lines.append('<section style="margin-top:20px;">')
-    lines.append('<h3 style="color:#E2E8F0;font-size:14px;margin-bottom:8px;">Sources</h3>')
-    lines.append('<p style="color:#94A3B8;font-size:12px;">All claims are sourced to verifiable reports including CENTCOM, IAEA, Al Jazeera, PBS, Reuters, FDD, Alma Center, Times of Israel, and dozens of others. Enable JavaScript for the full interactive experience with source links, filtering, and real-time status tracking.</p>')
+    lines.append('<h3 style="color:#E2E8F0;font-size:14px;margin-bottom:8px;">Sources &amp; Methodology</h3>')
+    lines.append('<p style="color:#94A3B8;font-size:12px;">Casualties, damage assessments, and war status sourced to CENTCOM, IAEA, Red Crescent, UNICEF, Al Jazeera, PBS, Reuters, FDD, Alma Center, Times of Israel, and dozens of others. Duration forecasts informed by historical analogues (Kosovo 1999, Iraq 2003). Enable JavaScript for the full interactive experience with source links, filtering, and real-time status tracking.</p>')
     lines.append('</section>')
 
     lines.append('</div>')
@@ -350,19 +351,25 @@ def generate_meta(jsx_text):
 
     # Build STABLE title — only day number changes, no volatile snippets
     # Google penalizes rapidly-changing titles by re-evaluating the page
+    # Include high-volume search terms: "status", "casualties", "damage assessment"
     day_prefix = f"Day {day_num}" if day_num else "Live"
-    title = f"Iran War Tracker — {day_prefix} | {goal_count} Goals | 2026 US-Israel-Iran Conflict"
+    title = f"Iran War Tracker 2026 — {day_prefix} Status | Casualties, Goals & Damage Assessment"
     if len(title) > 70:
-        title = f"Iran War Tracker — {day_prefix} | {goal_count} Goals Updated Daily"
+        title = f"Iran War Tracker 2026 — {day_prefix} | Status & Casualties"
 
-    # Dynamic DESCRIPTION is fine — Google handles desc changes well
-    desc_snippets_str = ", ".join(snippets[:3])
-    description = f"{day_prefix}: {desc_snippets_str}. Track {goal_count} sourced goals across military, nuclear, oil & casualties. Updated multiple times daily."
+    # Dynamic DESCRIPTION — lead with search intent (status, who's winning,
+    # casualties, duration), end with freshness signal.  Google handles
+    # description changes well; this is where we can be most aggressive.
+    description = (
+        f"{day_prefix}: 2026 Iran war status — casualties, damage assessment "
+        f"& who's winning. {goal_count} sourced goals across military, nuclear "
+        f"& economic dimensions. Updated daily."
+    )
     if len(description) > 160:
-        desc_snippets_str = ", ".join(snippets[:2])
-        description = f"{day_prefix}: {desc_snippets_str}. Track {goal_count} sourced war goals — military, nuclear, oil, casualties. Updated daily."
-    if len(description) > 160:
-        description = f"{day_prefix}: {snippets[0]}. {goal_count} sourced goals across the 2026 US-Israel-Iran war. Updated daily."
+        description = (
+            f"{day_prefix} status: 2026 Iran war casualties, damage assessment "
+            f"& who's winning. {goal_count} sourced goals tracked daily."
+        )
 
     # OG title can be longer and more dynamic (social shares, not search ranking)
     og_title_snips = ", ".join(snippets[:2])

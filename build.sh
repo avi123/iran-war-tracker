@@ -123,15 +123,48 @@ cat > "$OUT" << HTMLHEADER
 {
   "@context": "https://schema.org",
   "@type": "WebPage",
-  "name": "Iran War Goals Tracker",
+  "name": "Iran War Tracker 2026",
   "headline": "$DYNAMIC_TITLE",
   "url": "https://2026iranwartracker.com",
   "description": "$DYNAMIC_DESC",
   "specialty": "Conflict Analysis",
+  "keywords": "iran war tracker, iran war casualties 2026, iran war status, iran war damage assessment, iran israel war who is winning, iran war duration forecast, us israel iran conflict 2026",
   "datePublished": "2026-03-01T00:00:00Z",
   "dateModified": "$ISO_DATE",
   "publisher": { "@type": "Person", "name": "Avi Berkowitz" },
   "author": { "@type": "Person", "name": "Avi Berkowitz" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is the current status of the Iran war in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This tracker monitors $DYNAMIC_GOAL_COUNT strategic goals across the 2026 US-Israel-Iran conflict, updated multiple times daily with sourced assessments across military, nuclear, economic, and diplomatic dimensions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the casualties and damage in the 2026 Iran war?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Casualty figures and damage assessments are tracked from multiple sources including Red Crescent, UNICEF, CENTCOM, and regional reporting. See the full tracker for sourced, up-to-date figures."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How long will the Iran war last?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Duration forecasts are assessed using historical analogues including Kosovo 1999 and Iraq 2003. The tracker evaluates goal progress to inform timeline projections."
+      }
+    }
+  ]
 }
 </script>
 <!-- Google tag (gtag.js) -->
