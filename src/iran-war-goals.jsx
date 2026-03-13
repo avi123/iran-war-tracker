@@ -8,6 +8,9 @@ const useIsMobile = (breakpoint = 768) => {
   return isMobile;
 };
 
+const MONO = "'SF Mono',SFMono-Regular,Menlo,Consolas,monospace";
+const SANS = "-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif";
+
 const C = {
   bg: "#0B1120", card: "#111B2E", cardAlt: "#162035",
   navy: "#1A2744", blue: "#2D5FA0", blueLt: "#6AADDB",
@@ -79,7 +82,7 @@ const GoalRow = ({ goal, depth = 0, expanded, onToggle, mobile }) => {
         <div
           onClick={() => hasChildren && onToggle(goal.id)}
           style={{
-            padding:"10px 12px", paddingLeft:12 + depth*16,
+            padding:"12px 16px", paddingLeft:16 + depth*16,
             background: depth===0 ? C.cardAlt : "transparent",
             borderBottom:`1px solid ${C.border}30`,
             borderLeft: depth>0 ? `2px solid ${partyColor[goal.party]}30` : "none",
@@ -98,7 +101,7 @@ const GoalRow = ({ goal, depth = 0, expanded, onToggle, mobile }) => {
             <TypeBadge type={goal.type}/>
             <span style={{ fontSize:9, color:C.textDim }}>I:{goal.importance} A:{goal.achievability}</span>
           </div>
-          <div style={{ fontSize:11, color:C.text, lineHeight:1.4 }}>
+          <div style={{ fontSize:12, color:C.text, lineHeight:1.5, fontFamily:SANS }}>
             {goal.outcomeNote}
             <SourceLinks sources={goal.sources}/>
           </div>
@@ -134,7 +137,7 @@ const GoalRow = ({ goal, depth = 0, expanded, onToggle, mobile }) => {
         <div><TypeBadge type={goal.type}/></div>
         <div><ImportanceBar value={goal.importance} label="Import." color={goal.importance>=4?C.amber:C.blueLt}/></div>
         <div><ImportanceBar value={goal.achievability} label="Achiev." color={goal.achievability>=4?C.green:goal.achievability<=2?C.red:C.amber}/></div>
-        <div style={{ fontSize:11.5, color:C.text, lineHeight:1.4 }}>
+        <div style={{ fontSize:12, color:C.text, lineHeight:1.5, fontFamily:SANS }}>
           {goal.outcomeNote}
           <SourceLinks sources={goal.sources}/>
         </div>
@@ -211,8 +214,8 @@ const HighlightsContent = ({ mobile }) => {
               background: categoryColor[d.category] || C.textDim,
             }}/>
             <div>
-              <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{d.text}{d.sources && <SourceLinks sources={d.sources}/>}</span>
-              {d.why && <div style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic" }}>{d.why}</div>}
+              <span style={{ fontSize: 12, color: C.text, lineHeight: 1.5, fontFamily: SANS }}>{d.text}{d.sources && <SourceLinks sources={d.sources}/>}</span>
+              {d.why && <div style={{ fontSize: 11, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic", fontFamily: SANS }}>{d.why}</div>}
             </div>
           </div>
         ))}
@@ -233,8 +236,8 @@ const HighlightsContent = ({ mobile }) => {
                 letterSpacing: 0.3, whiteSpace: "nowrap", flexShrink: 0, marginTop: 3,
               }}>{tf.label}</span>
               <div>
-                <span style={{ fontSize: 11, color: C.text, lineHeight: 1.5 }}>{w.text}{w.sources && <SourceLinks sources={w.sources}/>}</span>
-                {w.why && <div style={{ fontSize: 10, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic" }}>{w.why}</div>}
+                <span style={{ fontSize: 12, color: C.text, lineHeight: 1.5, fontFamily: SANS }}>{w.text}{w.sources && <SourceLinks sources={w.sources}/>}</span>
+                {w.why && <div style={{ fontSize: 11, color: C.textDim, lineHeight: 1.4, marginTop: 2, fontStyle: "italic", fontFamily: SANS }}>{w.why}</div>}
               </div>
             </div>
           );
@@ -598,13 +601,14 @@ export default function App() {
   };
 
   return (
-    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:"'SF Mono',SFMono-Regular,Menlo,Consolas,monospace" }}>
+    <div style={{ background:C.bg, minHeight:"100vh", fontFamily:MONO }}>
       {/* HEADER */}
       <div style={{ background:`linear-gradient(135deg, ${C.navy} 0%, #0E1A30 100%)`, padding:mobile?"14px 12px 10px":"20px 24px 16px", borderBottom:`2px solid ${C.blue}` }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", flexWrap:"wrap", gap:mobile?8:12 }}>
           <div>
             <div style={{ fontSize:mobile?9:10, color:C.textDim, letterSpacing:3, textTransform:"uppercase", marginBottom:4 }}>Two Generals Framework</div>
             <div style={{ color:C.white, fontSize:mobile?16:20, fontWeight:800, margin:0, letterSpacing:-0.5 }} role="heading" aria-level="2">Iran War Goals Assessment</div>
+            <div style={{ fontSize:mobile?10:12, color:C.textDim, marginTop:2, fontFamily:SANS }}>Live conflict tracker — sourced, multi-perspective, updated daily</div>
             <div style={{ fontSize:mobile?10:11, color:C.textDim, marginTop:4 }}>
               <span style={{color:C.us}}>■</span> {mobile?"US":"Gen. Caine (CJCS/CENTCOM)"} &nbsp;
               <span style={{color:C.israel}}>■</span> {mobile?"ISR":"IDF Chief Halevi"} &nbsp;
@@ -621,10 +625,10 @@ export default function App() {
               { label:"UNACHIEVABLE", value:stats.unachievable, color:C.gray },
               { label:"TBD", value:stats.tbd, color:C.gray },
             ].map(s => (
-              <div key={s.label} style={{ background:C.card, borderRadius:8, padding:"8px 10px", border:`1px solid ${C.border}`, textAlign:"center", minWidth:60 }}>
+              <div key={s.label} style={{ background:C.card, borderRadius:8, padding:"10px 12px", border:`1px solid ${C.border}`, textAlign:"center", minWidth:64 }}>
                 <div style={{ fontSize:18, fontWeight:800, color:s.color }}>{s.value}</div>
-                <div style={{ fontSize:8, color:C.textDim, letterSpacing:0.8 }}>{s.label}</div>
-                {s.sub && <div style={{ fontSize:8, color:C.textDim, marginTop:2, letterSpacing:0.3 }}>{s.sub}</div>}
+                <div style={{ fontSize:9, color:C.textDim, letterSpacing:0.8 }}>{s.label}</div>
+                {s.sub && <div style={{ fontSize:9, color:C.textDim, marginTop:2, letterSpacing:0.3 }}>{s.sub}</div>}
               </div>
             ))}
           </div>
@@ -731,9 +735,9 @@ export default function App() {
             ].map(f => (
               <div key={f.title} style={{ background:C.card, borderRadius:8, padding:14, border:`1px solid ${C.border}`, borderTop:`3px solid ${C.oppose}` }}>
                 <div style={{ fontWeight:700, color:C.white, fontSize:13, marginBottom:8 }}>{f.title}</div>
-                <div style={{ fontSize:11.5, marginBottom:6 }}><span style={{ color:C.us, fontWeight:700 }}>US: </span><span style={{ color:C.text }}>{f.us}</span></div>
-                <div style={{ fontSize:11.5, marginBottom:6 }}><span style={{ color:C.israel, fontWeight:700 }}>ISR: </span><span style={{ color:C.text }}>{f.israel}</span></div>
-                <div style={{ fontSize:11.5, borderTop:`1px solid ${C.border}`, paddingTop:6, marginTop:4 }}><span style={{ color:C.red, fontWeight:700 }}>RISK: </span><span style={{ color:C.amber }}>{f.risk}</span></div>
+                <div style={{ fontSize:12, marginBottom:6, fontFamily:SANS, lineHeight:1.5 }}><span style={{ color:C.us, fontWeight:700 }}>US: </span><span style={{ color:C.text }}>{f.us}</span></div>
+                <div style={{ fontSize:12, marginBottom:6, fontFamily:SANS, lineHeight:1.5 }}><span style={{ color:C.israel, fontWeight:700 }}>ISR: </span><span style={{ color:C.text }}>{f.israel}</span></div>
+                <div style={{ fontSize:12, borderTop:`1px solid ${C.border}`, paddingTop:6, marginTop:4, fontFamily:SANS, lineHeight:1.5 }}><span style={{ color:C.red, fontWeight:700 }}>RISK: </span><span style={{ color:C.amber }}>{f.risk}</span></div>
               </div>
             ))}
           </div>
@@ -745,30 +749,30 @@ export default function App() {
         <div style={{ padding:"12px 24px 12px", maxWidth:1400, margin:"0 auto" }}>
           <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.green}`, marginBottom:12 }}>
             <h3 style={{ color:C.green, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Succeeding — Day 14</h3>
-            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8, fontFamily:SANS }}>
               <span style={{color:C.green,fontWeight:700}}>6,000+ targets. 90+ vessels destroyed. BMs down 92%. 2/3 launchers neutralized. 80% air defense destroyed. Nuclear scientists killed ('no longer here' — Netanyahu). Parchin-Taleghan 2 struck with GBU-57. Basij roadblocks targeted in Tehran.</span> Entire Soleimani-class warship class destroyed (Janes). IRGC-Artesh rift deepening: IRGC refused to transport Artesh wounded. Local commanders refusing orders in Sistan-Baluchistan and Kurdistan. 7 NATO nations deployed. Houthis Day 14 on sidelines.
             </p>
-            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0, fontFamily:SANS }}>
               <span style={{color:C.green,fontWeight:700}}>France committed first KIA — coalition casualty costs shared, not just US.</span> IEA record 400M bbl reserve release. UK pledging mine-hunting systems. Hezbollah leadership decimated (Abu Ali Riyan, Abu Dharr Mohammadi killed) even as rockets surge. IDF evacuation zone covers 13% of Lebanon. Kosovo prior: Day 14 of 78. Iran near BM exhaustion while US/Israel systematically dismantling military, nuclear, and internal security infrastructure simultaneously.
             </p>
           </div>
 
           <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid #F59E0B`, marginBottom:12 }}>
             <h3 style={{ color:"#F59E0B", fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Expanding — Day 14</h3>
-            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8, fontFamily:SANS }}>
               <span style={{color:"#F59E0B",fontWeight:700}}>{stats.expanding} goals growing beyond plan</span>. IEA: 'largest supply disruption in history.' <span style={{color:"#F59E0B",fontWeight:700}}>Brent $100.46 despite record 400M bbl release. 6 ships struck in single overnight wave. Salalah Oman petroleum facility on fire. 13% of Lebanon under evacuation orders. 820,000 displaced.</span> France first KIA. KC-135 crew status unknown. Stryker cyberattack confirmed physical impact. Iran warned oil could hit $200/bbl. Trump: 'not this week.' Iran's 3 ceasefire conditions unbridgeable with unconditional surrender demand.
             </p>
-            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0, fontFamily:SANS }}>
               Treasury authorized Russian oil purchases to offset supply shock. BARZIN ship carrying Chinese rocket fuel precursors to Iran. Russia sharing drone tactics. $50B supplemental + 60-day War Powers clock (expires ~April 29). Gas $3.60/gal (+21%). <span style={{color:"#F59E0B",fontWeight:700}}>The war is militarily succeeding, economically failing, geographically expanding, and diplomatically frozen — all simultaneously true. Every bypass route under attack. Every reserve release insufficient.</span>
             </p>
           </div>
 
           <div style={{ background:C.card, borderRadius:8, padding:18, border:`1px solid ${C.border}`, borderLeft:`4px solid ${C.red}` }}>
             <h3 style={{ color:C.red, fontSize:14, fontWeight:700, marginBottom:8 }}>The Case That This Is Failing — Day 14</h3>
-            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8 }}>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, marginBottom:8, fontFamily:SANS }}>
               <span style={{color:C.red,fontWeight:700}}>{stats.failing} goals are genuinely failing</span>. (1) <span style={{color:C.red,fontWeight:700}}>IEA: 'largest supply disruption in history.' Oil $100+ despite record 400M bbl release. 6 ships in one wave. Salalah Oman on fire. Every bypass route under attack.</span> Iran warned $200/bbl. Gas $3.60 approaching $4 cliff. (2) 13% of Lebanon under evacuation. 820K displaced, 687 dead. IDF Chief: 'not short.' Hezbollah targeting Unit 8200 + Shayetet 13. (3) No ceasefire path: Trump 'unconditional surrender' vs Iran 'reparations + guarantees.' Structurally unbridgeable.
             </p>
-            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0 }}>
+            <p style={{ color:C.text, fontSize:13, lineHeight:1.65, margin:0, fontFamily:SANS }}>
               NIC classified: regime 'unlikely' to fall. No governance plan. Stryker cyberattack = first physical-impact cyber on US company. France first KIA — coalition costs mounting. KC-135 crew unknown. China shipping rocket fuel precursors. Russia sharing drone tactics. CENTCOM planning 100 days vs Trump's 'not this week.' Everything failing is structurally unchanged or worsening — $100 oil + 'largest disruption in history' proves destroying Iran's military doesn't fix the economic damage.
             </p>
           </div>
