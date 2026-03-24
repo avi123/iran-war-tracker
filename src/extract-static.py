@@ -205,12 +205,71 @@ def status_symbol(status):
     if status == 'in progress': return '\u25cb'
     return '\u2014'
 
-def generate_html(highlights, goals):
+def extract_axes_static(jsx_text):
+    """Extract AXES data for static/noscript content."""
+    axes_match = re.search(r'const AXES\s*=\s*\[', jsx_text)
+    if not axes_match:
+        return []
+    axes_start = axes_match.end() - 1
+    depth = 1
+    i = axes_start + 1
+    while i < len(jsx_text) and depth > 0:
+        if jsx_text[i] == '[': depth += 1
+        elif jsx_text[i] == ']': depth -= 1
+        i += 1
+    axes_text = jsx_text[axes_start+1:i-1]
+    axes = []
+    depth = 0
+    obj_start = None
+    for j, ch in enumerate(axes_text):
+        if ch == '{':
+            depth += 1
+            if depth == 1: obj_start = j
+        elif ch == '}':
+            depth -= 1
+            if depth == 0 and obj_start is not None:
+                obj = axes_text[obj_start:j+1]
+                axis_id = extract_field(obj, 'id')
+                if axis_id:
+                    axes.append({
+                        'id': axis_id,
+                        'question': extract_field(obj, 'question'),
+                        'slug': extract_field(obj, 'slug'),
+                        'statusLabel': extract_field(obj, 'statusLabel'),
+                        'keyMetric': extract_field(obj, 'keyMetric'),
+                        'keyMetricLabel': extract_field(obj, 'keyMetricLabel'),
+                        'summary': extract_field(obj, 'summary'),
+                    })
+                obj_start = None
+    return axes
+
+
+def generate_html(highlights, goals, axes=None):
     """Generate semantic HTML fragment."""
     lines = []
     lines.append('<div style="max-width:900px;margin:0 auto;padding:24px;color:#E2E8F0;">')
     lines.append('<h2 style="color:#E2E8F0;font-size:20px;margin-bottom:16px;">Iran War Tracker 2026 &mdash; Status, Casualties &amp; Damage Assessment</h2>')
     lines.append('<p style="color:#94A3B8;font-size:13px;margin-bottom:16px;">Live tracking of the 2026 US-Israel-Iran conflict &mdash; who&#39;s winning, casualty figures, damage assessment, and duration forecasts. All claims sourced to verifiable reports.</p>')
+
+    # Three axes — the key questions
+    if axes:
+        lines.append('<section>')
+        lines.append('<h3 style="color:#6AADDB;font-size:16px;margin:16px 0 8px;">Three Questions That Matter</h3>')
+        for axis in axes:
+            q = html.escape(axis['question'])
+            slug = html.escape(axis['slug'])
+            status = html.escape(axis['statusLabel'])
+            metric = html.escape(axis['keyMetric'])
+            metric_label = html.escape(axis['keyMetricLabel'])
+            summary = html.escape(axis['summary'])
+            if len(summary) > 300:
+                summary = summary[:297] + '...'
+            lines.append(f'<article style="margin:12px 0;padding:12px;border:1px solid #1E293B;border-radius:6px;">')
+            lines.append(f'<h4 style="color:#E2E8F0;font-size:15px;margin-bottom:4px;"><a href="{slug}" style="color:#E2E8F0;text-decoration:none;">{q}</a> <span style="color:#64748B;font-size:11px;">({status})</span></h4>')
+            lines.append(f'<p style="color:#6AADDB;font-size:14px;font-weight:700;margin:4px 0;">{metric} <span style="color:#94A3B8;font-size:12px;font-weight:400;">{metric_label}</span></p>')
+            lines.append(f'<p style="color:#94A3B8;font-size:12px;line-height:1.5;">{summary}</p>')
+            lines.append(f'</article>')
+        lines.append('</section>')
 
     # Key developments
     if highlights:
@@ -408,10 +467,11 @@ def main():
 
     highlights = extract_highlights(jsx_text)
     goals = extract_goals(jsx_text)
+    axes = extract_axes_static(jsx_text)
 
-    print(f"Extracted {len(highlights)} highlights, {len(goals)} goals", file=sys.stderr)
+    print(f"Extracted {len(highlights)} highlights, {len(goals)} goals, {len(axes)} axes", file=sys.stderr)
 
-    html_output = generate_html(highlights, goals)
+    html_output = generate_html(highlights, goals, axes)
     print(html_output)
 
 if __name__ == '__main__':

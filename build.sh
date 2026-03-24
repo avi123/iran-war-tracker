@@ -272,7 +272,14 @@ if [ -f "$WEEKLY_PY" ]; then
     python3 "$WEEKLY_PY" --all 2>&1 | while read line; do echo "  $line"; done
 fi
 
-# ── Step 7: Regenerate sitemap with all pages ──
+# ── Step 7: Generate axis briefing pages ──
+AXIS_PY="$SCRIPT_DIR/src/generate-axis-pages.py"
+if [ -f "$AXIS_PY" ]; then
+    echo "Generating axis pages..."
+    python3 "$AXIS_PY" "$SRC" "$SCRIPT_DIR/docs" 2>&1 | while read line; do echo "  $line"; done
+fi
+
+# ── Step 8: Regenerate sitemap with all pages ──
 SITEMAP_HEADER='<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -294,9 +301,23 @@ for WEEK_DIR in "$SCRIPT_DIR"/docs/week-*/; do
   </url>"
     fi
 done
-echo "$SITEMAP_HEADER$SITEMAP_WEEKS
+SITEMAP_AXES=""
+for AXIS_DIR in regime nuclear attrition; do
+    if [ -d "$SCRIPT_DIR/docs/$AXIS_DIR" ]; then
+        SITEMAP_AXES="$SITEMAP_AXES
+  <url>
+    <loc>https://2026iranwartracker.com/$AXIS_DIR/</loc>
+    <lastmod>$ISO_DATE</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>"
+    fi
+done
+echo "$SITEMAP_HEADER$SITEMAP_WEEKS$SITEMAP_AXES
 </urlset>" > "$SCRIPT_DIR/docs/sitemap.xml"
-echo "  Sitemap updated with $(echo "$SCRIPT_DIR"/docs/week-*/ | wc -w | tr -d ' ') week pages"
+WEEK_COUNT=$(echo "$SCRIPT_DIR"/docs/week-*/ | wc -w | tr -d ' ')
+AXIS_COUNT=$(ls -d "$SCRIPT_DIR"/docs/regime "$SCRIPT_DIR"/docs/nuclear "$SCRIPT_DIR"/docs/attrition 2>/dev/null | wc -l | tr -d ' ')
+echo "  Sitemap updated with $WEEK_COUNT week pages + $AXIS_COUNT axis pages"
 
 # Report
 SRC_SIZE=$(wc -c < "$SRC")

@@ -181,6 +181,90 @@ const HIGHLIGHTS = {
   ],
 };
 
+// ═══ AXES: The 3 key analytical lenses for understanding the war ═══
+const AXES = [
+  {
+    id: "regime",
+    question: "Can the regime survive?",
+    slug: "/regime/",
+    status: "holding",
+    statusLabel: "REGIME HOLDING",
+    statusColor: "#F59E0B",
+    keyMetric: "16+ days",
+    keyMetricLabel: "Mojtaba absent",
+    summary: "The US-Israel campaign has successfully decapitated Iran's senior leadership — both SPND nuclear chiefs, the Intelligence Minister, 15+ senior Basij commanders, and dozens of IRGC officers. But the institutional regime is not collapsing. An IRGC troika (Vahidi/Ghalibaf/Jafari) has filled the vacuum left by Mojtaba Khamenei's absence (16+ days, confirmed injured). The Assembly of Experts reached consensus on a successor despite bombardment — meeting virtually after their building was destroyed. Protests have not gained ground despite calls for uprising. The internal security apparatus, while under sustained attack, continues to function. CTP-ISW's assessment stands: 'disruption will not cause regime collapse without an indigenous force to exploit it.'",
+    keyIndicators: [
+      { label: "IRGC troika", value: "Functioning", detail: "Vahidi/Ghalibaf/Jafari running the state. Ghalibaf issuing military threats on X. IRGC commander visiting Kurdish border.", color: "#F59E0B" },
+      { label: "Protests", value: "Stalled", detail: "No sustained popular uprising despite US/Israeli calls. Internet blackout limits organizing. Kurdish mobilization is the exception.", color: "#EF4444" },
+      { label: "Institutional continuity", value: "Intact", detail: "Assembly of Experts met virtually and elected successor. Regime adapting around strikes, not collapsing.", color: "#F59E0B" },
+      { label: "Security apparatus", value: "Degraded but active", detail: "Emergency command center hit, Intelligence Ministry HQ destroyed. But Basij + LEC still enforcing control in provinces.", color: "#F59E0B" },
+    ],
+    watching: [
+      { text: "IRGC troika cohesion under sustained decapitation — can junta maintain unity?", timeframe: "open question" },
+      { text: "Pezeshkian civilian-military split — first public break with IRGC over Gulf attacks. Negotiation channel or accelerant?", timeframe: "this week" },
+      { text: "Kurdish border activity — IRGC commander deployed, suggesting regime sees internal threat", timeframe: "this week" },
+    ],
+    goalIds: ["regime", "domestic", "narrative"],
+    seoTitle: "Iran Regime Status 2026 — Can the Islamic Republic Survive?",
+    seoDescription: "Analysis of Iran's regime stability during the 2026 war. IRGC troika, protests, institutional continuity, and leadership decapitation tracked with sourced assessments.",
+    seoKeywords: "iran regime change 2026, iran protests 2026, IRGC leadership, iran government collapse, mojtaba khamenei, iran war regime",
+  },
+  {
+    id: "nuclear",
+    question: "Is the nuclear threat actually neutralized?",
+    slug: "/nuclear/",
+    status: "contested",
+    statusLabel: "THREAT PERSISTS",
+    statusColor: "#EF4444",
+    keyMetric: "~400 kg",
+    keyMetricLabel: "HEU unaccounted for",
+    summary: "Natanz has been struck twice with bunker-busters. Fordow is assessed 'inoperable' by US officials but IAEA cannot verify. Both SPND nuclear chiefs are confirmed killed. Isfahan's surface facilities are damaged. But ~400 kg of highly enriched uranium — enough for ~11 weapons — remains unaccounted for. IAEA has had zero access to 4 declared facilities since the war started. A new underground enrichment site near Isfahan was revealed by IAEA, complicating battle damage assessment. IAEA chief Grossi stated the war 'can't entirely eliminate' Iran's nuclear program. The US and Israel are actively discussing sending special forces to seize the uranium — the most consequential nonproliferation action since Iraq. Meanwhile, Iran's control of the Strait of Hormuz complicates extraction: you need maritime access to move fissile material out.",
+    keyIndicators: [
+      { label: "Natanz", value: "Surface damaged", detail: "Struck twice with bunker-busters. Entrance buildings damaged, no radiation leak. Underground enrichment plant not confirmed destroyed.", color: "#F59E0B" },
+      { label: "Fordow", value: "Assessed inoperable", detail: "US official says 'off the table.' Built inside mountain. IAEA cannot verify. B-2 GBU-57 bunker busters deployed.", color: "#22C55E" },
+      { label: "HEU stockpile", value: "~400 kg persists", detail: "Enough for ~11 bombs if enriched to 90%. Special forces seizure under discussion. Location uncertain under blackout.", color: "#EF4444" },
+      { label: "IAEA access", value: "Zero", detail: "No inspectors at 4 declared facilities since war started. New underground site near Isfahan not inspected.", color: "#EF4444" },
+      { label: "Hormuz link", value: "Extraction blocked", detail: "Maritime access needed to remove fissile material. Strait at 97.8% closure. Complicates both military and diplomatic solutions.", color: "#EF4444" },
+    ],
+    watching: [
+      { text: "Special forces uranium seizure — Axios: US and Israel discussing sending operators + scientists. Would be first US ground operation inside Iran.", timeframe: "open question" },
+      { text: "5-day pause framework — does diplomatic window produce nuclear terms? Oman channel may be carrying nuclear proposals alongside Hormuz.", timeframe: "24-48h" },
+      { text: "IAEA verification — Grossi seeking access. Any inspection would change intelligence picture dramatically.", timeframe: "this week" },
+    ],
+    goalIds: ["nuke", "hormuz"],
+    seoTitle: "Iran Nuclear Weapons Status 2026 — Can They Get the Uranium Out?",
+    seoDescription: "Tracking Iran's nuclear program during the 2026 war. Natanz, Fordow, 400kg HEU stockpile, IAEA access, and uranium seizure options analyzed with sources.",
+    seoKeywords: "iran nuclear weapons 2026, natanz status, fordow status, iran uranium, iran nuclear program war, IAEA iran 2026",
+  },
+  {
+    id: "attrition",
+    question: "Who runs out first?",
+    slug: "/attrition/",
+    status: "diverging",
+    statusLabel: "BOTH DEPLETING",
+    statusColor: "#EF4444",
+    keyMetric: "90% / critical",
+    keyMetricLabel: "Iran BMs down / Israel interceptors low",
+    summary: "Iran has expended ~90% of its ballistic missile arsenal — from ~2,500 to near-exhaustion. Missile production is at zero. But this is not a clean win. Israel's Arrow interceptor stocks are 'critically low,' with an $826M emergency transfer approved but production rates fixed. Iran has adapted: 70% of launches now use cluster munitions specifically designed to overwhelm interception. Dimona and Arad were penetrated, wounding 180+. Iran also demonstrated 4,000km IRBM range by targeting Diego Garcia — proving strategic reach with remaining stocks. The attrition math has become bilateral: Iran is losing its offensive capability, but Israel is simultaneously losing its defensive capability. The 5-day diplomatic pause may be partly motivated by interceptor sustainability — buying time for resupply while Iranian fire continues.",
+    keyIndicators: [
+      { label: "Iran BM arsenal", value: "~90% depleted", detail: "~2,410 of ~2,500 expended. Production at zero. But 4,000km IRBM demonstrated at Diego Garcia. Remaining stocks used strategically.", color: "#22C55E" },
+      { label: "Israel interceptors", value: "Critically low", detail: "Arrow stocks depleted. $826M emergency transfer approved but production rate fixed. Dimona/Arad penetrated.", color: "#EF4444" },
+      { label: "Cluster munitions", value: "70% of launches", detail: "Iran shifted to cluster warheads specifically to evade interception. Area-effect weapons banned by 111 nations.", color: "#EF4444" },
+      { label: "Iran drones", value: "Still surging", detail: "Shahed factory destroyed but distributed production sustaining high tempo. UAE: 1,440 launched, 94% intercepted. Gulf allies bearing drone burden.", color: "#F59E0B" },
+      { label: "US casualties", value: "13 KIA, 200+ WIA", detail: "Across 7 countries. Approaching political threshold. Each named death becomes a story.", color: "#F59E0B" },
+    ],
+    watching: [
+      { text: "Interceptor resupply timeline — can production fill the gap before Arrow depletes entirely? Each day of Iranian fire accelerates depletion.", timeframe: "this week" },
+      { text: "Houthi entry — would open simultaneous Hormuz + Bab el-Mandeb disruption. 35% of global maritime trade at risk.", timeframe: "imminent" },
+      { text: "Russian supply route — Caspian vessels struck but weapons still flowing. Russia providing real-time targeting intelligence.", timeframe: "open question" },
+    ],
+    goalIds: ["missile", "airsup", "cas-us", "cas-isr", "gulf-protect"],
+    seoTitle: "Iran War Attrition 2026 — Who Is Winning the War of Depletion?",
+    seoDescription: "Tracking the attrition balance in the 2026 Iran war. Iran's missiles vs Israel's interceptors, cluster munitions, drone surge, and casualty figures analyzed.",
+    seoKeywords: "iran war who is winning 2026, israel missile defense, iran ballistic missiles depleted, iron dome arrow interceptors, iran war casualties",
+  },
+];
+
 const categoryColor = { military: "#3B82F6", political: "#A78BFA", economic: "#F59E0B", regime: "#EF4444", humanitarian: "#EC4899" };
 const timeframeConfig = {
   "imminent": { label: "IMMINENT", color: "#EF4444", bg: "#2E1010" },
@@ -512,6 +596,39 @@ const CollapsibleSection = ({ title, id, defaultOpen = true, children, mobile, b
   );
 };
 
+const AxisDashboard = ({ mobile }) => (
+  <div style={{ padding:mobile?"12px":"16px 24px", background:C.bg }}>
+    <div style={{ fontSize:9, fontWeight:700, color:C.textDim, letterSpacing:1.5, textTransform:"uppercase", marginBottom:10 }}>
+      Three Questions That Matter
+    </div>
+    <div style={{ display:"grid", gridTemplateColumns:mobile?"1fr":"1fr 1fr 1fr", gap:12 }}>
+      {AXES.map(axis => (
+        <a key={axis.id} href={axis.slug} style={{
+          display:"block", background:C.card, borderRadius:10, padding:mobile?"14px":"18px",
+          border:`1px solid ${C.border}`, borderTop:`3px solid ${axis.statusColor}`,
+          textDecoration:"none", transition:"all 0.2s", cursor:"pointer",
+        }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor=axis.statusColor; e.currentTarget.style.transform="translateY(-2px)"; }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor=C.border; e.currentTarget.style.transform="none"; }}
+        >
+          <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:8 }}>
+            <div style={{ fontSize:15, fontWeight:800, color:C.white, lineHeight:1.3, flex:1 }}>{axis.question}</div>
+            <span style={{ fontSize:8, fontWeight:700, padding:"2px 6px", borderRadius:6, background:`${axis.statusColor}20`, color:axis.statusColor, border:`1px solid ${axis.statusColor}40`, whiteSpace:"nowrap", marginLeft:8 }}>{axis.statusLabel}</span>
+          </div>
+          <div style={{ display:"flex", alignItems:"baseline", gap:6, marginBottom:8 }}>
+            <span style={{ fontSize:22, fontWeight:800, color:axis.statusColor }}>{axis.keyMetric}</span>
+            <span style={{ fontSize:10, color:C.textDim }}>{axis.keyMetricLabel}</span>
+          </div>
+          <div style={{ fontSize:11, color:C.text, lineHeight:1.5, fontFamily:SANS, display:"-webkit-box", WebkitLineClamp:3, WebkitBoxOrient:"vertical", overflow:"hidden" }}>
+            {axis.summary.slice(0, 200)}...
+          </div>
+          <div style={{ fontSize:10, color:C.blueLt, marginTop:8, fontWeight:600 }}>Read full analysis →</div>
+        </a>
+      ))}
+    </div>
+  </div>
+);
+
 const WeeksInReview = ({ mobile }) => {
   const warStart = new Date("2026-02-28T00:00:00Z");
   const updated = new Date(HIGHLIGHTS.updatedAt);
@@ -634,6 +751,9 @@ export default function App() {
           </div>
         </div>
       </div>
+
+      {/* AXIS DASHBOARD */}
+      <AxisDashboard mobile={mobile}/>
 
       {/* WEEKS IN REVIEW */}
       <WeeksInReview mobile={mobile}/>
