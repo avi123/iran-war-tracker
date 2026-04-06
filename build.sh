@@ -43,7 +43,7 @@ sed 's/^import { useState } from "react";/const { useState } = React;/' "$SRC" \
 
 # Compile JSX → JS (eliminates need for Babel in browser)
 if [ -x "$ESBUILD" ]; then
-    COMPILED_JS=$("$ESBUILD" "$TMPJSX" --bundle=false --jsx=transform 2>&1)
+    COMPILED_JS=$("$ESBUILD" "$TMPJSX" --bundle=false --jsx=transform)
     echo "  JSX pre-compiled via esbuild"
 else
     echo "WARNING: esbuild not found at $ESBUILD — falling back to Babel in browser"
