@@ -378,7 +378,7 @@ def count_goals(goals):
 
 def generate_meta(jsx_text):
     """Generate dynamic SEO title and description from HIGHLIGHTS data."""
-    WAR_START = datetime(2026, 2, 28)
+    WAR_START = datetime(2026, 2, 27)
 
     updated_at = extract_updated_at(jsx_text)
     highlights = extract_highlights(jsx_text)
